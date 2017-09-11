@@ -1,0 +1,13 @@
+# Folders
+/ClientProject/ClientProject/Debug/
+/ClientProject/ClientProject/Release/
+
+/CognitiveVRAnalytics/CognitiveVRAnalytics/Debug/
+/CognitiveVRAnalytics/CognitiveVRAnalytics/Release/
+/CognitiveVRAnalytics/CognitiveVRAnalytics/x64/
+
+# Misc
+**/.DS_Store
+.DS_Store
+*.ipch
+*.db
