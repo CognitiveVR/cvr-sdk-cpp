@@ -18,8 +18,7 @@ void Callback(std::string body)
 	{
 		auto cvr = CognitiveVRAnalyticsCore::Instance();
 		
-		cvr->log->Info("stuff");
-		return;
+		cvr->log->Info("generic callback has no body");
 	}
 }
 
@@ -27,19 +26,41 @@ void Callback(std::string body)
 void InitCallback(std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
+
+	cvr->log->Info("ANY RESPONSE");
+
 	//check that body can be parsed to json
 	if (body.empty())
 	{
 		cvr->log->Info("init response has no body");
 		cvr->SetInitSuccessful(false);
 		cvr->SetHasStartedSession(false);
-		return;
 	}
 	else
 	{
+		cvr->log->Info("NEW SPECIAL AND AMAZING RESPONSE\n"+body);
 		//try parsing body response to json
 		cvr->SetInitSuccessful(true);
 		cvr->SetHasStartedSession(true);
+
+		int errorcode = -1;
+
+		
+
+		auto jsonresponse = json::parse(body);
+
+		errorcode = jsonresponse["error"].get<int>();
+
+		if (errorcode == 0)
+		{
+			cvr->log->Info("error 0"); //tostring
+		}
+		else
+		{
+			cvr->log->Info("error " + std::to_string(errorcode));
+		}
+		
+		//cvr->log->Info("user " + jsonresponse["data"]["userid"].get<std::string>());
 	}
 }
 
@@ -83,10 +104,16 @@ void Network::DashboardCall(std::string suburl, std::string content)
 	if (suburl == "application_init")
 	{
 		wr = &InitCallback;
+		cvr->log->Info("set init callback");
 	}
 	else if (suburl == "exitpoll") //does exitpoll call this query? does it call sceneexplorer?
 	{
 		wr = &ExitPollCallback;
+		cvr->log->Info("set exitpoll callback");
+	}
+	else
+	{
+		cvr->log->Info("generic callback");
 	}
 
 	cvr->sendFunctionPointer(finalurl, content, wr);

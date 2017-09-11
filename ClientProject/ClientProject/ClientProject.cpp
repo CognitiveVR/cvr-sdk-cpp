@@ -5,6 +5,19 @@
 #include "CognitiveVRAnalytics.h"
 #include "include\curl\curl.h"
 
+std::string temp;
+
+size_t handle(char* buf, size_t size, size_t nmemb, void* up)
+{
+	//std::cout << "handle handle handle";
+
+	for (int c = 0; c < size*nmemb; c++)
+	{
+		temp.push_back(buf[c]);
+	}
+	return size * nmemb;
+}
+
 void DoWebStuff(std::string url, std::string content, WebResponse response)
 {
 	std::cout << url + "\n";
@@ -31,8 +44,16 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 		/* Now specify the POST data */
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
 
+		//curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, response);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &handle);
+		//curl_easy_setopt(curl, CURLOPT_WRITEDATA, &temp);
+
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
+
+		//call response
+		response(temp);
+
 		/* Check for errors */
 		if (res != CURLE_OK)
 		{

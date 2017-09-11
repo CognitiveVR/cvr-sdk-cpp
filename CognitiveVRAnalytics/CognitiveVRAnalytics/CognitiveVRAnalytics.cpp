@@ -204,7 +204,7 @@ std::string CognitiveVRAnalyticsCore::GetSessionID()
 {
 	if (SessionId.empty())
 	{
-		SessionId = std::to_string(GetSessionTimestamp()) + "_" + DeviceId;
+		SessionId = std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
 	}
 	return SessionId;
 }
