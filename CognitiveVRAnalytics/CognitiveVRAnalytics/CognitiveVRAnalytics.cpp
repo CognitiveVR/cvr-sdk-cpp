@@ -4,41 +4,43 @@
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 
-CognitiveVRAnalyticsCore* instance;
+std::shared_ptr<CognitiveVRAnalyticsCore> instance;
 
-CognitiveVRAnalyticsCore* CognitiveVRAnalyticsCore::Instance()
+std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
 {
 	return instance;
 }
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 {
-	instance = this;
+	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this);
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
 
-	log = new CognitiveLog(this);
+	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
 
-	config = new Config(this);
+	config = std::make_unique<Config>(Config(instance));
 
-	transaction = new Transaction(this);
-	gaze = new GazeTracker(this);
-	sensor = new Sensor(this);
+	tuning = std::make_unique<Tuning>(Tuning(instance));
+	transaction = std::make_unique<Transaction>(Transaction(instance));
+	gaze = std::make_unique<GazeTracker>(GazeTracker(instance));
+	sensor = std::make_unique<Sensor>(Sensor(instance));
+	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
 
-	network = new Network(this);
+	network = std::make_unique<Network>(Network(instance));
 }
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map<std::string, std::string> sceneids)
 {
-	instance = this;
+	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this);
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
 
-	log = new CognitiveLog(this);
+	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
 
-	config = new Config(this);
+	config = std::make_unique<Config>(Config(instance));
 	config->CustomerId = customerid;
 	config->GazeBatchSize = gazecount;
 	config->TransactionBatchSize = eventcount;
@@ -46,14 +48,16 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::str
 	config->DynamicDataLimit = dynamiccount;
 	config->sceneIds = sceneids;
 
-	transaction = new Transaction(this);
-	gaze = new GazeTracker(this);
-	sensor = new Sensor(this);
+	tuning = std::make_unique<Tuning>(Tuning(instance));
+	transaction = std::make_unique<Transaction>(Transaction(instance));
+	gaze = std::make_unique<GazeTracker>(GazeTracker(instance));
+	sensor = std::make_unique<Sensor>(Sensor(instance));
+	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
 
-	network = new Network(this);
+	network = std::make_unique<Network>(Network(instance));
 }
 
-CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
+/*CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
 	//delete a bunch of stuff
 
@@ -74,7 +78,7 @@ CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 	tuning = NULL;
 
 	sensor = NULL;
-}
+}*/
 
 void CognitiveVRAnalyticsCore::SetHasStartedSession(bool started)
 {

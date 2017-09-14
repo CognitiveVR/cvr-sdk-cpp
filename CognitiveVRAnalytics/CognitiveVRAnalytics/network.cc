@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "network.h"
 
-Network::Network(CognitiveVRAnalyticsCore* cog)
+Network::Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
     cvr = cog;
 }
@@ -54,6 +54,9 @@ void InitCallback(std::string body)
 		if (errorcode == 0)
 		{
 			cvr->log->Info("error 0"); //tostring
+			
+			cvr->tuning->ReceiveValues(jsonresponse);
+			
 		}
 		else
 		{

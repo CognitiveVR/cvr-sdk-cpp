@@ -18,7 +18,7 @@ class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API Sensor
 {
     private:
-		CognitiveVRAnalyticsCore* cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
 
 		//std::map<std::string, std::string> somedatapoints;
 		
@@ -32,7 +32,7 @@ class COGNITIVEVRANALYTICS_API Sensor
 		int jsonPart = 1;
 
     public:
-		Sensor(CognitiveVRAnalyticsCore* cog);
+		Sensor(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 		void RecordSensor(std::string Name, float value);
 		void SendData();
         

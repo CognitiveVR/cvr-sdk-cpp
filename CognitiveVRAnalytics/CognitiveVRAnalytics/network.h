@@ -7,6 +7,12 @@
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 
+#ifdef COGNITIVEVRANALYTICS_EXPORTS  
+#define COGNITIVEVRANALYTICS_API __declspec(dllexport)   
+#else  
+#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+#endif
+
 class CognitiveVRAnalyticsCore;
 
 //typedef void(*WebResponse) (std::string content);
@@ -15,10 +21,10 @@ class CognitiveVRAnalyticsCore;
 class Network
 {
     private:
-		CognitiveVRAnalyticsCore* cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
 
     public:
-        Network(CognitiveVRAnalyticsCore* cog);
+        Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
         
 
         /** Make a call to the CognitiveVR API.

@@ -5,7 +5,7 @@
 
 
 // Sets default values for this component's properties
-GazeTracker::GazeTracker(CognitiveVRAnalyticsCore* cog)
+GazeTracker::GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 	SetInterval(cvr->config->GazeInterval);

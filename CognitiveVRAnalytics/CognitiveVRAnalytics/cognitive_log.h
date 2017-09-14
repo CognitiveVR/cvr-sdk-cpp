@@ -20,10 +20,10 @@ class CognitiveLog
 {
 	private:
 		LoggingLevel logLevel;
-		CognitiveVRAnalyticsCore* cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
 
     public:
-		CognitiveLog(CognitiveVRAnalyticsCore* cog);
+		CognitiveLog(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
         void Info(std::string s);
 		void Warning(std::string s);
 		void Error(std::string s);

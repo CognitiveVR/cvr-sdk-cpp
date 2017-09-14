@@ -7,7 +7,7 @@
 using json = nlohmann::json;
 
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
-#define COGNITIVEVRANALYTICS_API __declspec(dllexport)   
+#define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 #else  
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
@@ -17,7 +17,7 @@ class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API GazeTracker
 {
 private:
-	CognitiveVRAnalyticsCore* cvr;
+	std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
 	long lastIntervalTime;
 	int jsonPart = 1;
 	int gazeCount = 0;
@@ -28,7 +28,7 @@ private:
 
 public:
 
-	GazeTracker(CognitiveVRAnalyticsCore* cog);
+	GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 	void SetInterval(float interval);
 	void SetHMDType(std::string hmdtype);
 

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "cognitive_log.h"
 
-CognitiveLog::CognitiveLog(CognitiveVRAnalyticsCore* cog)
+CognitiveLog::CognitiveLog(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 	SetLoggingLevel(LoggingLevel::All);

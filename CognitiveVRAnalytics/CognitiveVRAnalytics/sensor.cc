@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "sensor.h"
 
-Sensor::Sensor(CognitiveVRAnalyticsCore* cog)
+Sensor::Sensor(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }

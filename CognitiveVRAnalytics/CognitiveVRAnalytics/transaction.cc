@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "transaction.h"
 
-Transaction::Transaction(CognitiveVRAnalyticsCore* cog)
+Transaction::Transaction(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 

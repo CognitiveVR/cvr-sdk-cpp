@@ -20,7 +20,7 @@ class COGNITIVEVRANALYTICS_API Transaction
 	friend class CognitiveVRAnalyticsCore;
 
     private:
-		CognitiveVRAnalyticsCore* cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
 		//the array of objects {method:"whatever",args:json} to send to dashboard
 		json BatchedTransactions;
 		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
@@ -32,7 +32,7 @@ class COGNITIVEVRANALYTICS_API Transaction
 		int transactionCount = 0;
 
     public:
-        Transaction(CognitiveVRAnalyticsCore* cog);
+        Transaction(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
         /** Begin a new transaction.
 

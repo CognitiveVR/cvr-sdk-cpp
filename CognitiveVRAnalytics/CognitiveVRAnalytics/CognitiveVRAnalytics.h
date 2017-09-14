@@ -5,21 +5,23 @@
 #include "transaction.h"
 #include "gazetracker.h"
 #include "sensor.h"
+#include "tuning.h"
+#include "dynamicobject.h"
 #include "cognitive_log.h"
 #include "config.h"
 #include <chrono>
 using json = nlohmann::json;
 
-#ifdef COGNITIVEANALYTICS_EXPORTS  
-#define COGNITIVEANALYTICS_API __declspec(dllexport)   
+#ifdef COGNITIVEVRANALYTICS_EXPORTS  
+#define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 #else  
-#define COGNITIVEANALYTICS_API __declspec(dllimport)
+#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
 
 typedef void(*WebResponse) (std::string content);
 typedef void(*WebRequest) (std::string url, std::string content, WebResponse response);
 
-class COGNITIVEANALYTICS_API CognitiveVRAnalyticsCore
+class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
 	friend class CognitiveLog;
 	friend class Network;
@@ -27,12 +29,13 @@ class COGNITIVEANALYTICS_API CognitiveVRAnalyticsCore
 	friend class Tuning;
 	friend class Sensor;
 	friend class Config;
+	friend class DynamicObject;
 	friend class GazeTracker;
 
 private:
 	
-	Network* network;
-	Config* config;
+	std::unique_ptr<Network> network;
+	std::unique_ptr<Config> config;
 	
 
 	bool bHasSessionStarted;
@@ -50,16 +53,19 @@ private:
 
 public:
 
-	static CognitiveVRAnalyticsCore* Instance();
-	CognitiveLog* log;
-	Transaction* transaction;
-	Sensor* sensor;
-	Tuning* tuning;
-	GazeTracker* gaze;
+	static std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
+	std::unique_ptr<CognitiveLog> log;
+	std::unique_ptr<Transaction> transaction;
+	std::unique_ptr<Sensor> sensor;
+	std::unique_ptr<Tuning> tuning;
+	std::unique_ptr<GazeTracker> gaze;
+	std::unique_ptr<DynamicObject> dynamicobject;
 
 	CognitiveVRAnalyticsCore(WebRequest sendFunc);
 	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map < std::string, std::string> sceneids);
-	~CognitiveVRAnalyticsCore();
+	//CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&) = default;
+	//CognitiveVRAnalyticsCore& operator=(CognitiveVRAnalyticsCore&&) = default;
+	//~CognitiveVRAnalyticsCore();
 
 	void SetUser(std::string user_id, json* properties);
 	void SetDevice(std::string device_id, json* properties);
