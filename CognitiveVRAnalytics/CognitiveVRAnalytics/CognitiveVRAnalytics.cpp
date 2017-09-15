@@ -27,6 +27,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 	gaze = std::make_unique<GazeTracker>(GazeTracker(instance));
 	sensor = std::make_unique<Sensor>(Sensor(instance));
 	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
+	exitpoll = std::make_unique<ExitPoll>(ExitPoll(instance));
 
 	network = std::make_unique<Network>(Network(instance));
 }

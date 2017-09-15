@@ -6,6 +6,7 @@
 #include "gazetracker.h"
 #include "sensor.h"
 #include "tuning.h"
+#include "exitpoll.h"
 #include "dynamicobject.h"
 #include "cognitive_log.h"
 #include "config.h"
@@ -31,6 +32,7 @@ class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 	friend class Config;
 	friend class DynamicObject;
 	friend class GazeTracker;
+	friend class ExitPoll;
 
 private:
 	
@@ -60,6 +62,7 @@ public:
 	std::unique_ptr<Tuning> tuning;
 	std::unique_ptr<GazeTracker> gaze;
 	std::unique_ptr<DynamicObject> dynamicobject;
+	std::unique_ptr<ExitPoll> exitpoll;
 
 	CognitiveVRAnalyticsCore(WebRequest sendFunc);
 	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map < std::string, std::string> sceneids);

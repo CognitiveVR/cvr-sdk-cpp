@@ -20,8 +20,11 @@ size_t handle(char* buf, size_t size, size_t nmemb, void* up)
 
 void DoWebStuff(std::string url, std::string content, WebResponse response)
 {
+	std::cout << "<<<<curl url sent\n";
 	std::cout << url + "\n";
-	std::cout << content + "\n";
+
+	//std::cout << url + "\n";
+	//std::cout << content + "\n";
 
 	CURL* curl;
 	CURLcode res;
@@ -42,7 +45,10 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
 		/* Now specify the POST data */
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
+		if (content.size() > 0)
+		{
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
+		}
 
 		//curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, response);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &handle);
@@ -64,6 +70,7 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 			
 		}
 
+		temp.clear();
 		/* always cleanup */
 		curl_easy_cleanup(curl);
 	}
@@ -95,6 +102,11 @@ int main()
 	cog.transaction->BeginEndPosition("testing1", pos, nullptr);
 	cog.transaction->BeginEndPosition("testing2", pos, nullptr);
 	cog.transaction->BeginEndPosition("testing3", pos, nullptr);
+
+	cog.exitpoll->GetQuestionSet("player_died");
+	cog.exitpoll->GetQuestionSet("pre_experience_questions");
+	cog.exitpoll->GetQuestionSet("arquestions");
+	
 
 	/*cog.sensor->RecordSensor("comfort", 9);
 	cog.sensor->RecordSensor("fps", 60);

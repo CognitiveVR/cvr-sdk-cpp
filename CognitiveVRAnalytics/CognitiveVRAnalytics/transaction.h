@@ -17,7 +17,7 @@ class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API Transaction
 {
-	friend class CognitiveVRAnalyticsCore;
+	//friend class CognitiveVRAnalyticsCore;
 
     private:
 		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
@@ -26,7 +26,7 @@ class COGNITIVEVRANALYTICS_API Transaction
 		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
 		json BatchedTransactionsSE;
 
-		void AddToBatch(std::string method, json* args);
+		
 
 		int jsonPart = 1;
 		int transactionCount = 0;
@@ -84,6 +84,8 @@ class COGNITIVEVRANALYTICS_API Transaction
         */
 		//void BeginEnd(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
 		void BeginEndPosition(std::string category, std::vector<float> &Position, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
+
+		void AddToBatch(std::string method, json* args);
 
 		void SendData();
 };

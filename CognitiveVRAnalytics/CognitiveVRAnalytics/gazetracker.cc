@@ -46,65 +46,6 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 	{
 		SendData();
 	}
-
-	/*std::shared_ptr<json>snapObj = MakeShareable(new json);
-
-	snapObj->SetNumberField("time", time);
-
-	//positions
-	TArray<std::shared_ptr<FJsonValue>> posArray;
-	std::shared_ptr<FJsonValueNumber> JsonValue;
-	JsonValue = MakeShareable(new FJsonValueNumber(-(int)position.X)); //right
-	posArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber((int)position.Z)); //up
-	posArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber((int)position.Y));  //forward
-	posArray.Add(JsonValue);
-
-	snapObj->SetArrayField("p", posArray);
-
-	if (objectId >= 0)
-	{
-		snapObj->SetNumberField("o", objectId);
-	}
-
-	TArray<std::shared_ptr<FJsonValue>> gazeArray;
-	JsonValue = MakeShareable(new FJsonValueNumber(-(int)gaze.X));
-	gazeArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber((int)gaze.Z));
-	gazeArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber((int)gaze.Y));
-	gazeArray.Add(JsonValue);
-
-	snapObj->SetArrayField("g", gazeArray);
-
-	//rotation
-	TArray<std::shared_ptr<FJsonValue>> rotArray;
-
-	FQuat quat;
-	FRotator adjustedRot = rotation;
-	adjustedRot.Yaw -= 90;
-	quat = adjustedRot.Quaternion();
-
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.Y));
-	rotArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.Z));
-	rotArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.X));
-	rotArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.W));
-	rotArray.Add(JsonValue);
-
-	snapObj->SetArrayField("r", rotArray);
-
-	snapshots.Add(snapObj);
-	if (snapshots.Num() > GazeBatchSize)
-	{
-		SendGazeEventDataToSceneExplorer();
-		//s->FlushEvents();
-		snapshots.Empty();
-		events.Empty();
-	}*/
 }
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
@@ -125,50 +66,6 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 	{
 		SendData();
 	}
-
-	/*std::shared_ptr<json>snapObj = MakeShareable(new json);
-
-	snapObj->SetNumberField("time", time);
-
-	//positions
-	TArray<std::shared_ptr<FJsonValue>> posArray;
-	std::shared_ptr<FJsonValueNumber> JsonValue;
-	JsonValue = MakeShareable(new FJsonValueNumber(-(int)position.X)); //right
-	posArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber((int)position.Z)); //up
-	posArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber((int)position.Y));  //forward
-	posArray.Add(JsonValue);
-
-	snapObj->SetArrayField("p", posArray);
-
-	//rotation
-	TArray<std::shared_ptr<FJsonValue>> rotArray;
-
-	FQuat quat;
-	FRotator adjustedRot = rotation;
-	adjustedRot.Yaw -= 90;
-	quat = adjustedRot.Quaternion();
-
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.Y));
-	rotArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.Z));
-	rotArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.X));
-	rotArray.Add(JsonValue);
-	JsonValue = MakeShareable(new FJsonValueNumber(quat.W));
-	rotArray.Add(JsonValue);
-
-	snapObj->SetArrayField("r", rotArray);
-
-	snapshots.Add(snapObj);
-	if (snapshots.Num() > GazeBatchSize)
-	{
-		SendGazeEventDataToSceneExplorer();
-		//s->FlushEvents();
-		snapshots.Empty();
-		events.Empty();
-	}*/
 }
 
 void GazeTracker::SendData()

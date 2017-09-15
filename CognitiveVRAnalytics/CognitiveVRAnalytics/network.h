@@ -36,7 +36,10 @@ class Network
 		//void Call(std::string path, std::shared_ptr<json> content, NetworkCallback callback = NULL);
 		void DashboardCall(std::string suburl, std::string content);
 
-		///sub url is dynamic/sensor/gaze/event
+		//TODO use an enum to specify the type of call + bind to correct callback function
+		void APICall(std::string suburl, std::string callType);
+
+		//sub url is dynamic/sensor/gaze/event
 		void SceneExplorerCall(std::string suburl, std::string content);
 
 		//void Callback(std::string body);

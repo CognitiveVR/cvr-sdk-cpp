@@ -27,8 +27,6 @@ void InitCallback(std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
-	cvr->log->Info("ANY RESPONSE");
-
 	//check that body can be parsed to json
 	if (body.empty())
 	{
@@ -38,7 +36,6 @@ void InitCallback(std::string body)
 	}
 	else
 	{
-		cvr->log->Info("NEW SPECIAL AND AMAZING RESPONSE\n"+body);
 		//try parsing body response to json
 		cvr->SetInitSuccessful(true);
 		cvr->SetHasStartedSession(true);
@@ -70,12 +67,15 @@ void InitCallback(std::string body)
 //exitpoll response to requesting a hook. json is question set
 void ExitPollCallback(std::string body)
 {
+	auto cvr = CognitiveVRAnalyticsCore::Instance();
+
+	cvr->log->Info("ExitPollCallback==================START");
+	cvr->log->Info(body);
+	cvr->log->Info("ExitPollCallback==================END");
+
 	//check that body can be parsed to json
 	if (body.empty())
 	{
-		auto cvr = CognitiveVRAnalyticsCore::Instance();
-
-		cvr->log->Info("stuff");
 		return;
 	}
 
@@ -84,11 +84,9 @@ void ExitPollCallback(std::string body)
 
 void Network::DashboardCall(std::string suburl, std::string content)
 {
-	//cvr->WebRequestDelegate();
 	std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
 
-	//cache this query string?
-	//Build query string.
+	//TODO cache this query string
 	std::string query = "?";
 	query.append("ssf_ws_version=");
 	query.append(cvr->config->kSsfVersion);
@@ -109,17 +107,27 @@ void Network::DashboardCall(std::string suburl, std::string content)
 		wr = &InitCallback;
 		cvr->log->Info("set init callback");
 	}
-	else if (suburl == "exitpoll") //does exitpoll call this query? does it call sceneexplorer?
-	{
-		wr = &ExitPollCallback;
-		cvr->log->Info("set exitpoll callback");
-	}
 	else
 	{
 		cvr->log->Info("generic callback");
 	}
 
 	cvr->sendFunctionPointer(finalurl, content, wr);
+}
+
+void Network::APICall(std::string suburl, std::string callType)
+{
+	//TODO shoudl use api.networkhost from config
+	std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
+
+	WebResponse wr = &Callback;
+	if (callType == "exitpollget") //does exitpoll call this query? does it call sceneexplorer?
+	{
+		wr = &ExitPollCallback;
+		cvr->log->Info("set exitpoll callback");
+	}
+
+	cvr->sendFunctionPointer(path, "", wr);
 }
 
 void Network::SceneExplorerCall(std::string suburl, std::string content)

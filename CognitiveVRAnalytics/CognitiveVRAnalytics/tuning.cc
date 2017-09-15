@@ -9,27 +9,47 @@ Tuning::Tuning(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	cvr = cog;
 }
 
+//response received values, split by user and device
 void Tuning::ReceiveValues(json jsonvalues)
 {
-	//TODO map received values, split by user and device
-	//CacheValues(sp->GetUserID()), *json.GetObjectField("usertuning").Get(), kEntityTypeUser, true);
-	//CacheValues(sp->GetDeviceID()), *json.GetObjectField("devicetuning").Get(), kEntityTypeDevice, true);
+	//TODO error check - json count should be > 0
+	if (jsonvalues.size() == 0)
+	{
+		cvr->log->Info("Tuning::ReceiveValues josn value count is 0 elements");
+		return;
+	}
+
+	int errorcode = -1;
+	errorcode = jsonvalues["error"].get<int>();
+	if (errorcode != 0)
+	{
+		cvr->log->Info("Tuning::ReceiveValues error code " + errorcode);
+		return;
+	}
+
+	user_value_cache = jsonvalues["data"]["usertuning"];
+	device_value_cache = jsonvalues["data"]["devicetuning"];
+
+
+	//CacheValues(jsonvalues["data"]["userid"], jsonvalues["data"]["usertuning"], EntityType::kEntityTypeUser, true);
+	//CacheValues(jsonvalues["data"]["deviceid"], jsonvalues["data"]["devicetuning"], EntityType::kEntityTypeDevice, true);
 }
 
 void Tuning::ReceiveValues(std::string rawvalues)
 {
-	//TODO map received values, split by user and device
-	//CacheValues(sp->GetUserID()), *json.GetObjectField("usertuning").Get(), kEntityTypeUser, true);
-	//CacheValues(sp->GetDeviceID()), *json.GetObjectField("devicetuning").Get(), kEntityTypeDevice, true);
+	ReceiveValues(json::parse(rawvalues));
 }
 
+//TODO pass a reference of this json around. dereference and save copy
 void Tuning::CacheValues(std::string entity_id, json values, EntityType entity_type, bool getallc)
 {
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Tuning::CacheValues provider is null!");
+		cvr->log->Warning("Tuning::CacheValues session has not started");
 		return;
 	}
+
+	
 
 	//TODO split apart json values
 	/*
@@ -130,6 +150,7 @@ void Tuning::CacheValues(std::string entity_id, json values, EntityType entity_t
     //CacheValues(entity_id, resp.GetContent(), entity_type, true);
 }*/
 
+//TODO make a template to return a generic type instead of json
 json Tuning::GetValue(std::string name, std::string default_value)
 {
 	/*
@@ -159,6 +180,16 @@ json Tuning::GetValue(std::string name, std::string default_value)
 	return GetValue(name, default_value, TCHAR_TO_UTF8(*selectedID), entityType);
 	*/
 	json j;
+
+	if (cvr->UserId.size() > 0)
+	{
+		j[name] = user_value_cache[name];
+	}
+	else if (cvr->UserId.size() > 0)
+	{
+		j[name] = device_value_cache[name];
+	}
+
 	return j;
 }
 
@@ -252,6 +283,16 @@ json Tuning::GetValue(std::string name, std::string default_value, std::string e
 	return resp;*/
     
 	json j;
+
+	if (entity_type == EntityType::kEntityTypeUser)
+	{
+		j[name] = user_value_cache[name];
+	}
+	else if (entity_type == EntityType::kEntityTypeDevice)
+	{
+		j[name] = device_value_cache[name];
+	}
+
 	return j;
 }
 
@@ -274,6 +315,18 @@ void Tuning::RecordValueAccess(std::string name, std::string default_value, std:
 	jsonObject.Get()->SetField("args", jsonArray);
 
 	s->batcher->AddJsonToBatch(jsonObject);*/
+
+	double ts = cvr->GetSessionTimestamp();
+
+	json content = json::array();
+	content.emplace_back(ts);
+	content.emplace_back(ts);
+	content.emplace_back(cvr->UserId);
+	content.emplace_back(cvr->DeviceId);
+	content.emplace_back(name);
+	content.emplace_back(default_value);
+
+	cvr->transaction->AddToBatch("tuner_recordUsed", &content);
 }
 
 std::string Tuning::GetEntityTypeString(EntityType entity_type)

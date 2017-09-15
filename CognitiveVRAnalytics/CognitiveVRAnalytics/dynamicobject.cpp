@@ -31,12 +31,6 @@ DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(int id, std::string e
 	EngagementNumber = engagementNumber;
 }
 
-/*int DynamicObject::GetEngagementCount(int objectid, std::string name)
-{
-	engagements[objectid][name] += 1;
-	return engagements[objectid][name];
-}*/
-
 DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
@@ -123,6 +117,30 @@ void DynamicObject::Snapshot(std::vector<float> position, std::vector<float> rot
 void DynamicObject::Snapshot(std::vector<float> position, std::vector<float> rotation, int objectId, json properties)
 {
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId, properties);
+
+	if (allEngagements[objectId].size() > 0)
+	{
+		int i = 0;
+
+		//add engagements to snapshot
+		for (auto& e : allEngagements[objectId])
+		{
+			if (e.isActive)
+			{
+				json engagementEvent = json();
+				engagementEvent["engagementparent"] = objectId;
+				engagementEvent["engagement_count"] = e.EngagementNumber;
+				engagementEvent["engagement_time"] = cvr->GetTimestamp() - e.startTime;
+				snapshot.Engagements.emplace_back(engagementEvent);
+			}
+		}
+
+		//remove inactive engagements
+		allEngagements[objectId].erase(std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
+
+		//TODO this could be improved. should loop through once https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
+	}
+
 	snapshots.emplace_back(snapshot);
 
 	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)

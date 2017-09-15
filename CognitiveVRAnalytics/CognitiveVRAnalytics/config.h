@@ -19,13 +19,13 @@ class CognitiveVRAnalyticsCore;
 class Config {
 
 	private:
-		CognitiveVRAnalyticsCore* cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
 
     public:
 		#pragma warning(push)
 		#pragma warning(disable:4251) //Disable DLL warning that does not apply in this context.
 
-		Config(CognitiveVRAnalyticsCore* cog)
+		Config(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 		{
 			cvr = cog;
 		}
