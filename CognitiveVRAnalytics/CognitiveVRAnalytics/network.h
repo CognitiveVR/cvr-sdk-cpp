@@ -37,7 +37,7 @@ class Network
 		void DashboardCall(std::string suburl, std::string content);
 
 		//TODO use an enum to specify the type of call + bind to correct callback function
-		void APICall(std::string suburl, std::string callType);
+		void APICall(std::string suburl, std::string callType, std::string content = "");
 
 		//sub url is dynamic/sensor/gaze/event
 		void SceneExplorerCall(std::string suburl, std::string content);

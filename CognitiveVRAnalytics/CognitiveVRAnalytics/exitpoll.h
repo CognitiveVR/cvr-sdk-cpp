@@ -27,11 +27,32 @@ enum EAnswerValueTypeReturn
 struct FExitPollAnswer
 {
 public:
-		std::string type; //question type
+		//question type. TODO make this an enum. HAPPYSAD,SCALE,MULTIPLE,VOICE,THUMBS,BOOLEAN
+		std::string type;
 		EAnswerValueTypeReturn AnswerValueType;
 		int numberValue;
 		bool boolValue; //converted to 0 or 1
 		std::string stringValue; //for base64 voice
+
+		//TODO some nice converting function to json
+		/*void to_json(json& j, const FExitPollAnswer& a) {
+			if (AnswerValueType == EAnswerValueTypeReturn::Bool)
+			{
+				j = json{ { "name", a.type },{ "value", a.boolValue?1:0 }};
+			}
+			else if (AnswerValueType == EAnswerValueTypeReturn::Number)
+			{
+				j = json{ { "name", a.type },{ "value", a.numberValue } };
+			}
+			else if (AnswerValueType == EAnswerValueTypeReturn::Null)
+			{
+				j = json{ { "name", a.type },{ "value", -32768 } };
+			}
+			else if (AnswerValueType == EAnswerValueTypeReturn::String)
+			{
+				j = json{ { "name", a.type },{ "value", a.stringValue } };
+			}
+		}*/
 };
 
 struct FExitPollResponse
@@ -42,6 +63,40 @@ public:
 		std::string sessionId;
 		std::string hook;
 		std::vector<FExitPollAnswer> answers;
+
+		std::string questionSetName;
+		std::string questionSetVersion;
+
+		//TODO proper override of nlohmann::to_json and from_json
+		json to_json()
+		{
+			json j = json{ { "userId", user },{ "questionSetId", questionSetId },{ "sessionId", sessionId },{ "hook", hook } };
+			json janswers = json::array();
+			for (auto& an : answers)
+			{
+				json tempAnswer = json();
+				if (an.AnswerValueType == EAnswerValueTypeReturn::Bool)
+				{
+					tempAnswer = json{ { "name", an.type },{ "value", an.boolValue ? 1 : 0 } };
+				}
+				else if (an.AnswerValueType == EAnswerValueTypeReturn::Number)
+				{
+					tempAnswer = json{ { "name", an.type },{ "value", an.numberValue } };
+				}
+				else if (an.AnswerValueType == EAnswerValueTypeReturn::Null)
+				{
+					tempAnswer = json{ { "name", an.type },{ "value", -32768 } };
+				}
+				else if (an.AnswerValueType == EAnswerValueTypeReturn::String)
+				{
+					tempAnswer = json{ { "name", an.type },{ "value", an.stringValue } };
+				}
+
+				janswers.push_back(tempAnswer);
+			}
+			j["answers"] = janswers;
+			return j;
+		};
 };
 
 class COGNITIVEVRANALYTICS_API ExitPoll
@@ -49,12 +104,29 @@ class COGNITIVEVRANALYTICS_API ExitPoll
 private:
 	std::string lastHook;
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
+	json currentQuestionSet;
+
+	FExitPollResponse fullResponse;
+
 public:
 
 	ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-	//TODO figure out simple delegate
-	void GetQuestionSet(std::string Hook);
+	void RequestQuestionSet(std::string Hook);
+	void ReceiveQuestionSet(json questionset);
 
-	void SendQuestionResponse(FExitPollResponse responses);
+	//can return empty json if request failed
+	json GetQuestionSet();
+	bool HasQuestionSet()
+	{
+		return currentQuestionSet.size() > 0;
+	}
+
+	void AddAnswer(FExitPollAnswer answer);
+	void AddAnswer(std::string questionType, EAnswerValueTypeReturn valueType, int numbervalue = 0, bool boolvalue = false, std::string stringvalue = "");
+
+	void SendAllAnswers();
+
+	//called after SendQuestionResponse. clears the currentQuestionSetData and response
+	void ClearQuestionSet();
 };

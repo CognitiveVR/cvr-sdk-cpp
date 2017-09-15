@@ -79,6 +79,8 @@ void ExitPollCallback(std::string body)
 		return;
 	}
 
+	cvr->exitpoll->ReceiveQuestionSet(json::parse(body));
+
 	//call cvr->exitpoll->GetQuestionSet to return json formatted to display question after this callback has been called
 }
 
@@ -115,7 +117,7 @@ void Network::DashboardCall(std::string suburl, std::string content)
 	cvr->sendFunctionPointer(finalurl, content, wr);
 }
 
-void Network::APICall(std::string suburl, std::string callType)
+void Network::APICall(std::string suburl, std::string callType, std::string content)
 {
 	//TODO shoudl use api.networkhost from config
 	std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
@@ -127,7 +129,7 @@ void Network::APICall(std::string suburl, std::string callType)
 		cvr->log->Info("set exitpoll callback");
 	}
 
-	cvr->sendFunctionPointer(path, "", wr);
+	cvr->sendFunctionPointer(path, content, wr);
 }
 
 void Network::SceneExplorerCall(std::string suburl, std::string content)

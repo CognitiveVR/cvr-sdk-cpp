@@ -8,25 +8,73 @@ ExitPoll::ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	cvr = cog;
 }
 
-void ExitPoll::GetQuestionSet(std::string Hook)
+void ExitPoll::RequestQuestionSet(std::string Hook)
 {
 	cvr->network->APICall("questionSetHooks/" + Hook + "/questionSet","exitpollget");
 
-	/*TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
+	fullResponse.user = cvr->UserId;
+	fullResponse.sessionId = cvr->GetSessionID();
+	fullResponse.hook = Hook;
+}
 
-	if (cogProvider.Get() == NULL)
-	{
-		cogProvider = FAnalyticsCognitiveVR::Get().GetCognitiveVRProvider();
+std::vector<std::string> split(const std::string &text, char sep) {
+	std::vector<std::string> tokens;
+	std::size_t start = 0, end = 0;
+	while ((end = text.find(sep, start)) != std::string::npos) {
+		tokens.push_back(text.substr(start, end - start));
+		start = end + 1;
 	}
-	std::string ValueReceived = cogProvider->CustomerId;// = FAnalytics::Get().GetConfigValueFromIni(GEngineIni, "Analytics", "CognitiveVRApiKey", false);
+	tokens.push_back(text.substr(start));
+	return tokens;
+}
 
-	std::string url = "https://api.cognitivevr.io/products/"+ ValueReceived +"/questionSetHooks/"+ Hook+"/questionSet";
-	HttpRequest->SetURL(url);
-	HttpRequest->SetVerb("GET");
-	r = response;
-	lastHook = Hook;
-	HttpRequest->OnProcessRequestComplete().BindStatic(ExitPoll::OnResponseReceivedAsync);
-	HttpRequest->ProcessRequest();*/
+void ExitPoll::ReceiveQuestionSet(json questionset)
+{
+	fullResponse.questionSetId = questionset["id"].get<std::string>();
+	auto splitquestionid = split(fullResponse.questionSetId, ':');
+	fullResponse.questionSetName = splitquestionid[0];
+	fullResponse.questionSetVersion = splitquestionid[1];
+	currentQuestionSet = questionset;
+}
+
+
+
+json ExitPoll::GetQuestionSet()
+{
+	return currentQuestionSet;
+}
+
+void ExitPoll::ClearQuestionSet()
+{
+	currentQuestionSet.clear();
+
+	fullResponse.answers.clear();
+	fullResponse.hook.clear();
+	fullResponse.questionSetId.clear();
+	fullResponse.sessionId.clear();
+	fullResponse.user.clear();
+}
+
+void ExitPoll::AddAnswer(FExitPollAnswer answer)
+{
+	//TODO critical test that this adds to vector in correct order!
+	fullResponse.answers.push_back(answer);
+}
+
+void ExitPoll::SendAllAnswers()
+{
+	//companyname1234-productname-test/questionSets/unreal_questionset/5/responses HTTP/1.1
+
+	json full = fullResponse.to_json();
+
+	cvr->network->APICall(cvr->GetCustomerId() + "/questionSets/" + fullResponse.questionSetName + "/" + fullResponse.questionSetVersion + "/responses", "answerSend", full.dump());
+
+	//dump json into string
+	//send to api somewhere
+
+	//TODO send this as a transaction too?
+
+	ClearQuestionSet();
 }
 
 /*
@@ -148,9 +196,19 @@ void ExitPoll::OnResponseReceivedAsync(FHttpRequestPtr Request, FHttpResponsePtr
 }
 */
 
-void ExitPoll::SendQuestionResponse(FExitPollResponse Responses)
+
+
+/*void ExitPoll::SendAllAnswers()
 {
-	/*if (cogProvider.Get() == NULL)
+	//turn fullresponse into json
+	//dump json into string
+	//send to api somewhere
+
+	//TODO send this as a transaction too?
+
+	ClearQuestionSet();
+
+	if (cogProvider.Get() == NULL)
 	{
 		cogProvider = FAnalyticsCognitiveVR::Get().GetCognitiveVRProvider();
 	}
@@ -268,5 +326,5 @@ void ExitPoll::SendQuestionResponse(FExitPollResponse Responses)
 	cogProvider.Get()->transaction->BeginEnd("cvr.exitpoll", properties);
 
 	//then flush transactions
-	cogProvider.Get()->FlushEvents();*/
-}
+	cogProvider.Get()->FlushEvents();
+}*/

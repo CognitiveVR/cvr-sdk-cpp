@@ -103,10 +103,7 @@ int main()
 	cog.transaction->BeginEndPosition("testing2", pos, nullptr);
 	cog.transaction->BeginEndPosition("testing3", pos, nullptr);
 
-	cog.exitpoll->GetQuestionSet("player_died");
-	cog.exitpoll->GetQuestionSet("pre_experience_questions");
-	cog.exitpoll->GetQuestionSet("arquestions");
-	
+	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
 
 	/*cog.sensor->RecordSensor("comfort", 9);
 	cog.sensor->RecordSensor("fps", 60);
