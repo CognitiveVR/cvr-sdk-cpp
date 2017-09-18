@@ -4,6 +4,12 @@
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 #include "include\curl\curl.h"
+#include "gtest\gtest.h"
+
+TEST(BasicMathTest, MathTest) {
+	EXPECT_EQ(18, 18);
+	EXPECT_EQ(25, 24);
+}
 
 std::string temp;
 
@@ -76,8 +82,11 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 	}
 }
 
-int main()
+int main(int argc, char **argv)
 {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+
 	WebRequest fp = &DoWebStuff;
 
 	auto cog = CognitiveVRAnalyticsCore(fp);
