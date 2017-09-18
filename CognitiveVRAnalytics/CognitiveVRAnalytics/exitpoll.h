@@ -53,6 +53,30 @@ public:
 				j = json{ { "name", a.type },{ "value", a.stringValue } };
 			}
 		}*/
+
+		FExitPollAnswer(std::string questionType, int number)
+		{
+			type = questionType;
+			AnswerValueType = EAnswerValueTypeReturn::Number;
+			numberValue = number;
+		}
+		FExitPollAnswer(std::string questionType)
+		{
+			type = questionType;
+			AnswerValueType = EAnswerValueTypeReturn::Null;
+		}
+		FExitPollAnswer(std::string questionType, bool boolean)
+		{
+			type = questionType;
+			AnswerValueType = EAnswerValueTypeReturn::Bool;
+			boolValue = boolean;
+		}
+		FExitPollAnswer(std::string questionType, std::string string)
+		{
+			type = questionType;
+			AnswerValueType = EAnswerValueTypeReturn::String;
+			stringValue = string;
+		}
 };
 
 struct FExitPollResponse
@@ -123,7 +147,6 @@ public:
 	}
 
 	void AddAnswer(FExitPollAnswer answer);
-	void AddAnswer(std::string questionType, EAnswerValueTypeReturn valueType, int numbervalue = 0, bool boolvalue = false, std::string stringvalue = "");
 
 	void SendAllAnswers();
 
