@@ -8,8 +8,7 @@
 GazeTracker::GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
-	SetInterval(cvr->config->GazeInterval);
-	SetHMDType(cvr->config->HMDType);
+	cvr->log->Info("---gaze tracker constuctor begin");
 }
 
 void GazeTracker::SetInterval(float interval)

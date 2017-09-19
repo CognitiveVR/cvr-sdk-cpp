@@ -6,11 +6,6 @@
 #include "include\curl\curl.h"
 #include "gtest\gtest.h"
 
-TEST(BasicMathTest, MathTest) {
-	EXPECT_EQ(18, 18);
-	EXPECT_EQ(25, 24);
-}
-
 std::string temp;
 
 size_t handle(char* buf, size_t size, size_t nmemb, void* up)
@@ -73,7 +68,7 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 		}
 		else
 		{
-			
+
 		}
 
 		temp.clear();
@@ -82,10 +77,39 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 	}
 }
 
+TEST(Initialization, Initialization) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	//deconstructor was not called?
+	cog.GetTimestamp();
+}
+
+TEST(Initialization, SessionStart) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.StartSession();
+}
+
+TEST(Initialization, SessionEnd) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.EndSession();
+}/*
+
+TEST(Initialization, SessionStartEnd) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.StartSession();
+	cog.EndSession();
+}*/
+
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
+
+
+
 
 	WebRequest fp = &DoWebStuff;
 
@@ -95,7 +119,7 @@ int main(int argc, char **argv)
 	user["age"] = 21;
 	user["location"] = "vancouver";
 
-	cog.SetUser("john", &user);
+	cog.SetUser("john", user);
 
 
 	nlohmann::json device = nlohmann::json();
@@ -103,7 +127,7 @@ int main(int argc, char **argv)
 	device["retail value"] = 79.95;
 	device["ram"] = 4;
 
-	cog.SetDevice("chromebook", &device);
+	cog.SetDevice("chromebook", device);
 
 	cog.StartSession();
 

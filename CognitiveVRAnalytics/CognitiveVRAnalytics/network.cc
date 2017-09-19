@@ -42,8 +42,6 @@ void InitCallback(std::string body)
 
 		int errorcode = -1;
 
-		
-
 		auto jsonresponse = json::parse(body);
 
 		errorcode = jsonresponse["error"].get<int>();

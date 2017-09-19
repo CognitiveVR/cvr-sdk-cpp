@@ -66,12 +66,13 @@ public:
 
 	CognitiveVRAnalyticsCore(WebRequest sendFunc);
 	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map < std::string, std::string> sceneids);
-	//CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&) = default;
+	CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&);
 	//CognitiveVRAnalyticsCore& operator=(CognitiveVRAnalyticsCore&&) = default;
-	//~CognitiveVRAnalyticsCore();
+	
+	~CognitiveVRAnalyticsCore();
 
-	void SetUser(std::string user_id, json* properties);
-	void SetDevice(std::string device_id, json* properties);
+	void SetUser(std::string user_id, json properties);
+	void SetDevice(std::string device_id, json properties);
 	std::string GetCustomerId();
 
 	double GetSessionTimestamp();
@@ -83,6 +84,7 @@ public:
 	void SetInitSuccessful(bool success);
 	bool WasInitSuccessful();
 
+	//returns true if successfully starting session. ie, not already started
 	bool StartSession();
 	void EndSession();
 
