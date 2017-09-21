@@ -4,7 +4,7 @@
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>--gtest_repeat=10 --gtest_break_on_failure</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--gtest_repeat=2 --gtest_break_on_failure --gtest_filter=Transaction.*</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

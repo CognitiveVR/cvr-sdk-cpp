@@ -94,21 +94,82 @@ TEST(Initialization, SessionEnd) {
 	WebRequest fp = &DoWebStuff;
 	auto cog = CognitiveVRAnalyticsCore(fp);
 	cog.EndSession();
-}/*
+}
 
 TEST(Initialization, SessionStartEnd) {
 	WebRequest fp = &DoWebStuff;
 	auto cog = CognitiveVRAnalyticsCore(fp);
 	cog.StartSession();
 	cog.EndSession();
-}*/
+}
+
+TEST(Transaction, PreSessionNoEnd) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+
+	cog.StartSession();
+}
+
+TEST(Transaction, PreSessionEnd) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+
+	cog.StartSession();
+	cog.EndSession();
+}
+
+TEST(Transaction, PreSessionSend) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+
+	cog.StartSession();
+	cog.SendData();
+}
+
+TEST(Transaction, PreSessionPropsSend) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	std::vector<float> pos = { 0,0,0 };
+
+	nlohmann::json user = nlohmann::json();
+	user["age"] = 21;
+	user["location"] = "vancouver";
+
+	cog.transaction->BeginEndPosition("testing1", pos, user);
+
+	cog.StartSession();
+	cog.SendData();
+}
+
+TEST(Transaction, SessionEnd) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	std::vector<float> pos = { 0,0,0 };
+
+	nlohmann::json user = nlohmann::json();
+	user["age"] = 21;
+	user["location"] = "vancouver";
+
+	cog.StartSession();
+	cog.transaction->BeginEndPosition("testing1", pos, user);
+	cog.EndSession();
+}
 
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
-
-
 
 
 	WebRequest fp = &DoWebStuff;
@@ -132,9 +193,9 @@ int main(int argc, char **argv)
 	cog.StartSession();
 
 	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos, nullptr);
-	cog.transaction->BeginEndPosition("testing2", pos, nullptr);
-	cog.transaction->BeginEndPosition("testing3", pos, nullptr);
+	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.transaction->BeginEndPosition("testing2", pos);
+	cog.transaction->BeginEndPosition("testing3", pos);
 
 	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
 

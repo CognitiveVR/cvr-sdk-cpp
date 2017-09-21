@@ -34,7 +34,6 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 	exitpoll = std::make_unique<ExitPoll>(ExitPoll(instance));
 
 	network = std::make_unique<Network>(Network(instance));
-	log->Info("constructor simple end");
 }
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map<std::string, std::string> sceneids)
@@ -66,7 +65,6 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::str
 	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
 
 	network = std::make_unique<Network>(Network(instance));
-	log->Info("constructor full end");
 }
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
@@ -113,6 +111,8 @@ bool CognitiveVRAnalyticsCore::StartSession()
 		return false;
 	}
 
+	log->Info("CognitiveVRAnalytics::StartSession");
+
 	GetSessionTimestamp();
 	GetSessionID();
 
@@ -122,7 +122,6 @@ bool CognitiveVRAnalyticsCore::StartSession()
 		SetUser("anonymous", nullptr);
 	}
 
-	log->Info("CognitiveVRAnalytics::StartSession pre device info!");
 	if (DeviceId.empty())
 	{
 		log->Info("CognitiveVRAnalytics::StartSession device id is empty!");
@@ -158,7 +157,6 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	network->DashboardCall("application_init", content.dump());
 
-
 	gaze->SetInterval(config->GazeInterval);
 	gaze->SetHMDType(config->HMDType);
 
@@ -172,10 +170,9 @@ std::string CognitiveVRAnalyticsCore::GetCustomerId()
 
 void CognitiveVRAnalyticsCore::EndSession()
 {
-	json properties;
-	//properties["sessionlength"] = Util::GetTimestamp() - GetSessionTimestamp();
+	log->Info("CognitiveVRAnalytics::EndSession");
 
-	std::shared_ptr<json> props = std::make_shared<json>(properties);
+	json props;
 
 	std::vector<float> endPos = { 0,0,0 };
 
@@ -231,11 +228,9 @@ void CognitiveVRAnalyticsCore::SendData()
 
 void CognitiveVRAnalyticsCore::SetUser(std::string user_id, json properties)
 {
-	log->Info("CognitiveVRAnalytics::set user begin");
+	log->Info("CognitiveVRAnalytics::set user");
 	UserId = user_id;
 	double ts = GetTimestamp();
-
-	log->Info("CognitiveVRAnalytics::set post timestamp");
 
 	json args = json::array();
 
@@ -244,26 +239,24 @@ void CognitiveVRAnalyticsCore::SetUser(std::string user_id, json properties)
 	args.emplace_back(UserId);
 	args.emplace_back(DeviceId);
 
-	log->Info("CognitiveVRAnalytics::set user post args");
-
 	if (properties != nullptr)
 	{
 		UserProperties = properties;
 		//add this to transactions batch
 		args.emplace_back(properties);
-		transaction->AddToBatch("datacollector_updateUserState", &args);
+		transaction->AddToBatch("datacollector_updateUserState", args);
 	}
 	else
 	{
 		UserProperties = json::array();
 		args.emplace_back(nullptr);
-		transaction->AddToBatch("datacollector_updateUserState", &args);
+		transaction->AddToBatch("datacollector_updateUserState", args);
 	}
-	log->Info("CognitiveVRAnalytics::set user end");
 }
 
 void CognitiveVRAnalyticsCore::SetDevice(std::string device_id, json properties)
 {
+	log->Info("CognitiveVRAnalytics::set device");
 	//requires timestamp, timestamp,userid, deviceid,deviceproperties
 
 	DeviceId = device_id;
@@ -281,18 +274,19 @@ void CognitiveVRAnalyticsCore::SetDevice(std::string device_id, json properties)
 		DeviceProperties = properties;
 		//add this to transactions batch
 		args.emplace_back(properties);
-		transaction->AddToBatch("datacollector_updateDeviceState", &args);
+		transaction->AddToBatch("datacollector_updateDeviceState", args);
 	}
 	else
 	{
 		DeviceProperties = json::array();
 		args.emplace_back(nullptr);
-		transaction->AddToBatch("datacollector_updateDeviceState", &args);
+		transaction->AddToBatch("datacollector_updateDeviceState", args);
 	}
 }
 
 void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 {
+	log->Info("CognitiveVRAnalytics::set scene");
 	auto search = config->sceneIds.find(sceneName);
 	if (search != config->sceneIds.end())
 	{

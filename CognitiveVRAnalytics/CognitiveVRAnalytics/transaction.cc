@@ -11,7 +11,12 @@ Transaction::Transaction(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	BatchedTransactions = json::array();
 }
 
-void Transaction::BeginPosition(std::string category, std::vector<float> &Position, std::shared_ptr<json> properties, std::string transaction_id)
+void Transaction::BeginPosition(std::string category, std::vector<float> &Position, std::string transaction_id)
+{
+	BeginPosition(category, Position, json(), transaction_id);
+}
+
+void Transaction::BeginPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("init not successful"); return; }
 
@@ -19,11 +24,6 @@ void Transaction::BeginPosition(std::string category, std::vector<float> &Positi
 	{
 		// this should still be added to the batch, but not sent
 		cvr->log->Warning("Transaction::Begin - Session not started!");
-	}
-
-	if (properties == nullptr)
-	{
-		properties = std::make_shared<json>();
 	}
 
 	std::string trans = std::string("TXN");
@@ -40,36 +40,34 @@ void Transaction::BeginPosition(std::string category, std::vector<float> &Positi
 	args.emplace_back(trans);
 	args.emplace_back(cvr->config->kNetworkTimeout);
 	args.emplace_back(transaction_id);
-	args.emplace_back(*properties);
+	args.emplace_back(properties);
 
-	json* ptrargs = &args;
-
-	AddToBatch("datacollector_beginTransaction", ptrargs);
+	AddToBatch("datacollector_beginTransaction", args);
 
 	json se = json();
 	se["name"] = category;
 	se["time"] = ts;
 	se["point"] = { Position[0],Position[1] ,Position[2] };
-	if (properties->size() > 0)
+	if (properties.size() > 0)
 	{
-		se["properties"] = *properties;
+		se["properties"] = properties;
 	}
 
 	BatchedTransactionsSE.emplace_back(se);
 }
 
-void Transaction::UpdatePosition(std::string category, std::vector<float> &Position, std::shared_ptr<json> properties, std::string transaction_id, double progress)
+void Transaction::UpdatePosition(std::string category, std::vector<float> &Position, std::string transaction_id, double progress)
+{
+	UpdatePosition(category, Position, json(), transaction_id, progress);
+}
+
+void Transaction::UpdatePosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, double progress)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
 		cvr->log->Warning("Transaction::UpdatePosition - Session not started!");
-	}
-
-	if (properties == nullptr)
-	{
-		properties = std::make_shared<json>();
 	}
 
 	double ts = cvr->GetTimestamp();
@@ -83,36 +81,34 @@ void Transaction::UpdatePosition(std::string category, std::vector<float> &Posit
 	args.emplace_back(category);
 	args.emplace_back(progress);
 	args.emplace_back(transaction_id);
-	args.emplace_back(*properties);
+	args.emplace_back(properties);
 
-	json* ptrargs = &args;
-
-	AddToBatch("datacollector_updateTransaction", ptrargs);
+	AddToBatch("datacollector_updateTransaction", args);
 
 	json se = json();
 	se["name"] = category;
 	se["time"] = ts;
 	se["point"] = { Position[0],Position[1] ,Position[2] };
-	if (properties->size() > 0)
+	if (properties.size() > 0)
 	{
-		se["properties"] = *properties;
+		se["properties"] = properties;
 	}
 
 	BatchedTransactionsSE.emplace_back(se);
 }
 
-void Transaction::EndPosition(std::string category, std::vector<float> &Position, std::shared_ptr<json> properties, std::string transaction_id, std::string result)
+void Transaction::EndPosition(std::string category, std::vector<float> &Position, std::string transaction_id, std::string result)
+{
+	EndPosition(category, Position, json(), transaction_id, result);
+}
+
+void Transaction::EndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, std::string result)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
 		cvr->log->Warning("Transaction::EndPosition - Session not started!");
-	}
-
-	if (properties == nullptr)
-	{
-		properties = std::make_shared<json>();
 	}
 
 	double ts = cvr->GetTimestamp();
@@ -126,25 +122,28 @@ void Transaction::EndPosition(std::string category, std::vector<float> &Position
 	args.emplace_back(category);
 	args.emplace_back(result);
 	args.emplace_back(transaction_id);
-	args.emplace_back(*properties);
+	args.emplace_back(properties);
 
-	json* ptrargs = &args;
-
-	AddToBatch("datacollector_endTransaction", ptrargs);
+	AddToBatch("datacollector_endTransaction", args);
 
 	json se = json();
 	se["name"] = category;
 	se["time"] = ts;
 	se["point"] = { Position[0],Position[1] ,Position[2] };
-	if (properties->size() > 0)
+	if (properties.size() > 0)
 	{
-		se["properties"] = *properties;
+		se["properties"] = properties;
 	}
 
 	BatchedTransactionsSE.emplace_back(se);
 }
 
-void Transaction::BeginEndPosition(std::string category, std::vector<float> &Position, std::shared_ptr<json> properties, std::string transaction_id, std::string result)
+void Transaction::BeginEndPosition(std::string category, std::vector<float> &Position,std::string transaction_id, std::string result)
+{
+	BeginEndPosition(category, Position, json(), transaction_id, result);
+}
+
+void Transaction::BeginEndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, std::string result)
 {
 	if (!cvr->HasStartedSession())
 	{
@@ -154,20 +153,13 @@ void Transaction::BeginEndPosition(std::string category, std::vector<float> &Pos
 	this->EndPosition(category, Position, properties, transaction_id, result);
 }
 
-void Transaction::AddToBatch(std::string method, json* args)
+void Transaction::AddToBatch(std::string method, json args)
 {
 	cvr->log->Info("batch begin");
 	json batchObject;
 
 	batchObject["method"] = method;
-	if (args == nullptr)
-	{
-		batchObject["args"] = nullptr;
-	}
-	else
-	{
-		batchObject["args"] = *args;
-	}
+	batchObject["args"] = args;
 
 	BatchedTransactions.emplace_back(batchObject);
 

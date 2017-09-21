@@ -52,8 +52,10 @@ class COGNITIVEVRANALYTICS_API Tuning
 		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
 
         //std::map< std::string, std::map<std::string, TuningValue*> > users_value_cache;
+
 		json user_value_cache;
         //std::map< std::string, std::map<std::string, TuningValue*> > devices_value_cache;
+
 		json device_value_cache;
         //long getallval_cache_ttl;
 
