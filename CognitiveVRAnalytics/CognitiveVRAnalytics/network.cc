@@ -30,6 +30,8 @@ void InitCallback(std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
+	cvr->log->Info("init callback");
+
 	//check that body can be parsed to json
 	if (body.empty())
 	{
@@ -54,11 +56,12 @@ void InitCallback(std::string body)
 			cvr->log->Info("applicaiton init successful");
 			
 			cvr->tuning->ReceiveValues(jsonresponse);
-			
 		}
 		else
 		{
 			cvr->log->Info("error " + std::to_string(errorcode));
+			cvr->SetInitSuccessful(false);
+			cvr->SetHasStartedSession(false);
 		}
 		
 		//TODO begin session transaction
@@ -89,7 +92,10 @@ void ExitPollCallback(std::string body)
 
 void Network::DashboardCall(std::string suburl, std::string content)
 {
-	std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
+	cvr->log->Info("Network Dashboard call");
+
+	//std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
+	std::string path = "/isos-personalization/ws/interface/" + suburl;
 
 	//TODO cache this query string
 	std::string query = "?";
@@ -108,11 +114,18 @@ void Network::DashboardCall(std::string suburl, std::string content)
 
 	WebResponse wr = &Callback;
 
+	if (suburl == "application_init")
+	{
+		wr = &InitCallback;
+	}
+
 	cvr->sendFunctionPointer(finalurl, content, wr);
 }
 
 void Network::APICall(std::string suburl, std::string callType, std::string content)
 {
+	cvr->log->Info("Network API call");
+
 	//TODO shoudl use api.networkhost from config
 	std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
 
@@ -128,6 +141,8 @@ void Network::APICall(std::string suburl, std::string callType, std::string cont
 
 void Network::SceneExplorerCall(std::string suburl, std::string content)
 {
+	cvr->log->Info("Network SceneExplorer call");
+
 	std::string scenekey = cvr->GetSceneKey();
 	if (scenekey.empty())
 	{

@@ -20,9 +20,9 @@ enum CommonMeshName
 class DynamicObjectManifestEntry
 {
 public:
-	int Id;
-	std::string Name;
-	std::string MeshName;
+	int Id = 0;
+	std::string Name = "";
+	std::string MeshName = "";
 	//json Properties
 
 	DynamicObjectManifestEntry(int id, std::string name, std::string mesh)
@@ -36,9 +36,9 @@ public:
 class DynamicObjectId
 {
 public:
-	int Id;
+	int Id = 0;
 	bool Used = true;
-	std::string MeshName;
+	std::string MeshName = "";
 
 	DynamicObjectId(int id, std::string meshName)
 	{
@@ -52,8 +52,8 @@ struct DynamicObjectSnapshot
 public:
 	std::vector<float> Position;
 	std::vector<float> Rotation;
-	double Time;
-	int Id;
+	double Time = -1;
+	int Id = 0;
 	json Properties;
 	json Engagements;
 
@@ -66,10 +66,10 @@ struct DynamicObjectEngagementEvent
 public:
 	bool isActive = true;
 
-	double startTime;
-	std::string Name;
-	int ObjectId;
-	int EngagementNumber;
+	double startTime = -1;
+	std::string Name = "";
+	int ObjectId = 0;
+	int EngagementNumber = 0;
 
 	DynamicObjectEngagementEvent(int id, std::string engagementName, int engagementNumber);
 };
@@ -77,7 +77,7 @@ public:
 class COGNITIVEVRANALYTICS_API DynamicObject
 {
 private:
-	std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
+	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 	std::vector<DynamicObjectId> objectIds; //cumulative
 	std::vector<DynamicObjectSnapshot> snapshots; //cleared on send
 	std::vector<DynamicObjectManifestEntry> manifestEntries; //cleared on send

@@ -21,7 +21,7 @@ class CognitiveVRAnalyticsCore;
 class Network
 {
     private:
-		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 
     public:
         Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
@@ -33,7 +33,7 @@ class Network
             @param Json::Value content - JSON content sent to CognitiveVR.
 			@param NetworkCallback callback - JSON content sent to CognitiveVR.
         */
-		//void Call(std::string path, std::shared_ptr<json> content, NetworkCallback callback = NULL);
+		
 		void DashboardCall(std::string suburl, std::string content);
 
 		//TODO use an enum to specify the type of call + bind to correct callback function
@@ -41,6 +41,4 @@ class Network
 
 		//sub url is dynamic/sensor/gaze/event. for sending stuff to sceneexplorer
 		void SceneExplorerCall(std::string suburl, std::string content);
-
-		//void Callback(std::string body);
 };

@@ -20,7 +20,7 @@ class COGNITIVEVRANALYTICS_API Transaction
 	//friend class CognitiveVRAnalyticsCore;
 
     private:
-		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 		//the array of objects {method:"whatever",args:json} to send to dashboard
 		json BatchedTransactions;
 		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard

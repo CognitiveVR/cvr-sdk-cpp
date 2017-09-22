@@ -13,18 +13,16 @@ std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 {
-	if (instance.get() == nullptr)
-	{
-		instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this);
-	}
+	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {std::cout << "custom deleter\n"; });
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
 
 	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
 	log->Info("constructor simple");
-
+	
 	config = std::make_unique<Config>(Config(instance));
+	network = std::make_unique<Network>(Network(instance));
 
 	tuning = std::make_unique<Tuning>(Tuning(instance));
 	transaction = std::make_unique<Transaction>(Transaction(instance));
@@ -33,16 +31,11 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
 	exitpoll = std::make_unique<ExitPoll>(ExitPoll(instance));
 
-	network = std::make_unique<Network>(Network(instance));
 }
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map<std::string, std::string> sceneids)
 {
-	
-	if (instance.get() == nullptr)
-	{
-		instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this);
-	}
+	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {std::cout << "custom deleter\n"; });
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
@@ -57,19 +50,19 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::str
 	config->SensorDataLimit = sensorcount;
 	config->DynamicDataLimit = dynamiccount;
 	config->sceneIds = sceneids;
+	network = std::make_unique<Network>(Network(instance));
 
 	tuning = std::make_unique<Tuning>(Tuning(instance));
 	transaction = std::make_unique<Transaction>(Transaction(instance));
 	gaze = std::make_unique<GazeTracker>(GazeTracker(instance));
 	sensor = std::make_unique<Sensor>(Sensor(instance));
 	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
-
-	network = std::make_unique<Network>(Network(instance));
+	exitpoll = std::make_unique<ExitPoll>(ExitPoll(instance));
 }
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
-	log->Info("deconstructor");
+	std::cout << "deconstructor\n";
 	//delete a bunch of stuff
 	config.reset();
 	log.reset();
@@ -80,8 +73,7 @@ CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 	gaze.reset();
 	dynamicobject.reset();
 	exitpoll.reset();
-	//instance.reset();
-	//delete instance.get();
+	instance.reset();
 }
 
 void CognitiveVRAnalyticsCore::SetHasStartedSession(bool started)
@@ -118,14 +110,12 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	if (UserId.empty())
 	{
-		log->Info("CognitiveVRAnalytics::StartSession user id is empty!");
-		SetUser("anonymous", nullptr);
+		SetUser("anonymous", json());
 	}
 
 	if (DeviceId.empty())
 	{
-		log->Info("CognitiveVRAnalytics::StartSession device id is empty!");
-		SetDevice("unknown", nullptr);
+		SetDevice("unknown", json());
 	}
 
 	//std::string content = "[1504208516.4110603, 1504208516.4110603, \"38f44d5b70939aa215476c29d5735bf2c181019a\", \"46c0e715b45064cf607638bbca3dec69\", null, { \"cvr.app.name\":\"CognitiveVRUnity\",\"cvr.app.version\" : \"1.0\",\"cvr.unity.version\" : \"5.4.1p4\",\"cvr.device.model\" : \"System Product Name (System manufacturer)\",\"cvr.device.type\" : \"Desktop\",\"cvr.device.platform\" : \"WindowsEditor\",\"cvr.device.os\" : \"Windows 10  (10.0.0) 64bit\" }]";
@@ -155,10 +145,17 @@ bool CognitiveVRAnalyticsCore::StartSession()
 		content.emplace_back(DeviceProperties);
 	}
 
-	network->DashboardCall("application_init", content.dump());
-
 	gaze->SetInterval(config->GazeInterval);
 	gaze->SetHMDType(config->HMDType);
+
+
+	if (network == nullptr || network.get() == nullptr)
+	{
+		std::cout << "NETWORK IS NULL\n";
+		return false;
+	}
+
+	network->DashboardCall("application_init", content.dump());
 
 	return true;
 }
@@ -224,11 +221,13 @@ void CognitiveVRAnalyticsCore::SendData()
 	transaction->SendData();
 	gaze->SendData();
 	sensor->SendData();
+	dynamicobject->SendData();
 }
 
 void CognitiveVRAnalyticsCore::SetUser(std::string user_id, json properties)
 {
 	log->Info("CognitiveVRAnalytics::set user");
+	
 	UserId = user_id;
 	double ts = GetTimestamp();
 
@@ -239,7 +238,7 @@ void CognitiveVRAnalyticsCore::SetUser(std::string user_id, json properties)
 	args.emplace_back(UserId);
 	args.emplace_back(DeviceId);
 
-	if (properties != nullptr)
+	if (properties.size() > 0)
 	{
 		UserProperties = properties;
 		//add this to transactions batch
@@ -269,7 +268,7 @@ void CognitiveVRAnalyticsCore::SetDevice(std::string device_id, json properties)
 	args.emplace_back(UserId);
 	args.emplace_back(DeviceId);
 
-	if (properties != nullptr)
+	if (properties.size() > 0)
 	{
 		DeviceProperties = properties;
 		//add this to transactions batch

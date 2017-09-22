@@ -173,6 +173,19 @@ void DynamicObject::EndEngagement(int objectId, std::string name)
 
 void DynamicObject::SendData()
 {
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("DynamicObject::SendData. init not successful"); return; }
+
+	if (!cvr->HasStartedSession())
+	{
+		cvr->log->Warning("DynamicObject::SendData - Session not started!");
+		return;
+	}
+
+	if (manifestEntries.size() + snapshots.size() == 0)
+	{
+		return;
+	}
+
 	json sendJson = json();
 
 	sendJson["userid"] = cvr->UserId;

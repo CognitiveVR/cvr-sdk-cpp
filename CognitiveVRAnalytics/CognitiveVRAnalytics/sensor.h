@@ -18,7 +18,7 @@ class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API Sensor
 {
     private:
-		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 
 		//std::map<std::string, std::string> somedatapoints;
 		
@@ -27,7 +27,7 @@ class COGNITIVEVRANALYTICS_API Sensor
 		//int sensorDataCount = 0;
 		//int SensorThreshold = 16;
 
-		std::map<std::string, json> allsensors;
+		std::map<std::string, json> allsensors = std::map<std::string,json>();
 		int sensorCount = 0;
 		int jsonPart = 1;
 

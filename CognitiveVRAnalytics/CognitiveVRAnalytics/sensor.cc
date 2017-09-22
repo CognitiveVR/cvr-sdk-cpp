@@ -68,6 +68,19 @@ void Sensor::RecordSensor(std::string Name, float value)
 
 void Sensor::SendData()
 {
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Sensor::SendData. init not successful"); return; }
+
+	if (!cvr->HasStartedSession())
+	{
+		cvr->log->Warning("Sensor::SendData - Session not started!");
+		return;
+	}
+
+	if (allsensors.size() == 0)
+	{
+		return;
+	}
+
 	//put together all json
 	json data = json();
 

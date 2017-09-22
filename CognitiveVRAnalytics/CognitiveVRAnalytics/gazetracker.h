@@ -17,14 +17,14 @@ class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API GazeTracker
 {
 private:
-	std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
-	long lastIntervalTime;
+	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+	long lastIntervalTime = -1;
 	int jsonPart = 1;
 	int gazeCount = 0;
 	json BatchedGazeSE;
 	//set from config
 	float PlayerSnapshotInterval = 0.1f;
-	std::string HMDType;
+	std::string HMDType = "";
 
 public:
 

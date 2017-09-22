@@ -24,8 +24,8 @@ enum EntityType
 class TuningValue
 {
 private:
-	std::string value;
-	long ttl;
+	std::string value = "";
+	long ttl = -1;
 
 public:
 	TuningValue(std::string val, long time)
@@ -49,7 +49,7 @@ public:
 class COGNITIVEVRANALYTICS_API Tuning
 {
     private:
-		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 
         //std::map< std::string, std::map<std::string, TuningValue*> > users_value_cache;
 

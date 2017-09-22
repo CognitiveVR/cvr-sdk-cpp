@@ -21,11 +21,8 @@ size_t handle(char* buf, size_t size, size_t nmemb, void* up)
 
 void DoWebStuff(std::string url, std::string content, WebResponse response)
 {
-	std::cout << "<<<<curl url sent\n";
-	std::cout << url + "\n";
-
+	//std::cout << "<<<<curl url sent\n";
 	//std::cout << url + "\n";
-	//std::cout << content + "\n";
 
 	CURL* curl;
 	CURLcode res;
@@ -77,11 +74,16 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 	}
 }
 
-TEST(Initialization, Initialization) {
+//===========================TESTS
+//----------------------INITIALIZATION
+
+TEST(Initialization, SessionFullStartEnd) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
-	//deconstructor was not called?
-	cog.GetTimestamp();
+	std::vector<float> pos = { 0,0,0 };
+	auto cog = CognitiveVRAnalyticsCore(fp, "somename", 10, 10, 10, 10, std::map<std::string, std::string>());
+	cog.StartSession();
+	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.EndSession();
 }
 
 TEST(Initialization, SessionStart) {
@@ -90,10 +92,24 @@ TEST(Initialization, SessionStart) {
 	cog.StartSession();
 }
 
+
+
+TEST(Initialization, Initialization) {
+	WebRequest fp = &DoWebStuff;
+	std::vector<float> pos = { 0,0,0 };
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.StartSession();
+	//deconstructor isn't called if ^constructor is the last line of this test?
+	cog.GetTimestamp();
+	Sleep(2000);
+}
+
 TEST(Initialization, SessionEnd) {
 	WebRequest fp = &DoWebStuff;
 	auto cog = CognitiveVRAnalyticsCore(fp);
 	cog.EndSession();
+	cog.GetTimestamp();
 }
 
 TEST(Initialization, SessionStartEnd) {
@@ -102,6 +118,10 @@ TEST(Initialization, SessionStartEnd) {
 	cog.StartSession();
 	cog.EndSession();
 }
+
+//----------------------SET USER DEVICE
+
+//----------------------TRANSACTIONS
 
 TEST(Transaction, PreSessionNoEnd) {
 	WebRequest fp = &DoWebStuff;
@@ -166,48 +186,58 @@ TEST(Transaction, SessionEnd) {
 	cog.EndSession();
 }
 
+//----------------------TUNING
+
+//----------------------EXITPOLL
+
+//----------------------GAZE
+
+//----------------------SENSORS
+
+//----------------------DYNAMICS
+
+
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
-
-
-	WebRequest fp = &DoWebStuff;
-
-	auto cog = CognitiveVRAnalyticsCore(fp);
-
-	nlohmann::json user = nlohmann::json();
-	user["age"] = 21;
-	user["location"] = "vancouver";
-
-	cog.SetUser("john", user);
-
-
-	nlohmann::json device = nlohmann::json();
-	device["os"] = "chrome";
-	device["retail value"] = 79.95;
-	device["ram"] = 4;
-
-	cog.SetDevice("chromebook", device);
-
-	cog.StartSession();
-
-	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	cog.transaction->BeginEndPosition("testing2", pos);
-	cog.transaction->BeginEndPosition("testing3", pos);
-
-	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
-
-	/*cog.sensor->RecordSensor("comfort", 9);
-	cog.sensor->RecordSensor("fps", 60);
-	cog.sensor->RecordSensor("fps", 55);
-	cog.sensor->RecordSensor("comfort", 8);
-	cog.sensor->RecordSensor("fps", 30);
-	cog.sensor->RecordSensor("fps", 25);
-	cog.sensor->RecordSensor("comfort", 5);*/
-
-	cog.SendData();
-
-    return 0;
 }
+
+/*
+WebRequest fp = &DoWebStuff;
+
+auto cog = CognitiveVRAnalyticsCore(fp);
+
+nlohmann::json user = nlohmann::json();
+user["age"] = 21;
+user["location"] = "vancouver";
+
+cog.SetUser("john", user);
+
+
+nlohmann::json device = nlohmann::json();
+device["os"] = "chrome";
+device["retail value"] = 79.95;
+device["ram"] = 4;
+
+cog.SetDevice("chromebook", device);
+
+cog.StartSession();
+
+std::vector<float> pos = { 0,0,0 };
+cog.transaction->BeginEndPosition("testing1", pos);
+cog.transaction->BeginEndPosition("testing2", pos);
+cog.transaction->BeginEndPosition("testing3", pos);
+
+cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+
+cog.sensor->RecordSensor("comfort", 9);
+cog.sensor->RecordSensor("fps", 60);
+cog.sensor->RecordSensor("fps", 55);
+cog.sensor->RecordSensor("comfort", 8);
+cog.sensor->RecordSensor("fps", 30);
+cog.sensor->RecordSensor("fps", 25);
+cog.sensor->RecordSensor("comfort", 5);
+
+cog.SendData();
+*/

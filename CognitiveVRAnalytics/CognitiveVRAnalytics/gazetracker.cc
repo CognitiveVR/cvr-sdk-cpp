@@ -68,11 +68,16 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::SendData()
 {
-	if (!cvr->WasInitSuccessful()) { return; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("GazeTracker::SendData. init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
 		cvr->log->Warning("GazeTracker::SendData - Session not started!");
+		return;
+	}
+
+	if (BatchedGazeSE.size() == 0)
+	{
 		return;
 	}
 

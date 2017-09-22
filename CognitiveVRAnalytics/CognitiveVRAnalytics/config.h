@@ -19,7 +19,7 @@ class CognitiveVRAnalyticsCore;
 class Config {
 
 	private:
-		std::shared_ptr<CognitiveVRAnalyticsCore> cvr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 
     public:
 		#pragma warning(push)
@@ -28,6 +28,7 @@ class Config {
 		Config(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 		{
 			cvr = cog;
+			std::cout << "config constructor\n";
 		}
 
 		std::string SdkVersion = "0.1";
@@ -51,7 +52,7 @@ class Config {
 		long kNetworkTimeout = 5;
 
 		//which product to send data to. Ex companyname1234-productname-test
-		std::string CustomerId = "altimagegames59340-unitywanderdemo-test";
+		std::string CustomerId = "companyname1234-productname-test";
 
 		int SensorDataLimit = 64;
 		int DynamicDataLimit = 64;
@@ -62,7 +63,7 @@ class Config {
 		//vive, rift, gear, mobile
 		std::string HMDType = "vive";
 
-		std::map < std::string, std::string> sceneIds;
+		std::map < std::string, std::string> sceneIds = std::map<std::string,std::string>();
 
 
 		#pragma warning(pop)

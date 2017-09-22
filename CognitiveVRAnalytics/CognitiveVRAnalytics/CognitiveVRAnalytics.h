@@ -36,33 +36,33 @@ class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 
 private:
 	
-	std::unique_ptr<Network> network;
-	std::unique_ptr<Config> config;
+	std::unique_ptr<Network> network = NULL;
+	std::unique_ptr<Config> config = NULL;
 	
 
-	bool bHasSessionStarted;
+	bool bHasSessionStarted = false;
 	bool bWasInitSuccessful = true; //set to false if there was an error in response
-	double SessionTimestamp;
+	double SessionTimestamp = -1;
 
 	std::string CurrentSceneKey = "";
-	std::string UserId;
+	std::string UserId = "";
 	json UserProperties;
-	std::string DeviceId;
+	std::string DeviceId = "";
 	json DeviceProperties;
-	std::string SessionId;
+	std::string SessionId = "";
 
-	WebRequest sendFunctionPointer;
+	WebRequest sendFunctionPointer = NULL;
 
 public:
 
 	static std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
-	std::unique_ptr<CognitiveLog> log;
-	std::unique_ptr<Transaction> transaction;
-	std::unique_ptr<Sensor> sensor;
-	std::unique_ptr<Tuning> tuning;
-	std::unique_ptr<GazeTracker> gaze;
-	std::unique_ptr<DynamicObject> dynamicobject;
-	std::unique_ptr<ExitPoll> exitpoll;
+	std::unique_ptr<CognitiveLog> log = NULL;
+	std::unique_ptr<Transaction> transaction = NULL;
+	std::unique_ptr<Sensor> sensor = NULL;
+	std::unique_ptr<Tuning> tuning = NULL;
+	std::unique_ptr<GazeTracker> gaze = NULL;
+	std::unique_ptr<DynamicObject> dynamicobject = NULL;
+	std::unique_ptr<ExitPoll> exitpoll = NULL;
 
 	CognitiveVRAnalyticsCore(WebRequest sendFunc);
 	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map < std::string, std::string> sceneids);
