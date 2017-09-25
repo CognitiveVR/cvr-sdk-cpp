@@ -17,11 +17,11 @@ void Callback(std::string body)
 	//check that body can be parsed to json
 	if (body.empty())
 	{
-		cvr->log->Info("generic callback has no body");
+		cvr->log->Info("Generic callback has no body");
 	}
 	else
 	{
-		cvr->log->Info("generic callback");
+		cvr->log->Info("Generic callback");
 	}
 }
 
@@ -30,12 +30,10 @@ void InitCallback(std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
-	cvr->log->Info("init callback");
-
 	//check that body can be parsed to json
 	if (body.empty())
 	{
-		cvr->log->Info("init response has no body");
+		cvr->log->Info("Application Init response has no body");
 		cvr->SetInitSuccessful(false);
 		cvr->SetHasStartedSession(false);
 	}
@@ -53,13 +51,15 @@ void InitCallback(std::string body)
 
 		if (errorcode == 0)
 		{
-			cvr->log->Info("applicaiton init successful");
-			
+			cvr->log->Info("Applicaiton Init callback successful");
+
+			//cvr->log->Info(body);
+
 			cvr->tuning->ReceiveValues(jsonresponse);
 		}
 		else
 		{
-			cvr->log->Info("error " + std::to_string(errorcode));
+			cvr->log->Info("Init Error " + std::to_string(errorcode));
 			cvr->SetInitSuccessful(false);
 			cvr->SetHasStartedSession(false);
 		}
@@ -75,9 +75,7 @@ void ExitPollCallback(std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
-	cvr->log->Info("ExitPollCallback==================START");
-	cvr->log->Info(body);
-	cvr->log->Info("ExitPollCallback==================END");
+	//cvr->log->Info(body);
 
 	//check that body can be parsed to json
 	if (body.empty())
@@ -124,8 +122,6 @@ void Network::DashboardCall(std::string suburl, std::string content)
 
 void Network::APICall(std::string suburl, std::string callType, std::string content)
 {
-	cvr->log->Info("Network API call");
-
 	//TODO shoudl use api.networkhost from config
 	std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
 
@@ -133,7 +129,6 @@ void Network::APICall(std::string suburl, std::string callType, std::string cont
 	if (callType == "exitpollget") //does exitpoll call this query? does it call sceneexplorer?
 	{
 		wr = &ExitPollCallback;
-		cvr->log->Info("get exitpoll callback");
 	}
 
 	cvr->sendFunctionPointer(path, content, wr);
@@ -141,12 +136,10 @@ void Network::APICall(std::string suburl, std::string callType, std::string cont
 
 void Network::SceneExplorerCall(std::string suburl, std::string content)
 {
-	cvr->log->Info("Network SceneExplorer call");
-
 	std::string scenekey = cvr->GetSceneKey();
 	if (scenekey.empty())
 	{
-		cvr->log->Warning("scene key not set. cannot upload to scene explorer");
+		cvr->log->Warning("Scene key not set. Cannot upload to Scene Explorer");
 		return;
 	}
 

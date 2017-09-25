@@ -7,7 +7,6 @@
 CognitiveLog::CognitiveLog(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
-	std::cout << "log constructor\n";
 	SetLoggingLevel(LoggingLevel::All);
 }
 

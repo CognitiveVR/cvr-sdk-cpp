@@ -19,7 +19,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 	bHasSessionStarted = false;
 
 	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
-	log->Info("constructor simple");
+	log->Info("CognitiveVRAnalyticsCore()");
 	
 	config = std::make_unique<Config>(Config(instance));
 	network = std::make_unique<Network>(Network(instance));
@@ -41,7 +41,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::str
 	bHasSessionStarted = false;
 
 	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
-	log->Info("constructor full");
+	log->Info("CognitiveVRAnalyticsCore()");
 
 	config = std::make_unique<Config>(Config(instance));
 	config->CustomerId = customerid;
@@ -62,7 +62,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::str
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
-	std::cout << "deconstructor\n";
+	log->Info("~CognitiveVRAnalyticsCore");
 	//delete a bunch of stuff
 	config.reset();
 	log.reset();

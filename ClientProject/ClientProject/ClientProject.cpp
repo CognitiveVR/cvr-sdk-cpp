@@ -92,24 +92,18 @@ TEST(Initialization, SessionStart) {
 	cog.StartSession();
 }
 
-
-
 TEST(Initialization, Initialization) {
 	WebRequest fp = &DoWebStuff;
 	std::vector<float> pos = { 0,0,0 };
 	auto cog = CognitiveVRAnalyticsCore(fp);
 	cog.transaction->BeginEndPosition("testing1", pos);
 	cog.StartSession();
-	//deconstructor isn't called if ^constructor is the last line of this test?
-	cog.GetTimestamp();
-	Sleep(2000);
 }
 
 TEST(Initialization, SessionEnd) {
 	WebRequest fp = &DoWebStuff;
 	auto cog = CognitiveVRAnalyticsCore(fp);
 	cog.EndSession();
-	cog.GetTimestamp();
 }
 
 TEST(Initialization, SessionStartEnd) {
@@ -119,7 +113,133 @@ TEST(Initialization, SessionStartEnd) {
 	cog.EndSession();
 }
 
+//----------------------SET USER
+
+TEST(UserSettings, UserPreSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	nlohmann::json user = nlohmann::json();
+	user["age"] = 21;
+	user["location"] = "vancouver";
+	cog.SetUser("john", user);
+	cog.StartSession();
+}
+
+TEST(UserSettings, UserPostSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	nlohmann::json user = nlohmann::json();
+	user["age"] = 21;
+	user["location"] = "vancouver";
+	cog.StartSession();
+	cog.SetUser("john", user);
+}
+
+TEST(UserSettings, UserNullPreSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.SetUser("", nlohmann::json());
+	cog.StartSession();
+}
+
+TEST(UserSettings, UserNullPostSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.StartSession();
+	cog.SetUser("", nlohmann::json());
+}
+
+//----------------------SET DEVICE
+
+TEST(DeviceSettings, DevicePreSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	nlohmann::json device = nlohmann::json();
+	device["os"] = "chrome";
+	device["retail value"] = 79.95;
+	device["ram"] = 4;
+
+	cog.SetDevice("chromebook", device);
+	cog.StartSession();
+}
+
+TEST(DeviceSettings, DevicePostSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	nlohmann::json device = nlohmann::json();
+	device["os"] = "chrome";
+	device["retail value"] = 79.95;
+	device["ram"] = 4;
+
+	cog.StartSession();
+	cog.SetDevice("chromebook", device);
+}
+
+TEST(DeviceSettings, DeviceNullPreSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.SetDevice("", nlohmann::json());
+	cog.StartSession();
+}
+
+TEST(DeviceSettings, DeviceNullPostSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.StartSession();
+	cog.SetDevice("", nlohmann::json());
+}
+
+TEST(DeviceSettings, DeviceNullPreEnd) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	nlohmann::json device = nlohmann::json();
+	device["os"] = "chrome";
+	device["retail value"] = 79.95;
+	device["ram"] = 4;
+
+	cog.SetDevice("chromebook", device);
+	cog.EndSession();
+}
+
 //----------------------SET USER DEVICE
+TEST(UserDeviceSettings, UserDevicePostSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	nlohmann::json device = nlohmann::json();
+	device["os"] = "chrome";
+	device["retail value"] = 79.95;
+	device["ram"] = 4;
+
+	nlohmann::json user = nlohmann::json();
+	user["age"] = 21;
+	user["location"] = "vancouver";
+
+
+	cog.StartSession();
+	cog.SetDevice("chromebook", device);
+	cog.SetUser("john", user);
+	cog.EndSession();
+}
+
+TEST(UserDeviceSettings, UserDevicePreSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	nlohmann::json device = nlohmann::json();
+	device["os"] = "chrome";
+	device["retail value"] = 79.95;
+	device["ram"] = 4;
+
+	nlohmann::json user = nlohmann::json();
+	user["age"] = 21;
+	user["location"] = "vancouver";
+	cog.SetUser("john", user);
+	cog.SetDevice("chromebook", device);
+
+	cog.StartSession();
+	cog.EndSession();
+}
 
 //----------------------TRANSACTIONS
 
@@ -188,6 +308,73 @@ TEST(Transaction, SessionEnd) {
 
 //----------------------TUNING
 
+TEST(Tuning, TuningGetValue) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.StartSession();
+
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", EntityType::kEntityTypeDevice);
+	EXPECT_EQ(snow_attitude, "ferocious");
+	std::cout << snow_attitude << std::endl;
+
+	auto blockPosition = cog.tuning->GetValue("vinegar_volume", 0, EntityType::kEntityTypeDevice);
+	EXPECT_EQ(blockPosition, 50);
+	std::cout << blockPosition << std::endl;
+
+	auto ExitPollActivated = cog.tuning->GetValue("ExitPollActivated", false, EntityType::kEntityTypeDevice);
+	EXPECT_EQ(ExitPollActivated, true);
+	std::cout << ExitPollActivated << std::endl;
+
+	auto pi = cog.tuning->GetValue("pi", (float)3.0, EntityType::kEntityTypeDevice);
+	EXPECT_FLOAT_EQ(pi, 3.1415927);
+	std::cout << pi << std::endl;
+
+
+	cog.EndSession();
+}
+
+TEST(Tuning, TuningGetValueNoSession) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", EntityType::kEntityTypeDevice);
+	std::cout << snow_attitude << std::endl;
+}
+
+TEST(Tuning, TuningGetInvalidValue) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.StartSession();
+	auto snow_attitude = cog.tuning->GetValue("snow_raditude", "mellow", EntityType::kEntityTypeDevice);
+	EXPECT_EQ(snow_attitude, "mellow");
+	std::cout << snow_attitude << std::endl;
+	cog.EndSession();
+}
+
+TEST(Tuning, TuningGetInvalidCast) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.StartSession();
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", 500, EntityType::kEntityTypeDevice);
+	EXPECT_EQ(snow_attitude, 500);
+	std::cout << snow_attitude << std::endl;
+	cog.EndSession();
+}
+
+TEST(Tuning, TuningGetInvalidCastBool) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.StartSession();
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", false, EntityType::kEntityTypeDevice);
+	EXPECT_EQ(snow_attitude, false);
+	std::cout << snow_attitude << std::endl;
+	cog.EndSession();
+}
+
 //----------------------EXITPOLL
 
 //----------------------GAZE
@@ -200,7 +387,12 @@ TEST(Transaction, SessionEnd) {
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+
+	RUN_ALL_TESTS();
+
+	system("pause");
+
+	return 0;
 }
 
 /*

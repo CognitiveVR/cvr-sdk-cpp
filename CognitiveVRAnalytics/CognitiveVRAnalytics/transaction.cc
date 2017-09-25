@@ -8,8 +8,6 @@ Transaction::Transaction(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 
-	std::cout << "transaction constructor\n";
-
 	BatchedTransactions = json::array();
 }
 

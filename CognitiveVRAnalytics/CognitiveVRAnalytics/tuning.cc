@@ -36,7 +36,6 @@ void Tuning::ReceiveValues(std::string rawvalues)
 	ReceiveValues(json::parse(rawvalues));
 }
 
-//TODO pass a reference of this json around. dereference and save copy
 void Tuning::CacheValues(std::string entity_id, json values, EntityType entity_type, bool getallc)
 {
 	if (!cvr->HasStartedSession())
@@ -46,43 +45,293 @@ void Tuning::CacheValues(std::string entity_id, json values, EntityType entity_t
 	}
 }
 
-//TODO make a template to return a generic type instead of json
-json Tuning::GetValue(std::string name, std::string default_value)
+bool Tuning::GetValue(std::string name, bool defaultValue, EntityType entity_type)
 {
-	json j;
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
 
-	if (cvr->UserId.size() > 0)
+	if (!cvr->HasStartedSession())
 	{
-		j[name] = user_value_cache[name];
-	}
-	else if (cvr->UserId.size() > 0)
-	{
-		j[name] = device_value_cache[name];
+		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		return defaultValue;
 	}
 
-	return j;
-}
-
-
-json Tuning::GetValue(std::string name, std::string default_value, std::string entity_id, EntityType entity_type)
-{    
-	json j;
-
+	cvr->log->Info("tuning variable bool");
+	bool result = defaultValue;
 	if (entity_type == EntityType::kEntityTypeUser)
 	{
-		j[name] = user_value_cache[name];
+		if (user_value_cache.find(name) != user_value_cache.end())
+		{
+			if (user_value_cache[name].is_boolean())
+			{
+				result = user_value_cache[name].get<bool>();
+			}
+			else
+			{
+				if (user_value_cache[name] == "true")
+				{
+					result = true;
+					user_value_cache[name] = result;
+				}
+				else if (user_value_cache[name] == "false")
+				{
+					result = false;
+					user_value_cache[name] = result;
+				}
+				else
+				{
+					cvr->log->Warning("Tuning Variable does cannot cast to bool: " + name);
+				}
+			}
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
 	}
-	else if (entity_type == EntityType::kEntityTypeDevice)
+	else
 	{
-		j[name] = device_value_cache[name];
+		if (device_value_cache.find(name) != device_value_cache.end())
+		{
+			if (device_value_cache[name].is_boolean())
+			{
+				result = device_value_cache[name].get<bool>();
+			}
+			else
+			{
+				if (device_value_cache[name] == "true")
+				{
+					result = true;
+					device_value_cache[name] = result;
+				}
+				else if (device_value_cache[name] == "false")
+				{
+					result = false;
+					device_value_cache[name] = result;
+				}
+				else
+				{
+					cvr->log->Warning("Tuning Variable does cannot cast to bool: " + name);
+				}
+			}
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	return result;
+}
+
+int Tuning::GetValue(std::string name, int defaultValue, EntityType entity_type)
+{
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+
+	if (!cvr->HasStartedSession())
+	{
+		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		return defaultValue;
 	}
 
-	return j;
+	cvr->log->Info("tuning variable int");
+	int result = defaultValue;
+	if (entity_type == EntityType::kEntityTypeUser)
+	{
+		if (user_value_cache.find(name) != user_value_cache.end())
+		{
+			if (user_value_cache[name].is_number_integer())
+			{
+				result = user_value_cache[name].get<int>();
+			}
+			else
+			{
+				try
+				{
+					result = std::stoi(user_value_cache[name].get<std::string>());
+					user_value_cache[name] = result;
+				}
+				catch (const std::invalid_argument& e)
+				{
+					cvr->log->Warning("Tuning Variable does cannot cast to int: " + name);
+				}
+			}
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	else
+	{
+		if (device_value_cache.find(name) != device_value_cache.end())
+		{
+			if (device_value_cache[name].is_number_integer())
+			{
+				result = device_value_cache[name].get<int>();
+			}
+			else
+			{
+				try
+				{
+					result = std::stoi(device_value_cache[name].get<std::string>());
+					device_value_cache[name] = result;
+				}
+				catch (const std::invalid_argument& e)
+				{
+					cvr->log->Warning("Tuning Variable does cannot cast to int: " + name);
+				}
+			}
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	return result;
+}
+
+float Tuning::GetValue(std::string name, float defaultValue, EntityType entity_type)
+{
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+
+	if (!cvr->HasStartedSession())
+	{
+		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		return defaultValue;
+	}
+
+	cvr->log->Info("tuning variable float");
+	float result = defaultValue;
+	if (entity_type == EntityType::kEntityTypeUser)
+	{
+		if (user_value_cache.find(name) != user_value_cache.end())
+		{
+			if (user_value_cache[name].is_number_float())
+			{
+				result = user_value_cache[name].get<float>();
+			}
+			else
+			{
+				try
+				{
+					result = std::stof(user_value_cache[name].get<std::string>());
+					user_value_cache[name] = result;
+				}
+				catch (const std::invalid_argument& e)
+				{
+					cvr->log->Warning("Tuning Variable does cannot cast to float: " + name);
+				}
+			}
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	else
+	{
+		if (device_value_cache.find(name) != device_value_cache.end())
+		{
+			if (device_value_cache[name].is_number_float())
+			{
+				result = device_value_cache[name].get<float>();
+			}
+			else
+			{
+				try
+				{
+					result = std::stof(device_value_cache[name].get<std::string>());
+					device_value_cache[name] = result;
+				}
+				catch (const std::invalid_argument& e)
+				{
+					cvr->log->Warning("Tuning Variable does cannot cast to float: " + name);
+				}
+			}
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	return result;
+}
+
+std::string Tuning::GetValue(std::string name, std::string defaultValue, EntityType entity_type)
+{
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+
+	if (!cvr->HasStartedSession())
+	{
+		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		return defaultValue;
+	}
+
+	cvr->log->Info("tuning variable string");
+	std::string result = defaultValue;
+	if (entity_type == EntityType::kEntityTypeUser)
+	{
+		if (user_value_cache.find(name) != user_value_cache.end())
+		{
+			result = user_value_cache[name].get<std::string>();
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	else
+	{
+		if (device_value_cache.find(name) != device_value_cache.end())
+		{
+			result = device_value_cache[name].get<std::string>();
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	return result;
+}
+
+std::string Tuning::GetValue(std::string name, char* defaultValue, EntityType entity_type)
+{
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+
+	if (!cvr->HasStartedSession())
+	{
+		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		return defaultValue;
+	}
+
+	cvr->log->Info("tuning variable char*");
+	std::string result = defaultValue;
+	if (entity_type == EntityType::kEntityTypeUser)
+	{
+		if (user_value_cache.find(name) != user_value_cache.end())
+		{
+			result = user_value_cache[name].get<std::string>();
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	else
+	{
+		if (device_value_cache.find(name) != device_value_cache.end())
+		{
+			result = device_value_cache[name].get<std::string>();
+		}
+		else
+		{
+			cvr->log->Warning("Tuning Variable does not exist: " + name);
+		}
+	}
+	return result;
 }
 
 void Tuning::RecordValueAccess(std::string name, std::string default_value, std::string user_id, std::string device_id)
 {
-
 	double ts = cvr->GetSessionTimestamp();
 
 	json content = json::array();

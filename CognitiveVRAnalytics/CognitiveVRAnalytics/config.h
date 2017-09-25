@@ -28,7 +28,6 @@ class Config {
 		Config(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 		{
 			cvr = cog;
-			std::cout << "config constructor\n";
 		}
 
 		std::string SdkVersion = "0.1";
