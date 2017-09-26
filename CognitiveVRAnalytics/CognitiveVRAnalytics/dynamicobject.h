@@ -1,3 +1,4 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
@@ -5,7 +6,7 @@
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 using json = nlohmann::json;
-
+namespace cognitive {
 class CognitiveVRAnalyticsCore;
 
 enum CommonMeshName
@@ -121,3 +122,4 @@ public:
 	//deregister. recycles objectid. don't need to do this for objects that don't share ids
 	void RemoveObject(int objectid);
 };
+}

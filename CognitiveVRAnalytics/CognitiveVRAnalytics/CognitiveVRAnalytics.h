@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "stdafx.h"
@@ -19,8 +20,10 @@ using json = nlohmann::json;
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
 
-typedef void(*WebResponse) (std::string content);
-typedef void(*WebRequest) (std::string url, std::string content, WebResponse response);
+typedef void(*WebResponse) (::std::string content);
+typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
+
+namespace cognitive {
 
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
@@ -36,49 +39,49 @@ class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 
 private:
 	
-	std::unique_ptr<Network> network = NULL;
-	std::unique_ptr<Config> config = NULL;
+	::std::unique_ptr<Network> network = NULL;
+	::std::unique_ptr<Config> config = NULL;
 	
 
 	bool bHasSessionStarted = false;
 	bool bWasInitSuccessful = true; //set to false if there was an error in response
 	double SessionTimestamp = -1;
 
-	std::string CurrentSceneKey = "";
-	std::string UserId = "";
+	::std::string CurrentSceneKey = "";
+	::std::string UserId = "";
 	json UserProperties = json();
-	std::string DeviceId = "";
+	::std::string DeviceId = "";
 	json DeviceProperties = json();
-	std::string SessionId = "";
+	::std::string SessionId = "";
 
 	WebRequest sendFunctionPointer = NULL;
 
 public:
 
-	static std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
-	std::unique_ptr<CognitiveLog> log = NULL;
-	std::unique_ptr<Transaction> transaction = NULL;
-	std::unique_ptr<Sensor> sensor = NULL;
-	std::unique_ptr<Tuning> tuning = NULL;
-	std::unique_ptr<GazeTracker> gaze = NULL;
-	std::unique_ptr<DynamicObject> dynamicobject = NULL;
-	std::unique_ptr<ExitPoll> exitpoll = NULL;
+	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
+	::std::unique_ptr<CognitiveLog> log = NULL;
+	::std::unique_ptr<Transaction> transaction = NULL;
+	::std::unique_ptr<Sensor> sensor = NULL;
+	::std::unique_ptr<Tuning> tuning = NULL;
+	::std::unique_ptr<GazeTracker> gaze = NULL;
+	::std::unique_ptr<DynamicObject> dynamicobject = NULL;
+	::std::unique_ptr<ExitPoll> exitpoll = NULL;
 
 	CognitiveVRAnalyticsCore(WebRequest sendFunc);
-	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::map<std::string, std::string> sceneids);
-	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map < std::string, std::string> sceneids);
+	CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids);
+	CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, ::std::map < ::std::string, ::std::string> sceneids);
 	CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&);
 	//CognitiveVRAnalyticsCore& operator=(CognitiveVRAnalyticsCore&&) = default;
 	
 	~CognitiveVRAnalyticsCore();
 
-	void SetUser(std::string user_id, json properties);
-	void SetDevice(std::string device_id, json properties);
-	std::string GetCustomerId();
+	void SetUser(::std::string user_id, json properties);
+	void SetDevice(::std::string device_id, json properties);
+	::std::string GetCustomerId();
 
 	double GetSessionTimestamp();
 	double GetTimestamp();
-	std::string GetSessionID();
+	::std::string GetSessionID();
 	
 	void SetHasStartedSession(bool started);
 	bool HasStartedSession();
@@ -91,6 +94,7 @@ public:
 
 	void SendData();
 
-	void SetScene(std::string sceneName);
-	std::string GetSceneKey();
+	void SetScene(::std::string sceneName);
+	::std::string GetSceneKey();
 };
+}

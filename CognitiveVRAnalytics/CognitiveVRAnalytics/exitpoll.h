@@ -1,3 +1,4 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 //organizes all the question sets, responses and exit poll panel actors
@@ -13,7 +14,7 @@ using json = nlohmann::json;
 #else  
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
-
+namespace cognitive {
 class CognitiveVRAnalyticsCore;
 
 enum EAnswerValueTypeReturn
@@ -38,11 +39,11 @@ struct FExitPollAnswer
 {
 public:
 		//question type. TODO make this an enum. HAPPYSAD,SCALE,MULTIPLE,VOICE,THUMBS,BOOLEAN
-		std::string type = "";
+		::std::string type = "";
 		EAnswerValueTypeReturn AnswerValueType = EAnswerValueTypeReturn::Null;
 		int numberValue = -1;
 		bool boolValue = false; //converted to 0 or 1
-		std::string stringValue = "";; //for base64 voice
+		::std::string stringValue = "";; //for base64 voice
 
 		//TODO some nice converting function to json
 		/*void to_json(json& j, const FExitPollAnswer& a) {
@@ -81,14 +82,14 @@ public:
 			AnswerValueType = EAnswerValueTypeReturn::Bool;
 			boolValue = boolean;
 		}
-		FExitPollAnswer(EQuestionType questionType, std::string string)
+		FExitPollAnswer(EQuestionType questionType, ::std::string string)
 		{
 			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::String;
 			stringValue = string;
 		}
 
-		std::string GetQuestionTypeString(EQuestionType questionType)
+		::std::string GetQuestionTypeString(EQuestionType questionType)
 		{
 			if (questionType == EQuestionType::QBOOL)
 				return "BOOLEAN";
@@ -110,14 +111,14 @@ public:
 struct FExitPollResponse
 {
 public:
-		std::string user = "";
-		std::string questionSetId = "";
-		std::string sessionId = "";
-		std::string hook = "";
-		std::vector<FExitPollAnswer> answers = std::vector<FExitPollAnswer>();
+		::std::string user = "";
+		::std::string questionSetId = "";
+		::std::string sessionId = "";
+		::std::string hook = "";
+		::std::vector<FExitPollAnswer> answers = ::std::vector<FExitPollAnswer>();
 
-		std::string questionSetName = "";
-		std::string questionSetVersion = "";
+		::std::string questionSetName = "";
+		::std::string questionSetVersion = "";
 
 		//TODO proper override of nlohmann::to_json and from_json
 		json to_json()
@@ -154,17 +155,17 @@ public:
 class COGNITIVEVRANALYTICS_API ExitPoll
 {
 private:
-	std::string lastHook = "";
-	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+	::std::string lastHook = "";
+	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 	json currentQuestionSet = json();
 
 	FExitPollResponse fullResponse = FExitPollResponse();
 
 public:
 
-	ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+	ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-	void RequestQuestionSet(std::string Hook);
+	void RequestQuestionSet(::std::string Hook);
 	void ReceiveQuestionSet(json questionset);
 
 	//can return empty json if request failed
@@ -177,8 +178,9 @@ public:
 	void AddAnswer(FExitPollAnswer answer);
 
 	void SendAllAnswers();
-	void SendAllAnswers(std::vector<float> position);
+	void SendAllAnswers(::std::vector<float> position);
 
 	//called after SendQuestionResponse. clears the currentQuestionSetData and response
 	void ClearQuestionSet();
 };
+}

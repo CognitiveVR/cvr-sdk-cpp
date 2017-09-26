@@ -1,9 +1,11 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "stdafx.h"
 #include "dynamicobject.h"
 
-DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId)
+namespace cognitive {
+DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, int objectId)
 {
 	Position = position;
 	Rotation = rotation;
@@ -11,7 +13,7 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::v
 	Id = objectId;
 }
 
-DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId, json properties)
+DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, int objectId, json properties)
 {
 	Position = position;
 	Rotation = rotation;
@@ -23,7 +25,7 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::v
 	}
 }
 
-DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(int id, std::string engagementName, int engagementNumber)
+DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(int id, ::std::string engagementName, int engagementNumber)
 {
 	ObjectId = id;
 	Name = engagementName;
@@ -31,12 +33,12 @@ DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(int id, std::string e
 	EngagementNumber = engagementNumber;
 }
 
-DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+DynamicObject::DynamicObject(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
 
-int DynamicObject::RegisterObject(std::string name, std::string meshname)
+int DynamicObject::RegisterObject(::std::string name, ::std::string meshname)
 {
 	DynamicObjectId registerId = GetUniqueId(meshname);
 	objectIds.emplace_back(registerId);
@@ -53,7 +55,7 @@ int DynamicObject::RegisterObject(std::string name, std::string meshname)
 	return registerId.Id;
 }
 
-DynamicObjectId DynamicObject::GetUniqueId(std::string meshname)
+DynamicObjectId DynamicObject::GetUniqueId(::std::string meshname)
 {
 	int nextObjectId = 0;
 	for (auto& element : objectIds)
@@ -79,7 +81,7 @@ bool isInactive(DynamicObjectEngagementEvent engagement)
 	return engagement.isActive == false;
 }
 
-void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation)
+void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation)
 {
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId);
 	
@@ -101,7 +103,7 @@ void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vec
 		}
 
 		//remove inactive engagements
-		allEngagements[objectId].erase(std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
+		allEngagements[objectId].erase(::std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
 		
 		//TODO this could be improved. should loop through once https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 	}
@@ -114,7 +116,7 @@ void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vec
 	}
 }
 
-void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation, json properties)
+void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation, json properties)
 {
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId, properties);
 
@@ -136,7 +138,7 @@ void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vec
 		}
 
 		//remove inactive engagements
-		allEngagements[objectId].erase(std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
+		allEngagements[objectId].erase(::std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
 
 		//TODO this could be improved. should loop through once https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 	}
@@ -149,7 +151,7 @@ void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vec
 	}
 }
 
-void DynamicObject::BeginEngagement(int objectId, std::string name)
+void DynamicObject::BeginEngagement(int objectId, ::std::string name)
 {
 	engagementCounts[objectId][name] += 1;
 
@@ -158,7 +160,7 @@ void DynamicObject::BeginEngagement(int objectId, std::string name)
 	allEngagements[objectId].emplace_back(engagement);	
 }
 
-void DynamicObject::EndEngagement(int objectId, std::string name)
+void DynamicObject::EndEngagement(int objectId, ::std::string name)
 {
 	for (auto& e : dirtyEngagements[objectId])
 	{
@@ -202,7 +204,7 @@ void DynamicObject::SendData()
 		entryValues["name"] = element.Name;
 		entryValues["mesh"] = element.MeshName;
 
-		manifest[std::to_string(element.Id)] = entryValues;
+		manifest[::std::to_string(element.Id)] = entryValues;
 	}
 	sendJson["manifest"] = manifest;
 
@@ -239,4 +241,5 @@ void DynamicObject::RemoveObject(int objectid)
 			return;
 		}
 	}
+}
 }

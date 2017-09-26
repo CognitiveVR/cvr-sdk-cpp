@@ -1,3 +1,4 @@
+
 /*
 ** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
 */
@@ -5,14 +6,17 @@
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
-using json = nlohmann::json;
+
 
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)   
 #else  
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
+using json = nlohmann::json;
 
+namespace cognitive {
+	
 class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API Transaction
@@ -20,7 +24,7 @@ class COGNITIVEVRANALYTICS_API Transaction
 	//friend class CognitiveVRAnalyticsCore;
 
     private:
-		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 		//the array of objects {method:"whatever",args:json} to send to dashboard
 		json BatchedTransactions;
 		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
@@ -32,7 +36,7 @@ class COGNITIVEVRANALYTICS_API Transaction
 		int transactionCount = 0;
 
     public:
-        Transaction(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+        Transaction(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
         /** Begin a new transaction.
 
@@ -44,8 +48,8 @@ class COGNITIVEVRANALYTICS_API Transaction
             @throws CognitiveVR_exception
         */
 		//void Begin(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "");
-		void BeginPosition(std::string category, std::vector<float> &Position, std::string transaction_id = "");
-		void BeginPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id = "");
+		void BeginPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "");
+		void BeginPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "");
 
         /** Update an existing transaction.
 
@@ -58,8 +62,8 @@ class COGNITIVEVRANALYTICS_API Transaction
             @throws CognitiveVR_exception
         */
 		//void Update(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", double progress = 0);
-		void UpdatePosition(std::string category, std::vector<float> &Position, std::string transaction_id = "", double progress = 0);
-		void UpdatePosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id = "", double progress = 0);
+		void UpdatePosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", double progress = 0);
+		void UpdatePosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "", double progress = 0);
 
         /** End an existing transaction.
 
@@ -72,8 +76,8 @@ class COGNITIVEVRANALYTICS_API Transaction
             @throws cognitivevr_exception
         */
 		//void End(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
-		void EndPosition(std::string category, std::vector<float> &Position, std::string transaction_id = "", std::string result = "");
-		void EndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id = "", std::string result = "");
+		void EndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", ::std::string result = "");
+		void EndPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "", ::std::string result = "");
 
         /** Begin and end new transaction.
 
@@ -86,10 +90,11 @@ class COGNITIVEVRANALYTICS_API Transaction
             @throws cognitivevr_exception
         */
 		//void BeginEnd(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
-		void BeginEndPosition(std::string category, std::vector<float> &Position, std::string transaction_id = "", std::string result = "");
-		void BeginEndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id = "", std::string result = "");
+		void BeginEndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", ::std::string result = "");
+		void BeginEndPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "", ::std::string result = "");
 
-		void AddToBatch(std::string method, json args);
+		void AddToBatch(::std::string method, json args);
 
 		void SendData();
 };
+}

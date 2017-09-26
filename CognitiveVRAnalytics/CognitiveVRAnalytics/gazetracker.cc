@@ -1,11 +1,12 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "stdafx.h"
 #include "gazetracker.h"
 
-
+namespace cognitive {
 // Sets default values for this component's properties
-GazeTracker::GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+GazeTracker::GazeTracker(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
@@ -15,12 +16,12 @@ void GazeTracker::SetInterval(float interval)
 	PlayerSnapshotInterval = interval;
 }
 
-void GazeTracker::SetHMDType(std::string hmdtype)
+void GazeTracker::SetHMDType(::std::string hmdtype)
 {
 	HMDType = hmdtype;
 }
 
-void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, int objectId)
+void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId)
 {
 	if (!cvr->WasInitSuccessful()) { return; }
 
@@ -46,7 +47,7 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 	}
 }
 
-void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
+void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation)
 {
 	if (!cvr->WasInitSuccessful()) { return; }
 
@@ -96,4 +97,5 @@ void GazeTracker::SendData()
 	BatchedGazeSE.clear();
 
 	gazeCount = 0;
+}
 }

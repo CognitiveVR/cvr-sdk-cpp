@@ -1,84 +1,85 @@
+
 // CognitiveAnalytics.cpp : Defines the exported functions for the DLL application.
 //
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
+namespace cognitive {
+static ::std::shared_ptr<CognitiveVRAnalyticsCore> instance;
 
-static std::shared_ptr<CognitiveVRAnalyticsCore> instance;
-
-std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
+::std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
 {
 	return instance;
 }
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 {
-	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
+	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
 
-	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
+	log = ::std::make_unique<CognitiveLog>(CognitiveLog(instance));
 	log->Info("CognitiveVRAnalyticsCore()");
 	
-	config = std::make_unique<Config>(Config(instance));
-	network = std::make_unique<Network>(Network(instance));
+	config = ::std::make_unique<Config>(Config(instance));
+	network = ::std::make_unique<Network>(Network(instance));
 
-	tuning = std::make_unique<Tuning>(Tuning(instance));
-	transaction = std::make_unique<Transaction>(Transaction(instance));
-	gaze = std::make_unique<GazeTracker>(GazeTracker(instance));
-	sensor = std::make_unique<Sensor>(Sensor(instance));
-	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
-	exitpoll = std::make_unique<ExitPoll>(ExitPoll(instance));
+	tuning = ::std::make_unique<Tuning>(Tuning(instance));
+	transaction = ::std::make_unique<Transaction>(Transaction(instance));
+	gaze = ::std::make_unique<GazeTracker>(GazeTracker(instance));
+	sensor = ::std::make_unique<Sensor>(Sensor(instance));
+	dynamicobject = ::std::make_unique<DynamicObject>(DynamicObject(instance));
+	exitpoll = ::std::make_unique<ExitPoll>(ExitPoll(instance));
 }
 
-CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::map<std::string, std::string> sceneids)
+CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids)
 {
-	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
+	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
 
-	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
+	log = ::std::make_unique<CognitiveLog>(CognitiveLog(instance));
 	log->Info("CognitiveVRAnalyticsCore()");
 
-	config = std::make_unique<Config>(Config(instance));
+	config = ::std::make_unique<Config>(Config(instance));
 	config->sceneIds = sceneids;
-	network = std::make_unique<Network>(Network(instance));
+	network = ::std::make_unique<Network>(Network(instance));
 
-	tuning = std::make_unique<Tuning>(Tuning(instance));
-	transaction = std::make_unique<Transaction>(Transaction(instance));
-	gaze = std::make_unique<GazeTracker>(GazeTracker(instance));
-	sensor = std::make_unique<Sensor>(Sensor(instance));
-	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
-	exitpoll = std::make_unique<ExitPoll>(ExitPoll(instance));
+	tuning = ::std::make_unique<Tuning>(Tuning(instance));
+	transaction = ::std::make_unique<Transaction>(Transaction(instance));
+	gaze = ::std::make_unique<GazeTracker>(GazeTracker(instance));
+	sensor = ::std::make_unique<Sensor>(Sensor(instance));
+	dynamicobject = ::std::make_unique<DynamicObject>(DynamicObject(instance));
+	exitpoll = ::std::make_unique<ExitPoll>(ExitPoll(instance));
 }
 
-CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map<std::string, std::string> sceneids)
+CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, ::std::map<::std::string, ::std::string> sceneids)
 {
-	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
+	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
 
-	log = std::make_unique<CognitiveLog>(CognitiveLog(instance));
+	log = ::std::make_unique<CognitiveLog>(CognitiveLog(instance));
 	log->Info("CognitiveVRAnalyticsCore()");
 
-	config = std::make_unique<Config>(Config(instance));
+	config = ::std::make_unique<Config>(Config(instance));
 	config->CustomerId = customerid;
 	config->GazeBatchSize = gazecount;
 	config->TransactionBatchSize = eventcount;
 	config->SensorDataLimit = sensorcount;
 	config->DynamicDataLimit = dynamiccount;
 	config->sceneIds = sceneids;
-	network = std::make_unique<Network>(Network(instance));
+	network = ::std::make_unique<Network>(Network(instance));
 
-	tuning = std::make_unique<Tuning>(Tuning(instance));
-	transaction = std::make_unique<Transaction>(Transaction(instance));
-	gaze = std::make_unique<GazeTracker>(GazeTracker(instance));
-	sensor = std::make_unique<Sensor>(Sensor(instance));
-	dynamicobject = std::make_unique<DynamicObject>(DynamicObject(instance));
-	exitpoll = std::make_unique<ExitPoll>(ExitPoll(instance));
+	tuning = ::std::make_unique<Tuning>(Tuning(instance));
+	transaction = ::std::make_unique<Transaction>(Transaction(instance));
+	gaze = ::std::make_unique<GazeTracker>(GazeTracker(instance));
+	sensor = ::std::make_unique<Sensor>(Sensor(instance));
+	dynamicobject = ::std::make_unique<DynamicObject>(DynamicObject(instance));
+	exitpoll = ::std::make_unique<ExitPoll>(ExitPoll(instance));
 }
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
@@ -176,7 +177,7 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	return true;
 }
 
-std::string CognitiveVRAnalyticsCore::GetCustomerId()
+::std::string CognitiveVRAnalyticsCore::GetCustomerId()
 {
 	return config->CustomerId;
 }
@@ -187,7 +188,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 
 	json props;
 
-	std::vector<float> endPos = { 0,0,0 };
+	::std::vector<float> endPos = { 0,0,0 };
 
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
@@ -226,11 +227,11 @@ double CognitiveVRAnalyticsCore::GetTimestamp()
 	//auto gmt = std::gmtime(&t);
 }
 
-std::string CognitiveVRAnalyticsCore::GetSessionID()
+::std::string CognitiveVRAnalyticsCore::GetSessionID()
 {
 	if (SessionId.empty())
 	{
-		SessionId = std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
+		SessionId = ::std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
 	}
 	return SessionId;
 }
@@ -243,7 +244,7 @@ void CognitiveVRAnalyticsCore::SendData()
 	dynamicobject->SendData();
 }
 
-void CognitiveVRAnalyticsCore::SetUser(std::string user_id, json properties)
+void CognitiveVRAnalyticsCore::SetUser(::std::string user_id, json properties)
 {
 	log->Info("CognitiveVRAnalytics::set user");
 	
@@ -272,7 +273,7 @@ void CognitiveVRAnalyticsCore::SetUser(std::string user_id, json properties)
 	}
 }
 
-void CognitiveVRAnalyticsCore::SetDevice(std::string device_id, json properties)
+void CognitiveVRAnalyticsCore::SetDevice(::std::string device_id, json properties)
 {
 	log->Info("CognitiveVRAnalytics::set device");
 	//requires timestamp, timestamp,userid, deviceid,deviceproperties
@@ -302,7 +303,7 @@ void CognitiveVRAnalyticsCore::SetDevice(std::string device_id, json properties)
 	}
 }
 
-void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
+void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 {
 	if (CurrentSceneKey.size() > 0)
 	{
@@ -323,7 +324,8 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 	}
 }
 
-std::string CognitiveVRAnalyticsCore::GetSceneKey()
+::std::string CognitiveVRAnalyticsCore::GetSceneKey()
 {
 	return CurrentSceneKey;
+}
 }

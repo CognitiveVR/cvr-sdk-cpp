@@ -1,16 +1,17 @@
+
 /*
 ** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
 */
 
 #include "stdafx.h"
 #include "sensor.h"
-
-Sensor::Sensor(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+namespace cognitive {
+Sensor::Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
 
-void Sensor::RecordSensor(std::string Name, float value)
+void Sensor::RecordSensor(::std::string Name, float value)
 {
 	//initialize json as array if needed
 	auto search = allsensors.find(Name);
@@ -145,3 +146,4 @@ void Sensor::SendData()
 
 	return OutputString;
 }*/
+}

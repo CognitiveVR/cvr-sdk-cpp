@@ -1,10 +1,11 @@
+
 /*
 ** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
 */
 #include "stdafx.h"
 #include "tuning.h"
-
-Tuning::Tuning(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+namespace cognitive {
+Tuning::Tuning(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
@@ -31,12 +32,12 @@ void Tuning::ReceiveValues(json jsonvalues)
 	device_value_cache = jsonvalues["data"]["devicetuning"];
 }
 
-void Tuning::ReceiveValues(std::string rawvalues)
+void Tuning::ReceiveValues(::std::string rawvalues)
 {
 	ReceiveValues(json::parse(rawvalues));
 }
 
-void Tuning::CacheValues(std::string entity_id, json values, EntityType entity_type, bool getallc)
+void Tuning::CacheValues(::std::string entity_id, json values, EntityType entity_type, bool getallc)
 {
 	if (!cvr->HasStartedSession())
 	{
@@ -45,7 +46,7 @@ void Tuning::CacheValues(std::string entity_id, json values, EntityType entity_t
 	}
 }
 
-bool Tuning::GetValue(std::string name, bool defaultValue, EntityType entity_type)
+bool Tuning::GetValue(::std::string name, bool defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
@@ -122,7 +123,7 @@ bool Tuning::GetValue(std::string name, bool defaultValue, EntityType entity_typ
 	return result;
 }
 
-int Tuning::GetValue(std::string name, int defaultValue, EntityType entity_type)
+int Tuning::GetValue(::std::string name, int defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
@@ -146,10 +147,10 @@ int Tuning::GetValue(std::string name, int defaultValue, EntityType entity_type)
 			{
 				try
 				{
-					result = std::stoi(user_value_cache[name].get<std::string>());
+					result = ::std::stoi(user_value_cache[name].get<std::string>());
 					user_value_cache[name] = result;
 				}
-				catch (const std::invalid_argument& e)
+				catch (const ::std::invalid_argument& e)
 				{
 					cvr->log->Warning("Tuning Variable does cannot cast to int: " + name);
 				}
@@ -172,10 +173,10 @@ int Tuning::GetValue(std::string name, int defaultValue, EntityType entity_type)
 			{
 				try
 				{
-					result = std::stoi(device_value_cache[name].get<std::string>());
+					result = ::std::stoi(device_value_cache[name].get<::std::string>());
 					device_value_cache[name] = result;
 				}
-				catch (const std::invalid_argument& e)
+				catch (const ::std::invalid_argument& e)
 				{
 					cvr->log->Warning("Tuning Variable does cannot cast to int: " + name);
 				}
@@ -189,7 +190,7 @@ int Tuning::GetValue(std::string name, int defaultValue, EntityType entity_type)
 	return result;
 }
 
-float Tuning::GetValue(std::string name, float defaultValue, EntityType entity_type)
+float Tuning::GetValue(::std::string name, float defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
@@ -213,10 +214,10 @@ float Tuning::GetValue(std::string name, float defaultValue, EntityType entity_t
 			{
 				try
 				{
-					result = std::stof(user_value_cache[name].get<std::string>());
+					result = ::std::stof(user_value_cache[name].get<::std::string>());
 					user_value_cache[name] = result;
 				}
-				catch (const std::invalid_argument& e)
+				catch (const ::std::invalid_argument& e)
 				{
 					cvr->log->Warning("Tuning Variable does cannot cast to float: " + name);
 				}
@@ -239,10 +240,10 @@ float Tuning::GetValue(std::string name, float defaultValue, EntityType entity_t
 			{
 				try
 				{
-					result = std::stof(device_value_cache[name].get<std::string>());
+					result = ::std::stof(device_value_cache[name].get<::std::string>());
 					device_value_cache[name] = result;
 				}
-				catch (const std::invalid_argument& e)
+				catch (const ::std::invalid_argument& e)
 				{
 					cvr->log->Warning("Tuning Variable does cannot cast to float: " + name);
 				}
@@ -256,7 +257,7 @@ float Tuning::GetValue(std::string name, float defaultValue, EntityType entity_t
 	return result;
 }
 
-std::string Tuning::GetValue(std::string name, std::string defaultValue, EntityType entity_type)
+::std::string Tuning::GetValue(::std::string name, ::std::string defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
@@ -267,12 +268,12 @@ std::string Tuning::GetValue(std::string name, std::string defaultValue, EntityT
 	}
 
 	cvr->log->Info("tuning variable string");
-	std::string result = defaultValue;
+	::std::string result = defaultValue;
 	if (entity_type == EntityType::kEntityTypeUser)
 	{
 		if (user_value_cache.find(name) != user_value_cache.end())
 		{
-			result = user_value_cache[name].get<std::string>();
+			result = user_value_cache[name].get<::std::string>();
 		}
 		else
 		{
@@ -283,7 +284,7 @@ std::string Tuning::GetValue(std::string name, std::string defaultValue, EntityT
 	{
 		if (device_value_cache.find(name) != device_value_cache.end())
 		{
-			result = device_value_cache[name].get<std::string>();
+			result = device_value_cache[name].get<::std::string>();
 		}
 		else
 		{
@@ -293,7 +294,7 @@ std::string Tuning::GetValue(std::string name, std::string defaultValue, EntityT
 	return result;
 }
 
-std::string Tuning::GetValue(std::string name, char* defaultValue, EntityType entity_type)
+::std::string Tuning::GetValue(::std::string name, char* defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
@@ -304,12 +305,12 @@ std::string Tuning::GetValue(std::string name, char* defaultValue, EntityType en
 	}
 
 	cvr->log->Info("tuning variable char*");
-	std::string result = defaultValue;
+	::std::string result = defaultValue;
 	if (entity_type == EntityType::kEntityTypeUser)
 	{
 		if (user_value_cache.find(name) != user_value_cache.end())
 		{
-			result = user_value_cache[name].get<std::string>();
+			result = user_value_cache[name].get<::std::string>();
 		}
 		else
 		{
@@ -320,7 +321,7 @@ std::string Tuning::GetValue(std::string name, char* defaultValue, EntityType en
 	{
 		if (device_value_cache.find(name) != device_value_cache.end())
 		{
-			result = device_value_cache[name].get<std::string>();
+			result = device_value_cache[name].get<::std::string>();
 		}
 		else
 		{
@@ -330,7 +331,7 @@ std::string Tuning::GetValue(std::string name, char* defaultValue, EntityType en
 	return result;
 }
 
-void Tuning::RecordValueAccess(std::string name, std::string default_value, std::string user_id, std::string device_id)
+void Tuning::RecordValueAccess(::std::string name, ::std::string default_value, ::std::string user_id, ::std::string device_id)
 {
 	double ts = cvr->GetSessionTimestamp();
 
@@ -345,7 +346,7 @@ void Tuning::RecordValueAccess(std::string name, std::string default_value, std:
 	cvr->transaction->AddToBatch("tuner_recordUsed", content);
 }
 
-std::string Tuning::GetEntityTypeString(EntityType entity_type)
+::std::string Tuning::GetEntityTypeString(EntityType entity_type)
 {
     switch (entity_type) {
         case kEntityTypeUser:
@@ -354,4 +355,5 @@ std::string Tuning::GetEntityTypeString(EntityType entity_type)
             return "DEVICE";
     }
     return "UNKNOWN";
+}
 }

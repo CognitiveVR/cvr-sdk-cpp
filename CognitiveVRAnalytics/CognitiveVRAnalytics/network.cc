@@ -1,17 +1,18 @@
+
 /*
 ** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
 */
 
 #include "stdafx.h"
 #include "network.h"
-
-Network::Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+namespace cognitive {
+Network::Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
     cvr = cog;
 }
 
 //some random callback. use for debugging, otherwise nothing
-void Callback(std::string body)
+void Callback(::std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 	//check that body can be parsed to json
@@ -26,7 +27,7 @@ void Callback(std::string body)
 }
 
 //callback for application init. read out tuning variables
-void InitCallback(std::string body)
+void InitCallback(::std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
@@ -59,7 +60,7 @@ void InitCallback(std::string body)
 		}
 		else
 		{
-			cvr->log->Info("Init Error " + std::to_string(errorcode));
+			cvr->log->Info("Init Error " + ::std::to_string(errorcode));
 			cvr->SetInitSuccessful(false);
 			cvr->SetHasStartedSession(false);
 		}
@@ -68,7 +69,7 @@ void InitCallback(std::string body)
 
 		json props;
 
-		std::vector<float> beginPos = { 0,0,0 };
+		::std::vector<float> beginPos = { 0,0,0 };
 
 		cvr->transaction->BeginPosition("cvr.session", beginPos, props);
 
@@ -77,7 +78,7 @@ void InitCallback(std::string body)
 }
 
 //exitpoll response to requesting a hook. json is question set
-void ExitPollCallback(std::string body)
+void ExitPollCallback(::std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
@@ -104,21 +105,21 @@ void ExitPollCallback(std::string body)
 	}
 	else
 	{
-		std::string message = jsonresponse["message"].get<std::string>();
+		::std::string message = jsonresponse["message"].get<::std::string>();
 
 		cvr->log->Error("ExitPoll Callback Error: " + message);
 	}
 }
 
-void Network::DashboardCall(std::string suburl, std::string content)
+void Network::DashboardCall(::std::string suburl, ::std::string content)
 {
 	cvr->log->Info("Network Dashboard call: " + suburl);
 
 	//std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
-	std::string path = "/isos-personalization/ws/interface/" + suburl;
+	::std::string path = "/isos-personalization/ws/interface/" + suburl;
 
 	//TODO cache this query string
-	std::string query = "?";
+	::std::string query = "?";
 	query.append("ssf_ws_version=");
 	query.append(cvr->config->kSsfVersion);
 	query.append("&ssf_cust_id=");
@@ -130,7 +131,7 @@ void Network::DashboardCall(std::string suburl, std::string content)
 	query.append("&ssf_sdk_version=");
 	query.append(cvr->config->SdkVersion);
 
-	std::string finalurl = cvr->config->kNetworkHost + path + query;
+	::std::string finalurl = cvr->config->kNetworkHost + path + query;
 
 	WebResponse wr = NULL;// = &Callback;
 
@@ -142,12 +143,12 @@ void Network::DashboardCall(std::string suburl, std::string content)
 	cvr->sendFunctionPointer(finalurl, content, wr);
 }
 
-void Network::APICall(std::string suburl, std::string callType, std::string content)
+void Network::APICall(::std::string suburl, ::std::string callType, ::std::string content)
 {
 	cvr->log->Info("API call: " + suburl);
 
 	//TODO shoudl use api.networkhost from config
-	std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
+	::std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
 
 	WebResponse wr = NULL;// &Callback;
 	if (callType == "exitpollget") //does exitpoll call this query? does it call sceneexplorer?
@@ -158,9 +159,9 @@ void Network::APICall(std::string suburl, std::string callType, std::string cont
 	cvr->sendFunctionPointer(path, content, wr);
 }
 
-void Network::SceneExplorerCall(std::string suburl, std::string content)
+void Network::SceneExplorerCall(::std::string suburl, ::std::string content)
 {
-	std::string scenekey = cvr->GetSceneKey();
+	::std::string scenekey = cvr->GetSceneKey();
 	if (scenekey.empty())
 	{
 		cvr->log->Warning("SceneExplorer failed: Scene key not set");
@@ -171,8 +172,9 @@ void Network::SceneExplorerCall(std::string suburl, std::string content)
 	cvr->log->Info("SceneExplorer scenekey: " + scenekey);
 	cvr->log->Info("SceneExplorer body " + content);
 
-	std::string finalurl = "https://sceneexplorer.com/api/" + suburl + "/" + scenekey;
+	::std::string finalurl = "https://sceneexplorer.com/api/" + suburl + "/" + scenekey;
 
 	WebResponse wr = NULL;// &Callback;
 	cvr->sendFunctionPointer(finalurl, content, wr);
+}
 }

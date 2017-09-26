@@ -1,3 +1,4 @@
+
 /*
 ** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
 */
@@ -12,7 +13,7 @@
 #else  
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
-
+namespace cognitive {
 class CognitiveVRAnalyticsCore;
 
 //typedef void(*WebResponse) (std::string content);
@@ -21,10 +22,10 @@ class CognitiveVRAnalyticsCore;
 class Network
 {
     private:
-		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 
     public:
-        Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+        Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
         
 
         /** Make a call to the CognitiveVR API.
@@ -34,11 +35,12 @@ class Network
 			@param NetworkCallback callback - JSON content sent to CognitiveVR.
         */
 		
-		void DashboardCall(std::string suburl, std::string content);
+		void DashboardCall(::std::string suburl, ::std::string content);
 
 		//TODO use an enum to specify the type of call + bind to correct callback function
-		void APICall(std::string suburl, std::string callType, std::string content = "");
+		void APICall(::std::string suburl, ::std::string callType, ::std::string content = "");
 
 		//sub url is dynamic/sensor/gaze/event. for sending stuff to sceneexplorer
-		void SceneExplorerCall(std::string suburl, std::string content);
+		void SceneExplorerCall(::std::string suburl, ::std::string content);
 };
+}

@@ -1,22 +1,23 @@
+
 /*
 ** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
 */
 #include "stdafx.h"
 #include "transaction.h"
-
-Transaction::Transaction(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+namespace cognitive {
+Transaction::Transaction(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 
 	BatchedTransactions = json::array();
 }
 
-void Transaction::BeginPosition(std::string category, std::vector<float> &Position, std::string transaction_id)
+void Transaction::BeginPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id)
 {
 	BeginPosition(category, Position, json(), transaction_id);
 }
 
-void Transaction::BeginPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id)
+void Transaction::BeginPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginPosition failed: init not successful"); return; }
 
@@ -26,7 +27,7 @@ void Transaction::BeginPosition(std::string category, std::vector<float> &Positi
 		cvr->log->Warning("Transaction::Begin failed: Session not started!");
 	}
 
-	std::string trans = std::string("TXN");
+	::std::string trans = std::string("TXN");
 
 	double ts = cvr->GetTimestamp();
 
@@ -56,12 +57,12 @@ void Transaction::BeginPosition(std::string category, std::vector<float> &Positi
 	BatchedTransactionsSE.emplace_back(se);
 }
 
-void Transaction::UpdatePosition(std::string category, std::vector<float> &Position, std::string transaction_id, double progress)
+void Transaction::UpdatePosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id, double progress)
 {
 	UpdatePosition(category, Position, json(), transaction_id, progress);
 }
 
-void Transaction::UpdatePosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, double progress)
+void Transaction::UpdatePosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id, double progress)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::UpdatePosition failed: init not successful"); return; }
 
@@ -97,12 +98,12 @@ void Transaction::UpdatePosition(std::string category, std::vector<float> &Posit
 	BatchedTransactionsSE.emplace_back(se);
 }
 
-void Transaction::EndPosition(std::string category, std::vector<float> &Position, std::string transaction_id, std::string result)
+void Transaction::EndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id, ::std::string result)
 {
 	EndPosition(category, Position, json(), transaction_id, result);
 }
 
-void Transaction::EndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, std::string result)
+void Transaction::EndPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id, ::std::string result)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::EndPosition failed: init not successful"); return; }
 
@@ -138,12 +139,12 @@ void Transaction::EndPosition(std::string category, std::vector<float> &Position
 	BatchedTransactionsSE.emplace_back(se);
 }
 
-void Transaction::BeginEndPosition(std::string category, std::vector<float> &Position,std::string transaction_id, std::string result)
+void Transaction::BeginEndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id, ::std::string result)
 {
 	BeginEndPosition(category, Position, json(), transaction_id, result);
 }
 
-void Transaction::BeginEndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, std::string result)
+void Transaction::BeginEndPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id, ::std::string result)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginEndPosition failed: init not successful"); return; }
 
@@ -155,7 +156,7 @@ void Transaction::BeginEndPosition(std::string category, std::vector<float> &Pos
 	this->EndPosition(category, Position, properties, transaction_id, result);
 }
 
-void Transaction::AddToBatch(std::string method, json args)
+void Transaction::AddToBatch(::std::string method, json args)
 {
 	json batchObject;
 
@@ -208,4 +209,5 @@ void Transaction::SendData()
 	BatchedTransactionsSE.clear();
 
 	transactionCount = 0;
+}
 }

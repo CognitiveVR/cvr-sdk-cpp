@@ -1,14 +1,15 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "stdafx.h"
 #include "exitpoll.h"
-
-ExitPoll::ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+namespace cognitive {
+ExitPoll::ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
 
-void ExitPoll::RequestQuestionSet(std::string Hook)
+void ExitPoll::RequestQuestionSet(::std::string Hook)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("ExitPoll::RequestQuestionSet failed: init not successful"); return; }
 
@@ -25,10 +26,10 @@ void ExitPoll::RequestQuestionSet(std::string Hook)
 	fullResponse.hook = Hook;
 }
 
-std::vector<std::string> split(const std::string &text, char sep) {
-	std::vector<std::string> tokens;
-	std::size_t start = 0, end = 0;
-	while ((end = text.find(sep, start)) != std::string::npos) {
+::std::vector<::std::string> split(const ::std::string &text, char sep) {
+	::std::vector<::std::string> tokens;
+	::std::size_t start = 0, end = 0;
+	while ((end = text.find(sep, start)) != ::std::string::npos) {
 		tokens.push_back(text.substr(start, end - start));
 		start = end + 1;
 	}
@@ -38,7 +39,7 @@ std::vector<std::string> split(const std::string &text, char sep) {
 
 void ExitPoll::ReceiveQuestionSet(json questionset)
 {
-	fullResponse.questionSetId = questionset["id"].get<std::string>();
+	fullResponse.questionSetId = questionset["id"].get<::std::string>();
 	auto splitquestionid = split(fullResponse.questionSetId, ':');
 	fullResponse.questionSetName = splitquestionid[0];
 	fullResponse.questionSetVersion = splitquestionid[1];
@@ -94,11 +95,11 @@ void ExitPoll::SendAllAnswers()
 		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::String)
 		{
 			//strings are only for voice responses. these do not show up in dash
-			properties["Answer" + std::to_string(i)] = 0;
+			properties["Answer" + ::std::to_string(i)] = 0;
 		}
 		else //bool(0-1), null(-32768),number(0-10)
 		{
-			properties["Answer" + std::to_string(i)] = fullResponse.answers[i].numberValue;
+			properties["Answer" + ::std::to_string(i)] = fullResponse.answers[i].numberValue;
 		}
 	}
 
@@ -108,7 +109,7 @@ void ExitPoll::SendAllAnswers()
 	ClearQuestionSet();
 }
 
-void ExitPoll::SendAllAnswers(std::vector<float> pos)
+void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 {
 	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
 
@@ -130,11 +131,11 @@ void ExitPoll::SendAllAnswers(std::vector<float> pos)
 		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::String)
 		{
 			//strings are only for voice responses. these do not show up in dash
-			properties["Answer" + std::to_string(i)] = 0;
+			properties["Answer" + ::std::to_string(i)] = 0;
 		}
 		else //bool(0-1), null(-32768),number(0-10)
 		{
-			properties["Answer" + std::to_string(i)] = fullResponse.answers[i].numberValue;
+			properties["Answer" + ::std::to_string(i)] = fullResponse.answers[i].numberValue;
 		}
 	}
 
@@ -394,3 +395,4 @@ void ExitPoll::OnResponseReceivedAsync(FHttpRequestPtr Request, FHttpResponsePtr
 	//then flush transactions
 	cogProvider.Get()->FlushEvents();
 }*/
+}

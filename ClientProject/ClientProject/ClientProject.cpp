@@ -79,7 +79,7 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 TEST(Initialization, MultipleStartSessions) {
 	
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	bool first = cog.StartSession();
 	EXPECT_EQ(first, true);
 	bool second = cog.StartSession();
@@ -91,7 +91,7 @@ TEST(Initialization, MultipleStartSessions) {
 TEST(Initialization, MultipleStartEndSessions) {
 
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	bool first = cog.StartSession();
 	EXPECT_EQ(first, true);
 	cog.EndSession();
@@ -106,7 +106,7 @@ TEST(Initialization, MultipleStartEndSessions) {
 TEST(Initialization, SessionFullStartEnd) {
 	WebRequest fp = &DoWebStuff;
 	std::vector<float> pos = { 0,0,0 };
-	auto cog = CognitiveVRAnalyticsCore(fp, "somename", 10, 10, 10, 10, std::map<std::string, std::string>());
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, "somename", 10, 10, 10, 10, std::map<std::string, std::string>());
 	cog.StartSession();
 	cog.transaction->BeginEndPosition("testing1", pos);
 	cog.EndSession();
@@ -114,27 +114,27 @@ TEST(Initialization, SessionFullStartEnd) {
 
 TEST(Initialization, SessionStart) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.StartSession();
 }
 
 TEST(Initialization, Initialization) {
 	WebRequest fp = &DoWebStuff;
 	std::vector<float> pos = { 0,0,0 };
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.transaction->BeginEndPosition("testing1", pos);
 	cog.StartSession();
 }
 
 TEST(Initialization, SessionEnd) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.EndSession();
 }
 
 TEST(Initialization, SessionStartEnd) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.StartSession();
 	cog.EndSession();
 }
@@ -143,7 +143,7 @@ TEST(Initialization, SessionStartEnd) {
 
 TEST(UserSettings, UserPreSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	nlohmann::json user = nlohmann::json();
 	user["age"] = 21;
 	user["location"] = "vancouver";
@@ -153,7 +153,7 @@ TEST(UserSettings, UserPreSession) {
 
 TEST(UserSettings, UserPostSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	nlohmann::json user = nlohmann::json();
 	user["age"] = 21;
 	user["location"] = "vancouver";
@@ -163,14 +163,14 @@ TEST(UserSettings, UserPostSession) {
 
 TEST(UserSettings, UserNullPreSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.SetUser("", nlohmann::json());
 	cog.StartSession();
 }
 
 TEST(UserSettings, UserNullPostSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.StartSession();
 	cog.SetUser("", nlohmann::json());
 }
@@ -179,7 +179,7 @@ TEST(UserSettings, UserNullPostSession) {
 
 TEST(DeviceSettings, DevicePreSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	nlohmann::json device = nlohmann::json();
 	device["os"] = "chrome";
 	device["retail value"] = 79.95;
@@ -191,7 +191,7 @@ TEST(DeviceSettings, DevicePreSession) {
 
 TEST(DeviceSettings, DevicePostSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	nlohmann::json device = nlohmann::json();
 	device["os"] = "chrome";
 	device["retail value"] = 79.95;
@@ -203,7 +203,7 @@ TEST(DeviceSettings, DevicePostSession) {
 
 TEST(DeviceSettings, DeviceNullPreSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.SetDevice("", nlohmann::json());
 	cog.StartSession();
@@ -211,14 +211,14 @@ TEST(DeviceSettings, DeviceNullPreSession) {
 
 TEST(DeviceSettings, DeviceNullPostSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.StartSession();
 	cog.SetDevice("", nlohmann::json());
 }
 
 TEST(DeviceSettings, DeviceNullPreEnd) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	nlohmann::json device = nlohmann::json();
 	device["os"] = "chrome";
@@ -232,7 +232,7 @@ TEST(DeviceSettings, DeviceNullPreEnd) {
 //----------------------SET USER DEVICE
 TEST(UserDeviceSettings, UserDevicePostSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	nlohmann::json device = nlohmann::json();
 	device["os"] = "chrome";
 	device["retail value"] = 79.95;
@@ -251,7 +251,7 @@ TEST(UserDeviceSettings, UserDevicePostSession) {
 
 TEST(UserDeviceSettings, UserDevicePreSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	nlohmann::json device = nlohmann::json();
 	device["os"] = "chrome";
 	device["retail value"] = 79.95;
@@ -271,7 +271,7 @@ TEST(UserDeviceSettings, UserDevicePreSession) {
 
 TEST(Transaction, PreSessionNoEnd) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.transaction->BeginEndPosition("testing1", pos);
@@ -281,7 +281,7 @@ TEST(Transaction, PreSessionNoEnd) {
 
 TEST(Transaction, PreSessionEnd) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.transaction->BeginEndPosition("testing1", pos);
@@ -292,7 +292,7 @@ TEST(Transaction, PreSessionEnd) {
 
 TEST(Transaction, PreSessionSend) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.transaction->BeginEndPosition("testing1", pos);
@@ -303,7 +303,7 @@ TEST(Transaction, PreSessionSend) {
 
 TEST(Transaction, PreSessionPropsSend) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	std::vector<float> pos = { 0,0,0 };
 
@@ -319,7 +319,7 @@ TEST(Transaction, PreSessionPropsSend) {
 
 TEST(Transaction, SessionEnd) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	std::vector<float> pos = { 0,0,0 };
 
@@ -336,23 +336,23 @@ TEST(Transaction, SessionEnd) {
 
 TEST(Tuning, TuningGetValue) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
 
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", EntityType::kEntityTypeDevice);
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, "ferocious");
 	std::cout << snow_attitude << std::endl;
 
-	auto blockPosition = cog.tuning->GetValue("vinegar_volume", 0, EntityType::kEntityTypeDevice);
+	auto blockPosition = cog.tuning->GetValue("vinegar_volume", 0, cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(blockPosition, 50);
 	std::cout << blockPosition << std::endl;
 
-	auto ExitPollActivated = cog.tuning->GetValue("ExitPollActivated", false, EntityType::kEntityTypeDevice);
+	auto ExitPollActivated = cog.tuning->GetValue("ExitPollActivated", false, cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(ExitPollActivated, true);
 	std::cout << ExitPollActivated << std::endl;
 
-	auto pi = cog.tuning->GetValue("pi", (float)3.0, EntityType::kEntityTypeDevice);
+	auto pi = cog.tuning->GetValue("pi", (float)3.0, cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_FLOAT_EQ(pi, 3.1415927);
 	std::cout << pi << std::endl;
 
@@ -362,18 +362,18 @@ TEST(Tuning, TuningGetValue) {
 
 TEST(Tuning, TuningGetValueNoSession) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", EntityType::kEntityTypeDevice);
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", cognitive::EntityType::kEntityTypeDevice);
 	std::cout << snow_attitude << std::endl;
 }
 
 TEST(Tuning, TuningGetInvalidValue) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
-	auto snow_attitude = cog.tuning->GetValue("snow_raditude", "mellow", EntityType::kEntityTypeDevice);
+	auto snow_attitude = cog.tuning->GetValue("snow_raditude", "mellow", cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, "mellow");
 	std::cout << snow_attitude << std::endl;
 	cog.EndSession();
@@ -381,10 +381,10 @@ TEST(Tuning, TuningGetInvalidValue) {
 
 TEST(Tuning, TuningGetInvalidCast) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", 500, EntityType::kEntityTypeDevice);
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", 500, cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, 500);
 	std::cout << snow_attitude << std::endl;
 	cog.EndSession();
@@ -392,10 +392,10 @@ TEST(Tuning, TuningGetInvalidCast) {
 
 TEST(Tuning, TuningGetInvalidCastBool) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", false, EntityType::kEntityTypeDevice);
+	auto snow_attitude = cog.tuning->GetValue("snow_attitude", false, cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, false);
 	std::cout << snow_attitude << std::endl;
 	cog.EndSession();
@@ -405,7 +405,7 @@ TEST(Tuning, TuningGetInvalidCastBool) {
 
 TEST(Scenes, NoScenes) {
 	WebRequest fp = &DoWebStuff;
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
 
@@ -427,7 +427,7 @@ TEST(Scenes, InitScenes) {
 	scenes["tutorial"] = "DELETE_ME_1";
 	scenes["menu"] = "DELETE_ME_2";
 	scenes["finalboss"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp,scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp,scenes);
 
 	cog.StartSession();
 
@@ -449,7 +449,7 @@ TEST(Scenes, InitSetScenes) {
 	scenes["tutorial"] = "DELETE_ME_1";
 	scenes["menu"] = "DELETE_ME_2";
 	scenes["finalboss"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	cog.StartSession();
 	cog.SetScene("tutorial");
@@ -472,7 +472,7 @@ TEST(Scenes, InitSetSceneSwitch) {
 	scenes["tutorial"] = "DELETE_ME_1";
 	scenes["menu"] = "DELETE_ME_2";
 	scenes["finalboss"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	cog.StartSession();
 	cog.SetScene("tutorial");
@@ -497,7 +497,7 @@ TEST(Scenes, InitSetInvalidScene) {
 	scenes["tutorial"] = "DELETE_ME_1";
 	scenes["menu"] = "DELETE_ME_2";
 	scenes["finalboss"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	cog.StartSession();
 	cog.SetScene("non-existent");
@@ -512,7 +512,7 @@ TEST(Scenes, InitSetInvalidScene) {
 TEST(Scenes, InitSetInvalidNoScene) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
 	cog.SetScene("non-existent");
@@ -529,7 +529,7 @@ TEST(Scenes, InitSetInvalidNoScene) {
 TEST(ExitPoll, RequestSetNoInit) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.exitpoll->RequestQuestionSet("player_died");
 
@@ -539,7 +539,7 @@ TEST(ExitPoll, RequestSetNoInit) {
 TEST(ExitPoll, BasicRequest) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("player_died");
@@ -549,7 +549,7 @@ TEST(ExitPoll, BasicRequest) {
 TEST(ExitPoll, GetThenRequest) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 
 	cog.StartSession();
@@ -561,7 +561,7 @@ TEST(ExitPoll, GetThenRequest) {
 TEST(ExitPoll, RequestThenGet) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 
 	cog.StartSession();
@@ -573,7 +573,7 @@ TEST(ExitPoll, RequestThenGet) {
 TEST(ExitPoll, InvalidRequestThenGet) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("question-does-not-exist");
@@ -584,14 +584,14 @@ TEST(ExitPoll, InvalidRequestThenGet) {
 TEST(ExitPoll, RequestThenGetAnswers) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("player_died");
 	cog.exitpoll->GetQuestionSet();
-	cog.exitpoll->AddAnswer(FExitPollAnswer(EQuestionType::HAPPYSAD, false));
-	cog.exitpoll->AddAnswer(FExitPollAnswer(EQuestionType::MULTIPLE, 0));
-	cog.exitpoll->AddAnswer(FExitPollAnswer(EQuestionType::SCALE, 1));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::HAPPYSAD, false));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::MULTIPLE, 0));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::SCALE, 1));
 	cog.exitpoll->SendAllAnswers();
 	cog.EndSession();
 }
@@ -601,7 +601,7 @@ TEST(ExitPoll, RequestThenGetAnswers) {
 TEST(Gaze, GazeThenInit) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
@@ -621,7 +621,7 @@ TEST(Gaze, GazeThenInitSetScene) {
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
 	scenes["gazescene"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
@@ -642,7 +642,7 @@ TEST(Gaze, InitThenGazeThenSetScene) {
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
 	scenes["gazescene"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	cog.StartSession();
 	std::vector<float>pos = { 0,0,0 };
@@ -663,7 +663,7 @@ TEST(Gaze, InitThenGazeThenSendThenSetScene) {
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
 	scenes["gazescene"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	cog.StartSession();
 	std::vector<float>pos = { 0,0,0 };
@@ -684,7 +684,7 @@ TEST(Gaze, InitThenGazeThenSendThenSetScene) {
 TEST(Sensors, SenseThenInit) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	for (int i = 0; i < 10; ++i)
 	{
@@ -700,7 +700,7 @@ TEST(Sensors, SenseThenInitSetScene) {
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
 	scenes["sensescene"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	for (int i = 0; i < 10; ++i)
 	{
@@ -717,7 +717,7 @@ TEST(Sensors, InitThenGazeThenSetScene) {
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
 	scenes["sensescene"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	cog.StartSession();
 	for (int i = 0; i < 10; ++i)
@@ -734,7 +734,7 @@ TEST(Sensors, InitThenGazeThenSendThenSetScene) {
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
 	scenes["sensescene"] = "DELETE_ME_3";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 
 	cog.StartSession();
 	for (int i = 0; i < 10; ++i)
@@ -751,7 +751,7 @@ TEST(Sensors, InitThenGazeThenSendThenSetScene) {
 TEST(DISABLED_Dynamics, InitRegisterSend) {
 	WebRequest fp = &DoWebStuff;
 
-	auto cog = CognitiveVRAnalyticsCore(fp);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 	cog.StartSession();
 
 	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
@@ -784,7 +784,7 @@ TEST(Dynamics, InitRegisterSceneSend) {
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
 	scenes["dynamicscene"] = "DELETE_ME_2";
-	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	auto cog = cognitive::CognitiveVRAnalyticsCore(fp, scenes);
 	cog.StartSession();
 
 	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
