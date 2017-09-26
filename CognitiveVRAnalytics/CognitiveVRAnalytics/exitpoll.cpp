@@ -68,22 +68,77 @@ void ExitPoll::ClearQuestionSet()
 
 void ExitPoll::AddAnswer(FExitPollAnswer answer)
 {
-	//TODO critical test that this adds to vector in correct order!
 	fullResponse.answers.push_back(answer);
 }
 
 void ExitPoll::SendAllAnswers()
 {
-	//companyname1234-productname-test/questionSets/unreal_questionset/5/responses HTTP/1.1
+	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
 
 	json full = fullResponse.to_json();
 
+	//cvr->log->Info(full.dump());
+
 	cvr->network->APICall(cvr->GetCustomerId() + "/questionSets/" + fullResponse.questionSetName + "/" + fullResponse.questionSetVersion + "/responses", "answerSend", full.dump());
 
-	//dump json into string
-	//send to api somewhere
+	//send this as a transaction too
+	std::vector<float> pos = { 0,0,0 };
+	json properties = json();
+	properties["userId"] = cvr->UserId;
+	properties["questionSetId"] = fullResponse.questionSetId;
+	properties["hook"] = fullResponse.hook;
 
-	//TODO send this as a transaction too?
+	//add answers as properties
+	for (int i = 0; i < fullResponse.answers.size(); ++i)
+	{
+		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::String)
+		{
+			//strings are only for voice responses. these do not show up in dash
+			properties["Answer" + std::to_string(i)] = 0;
+		}
+		else //bool(0-1), null(-32768),number(0-10)
+		{
+			properties["Answer" + std::to_string(i)] = fullResponse.answers[i].numberValue;
+		}
+	}
+
+	cvr->transaction->BeginEndPosition("cvr.exitpoll", pos, properties);
+
+
+	ClearQuestionSet();
+}
+
+void ExitPoll::SendAllAnswers(std::vector<float> pos)
+{
+	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
+
+	json full = fullResponse.to_json();
+
+	//cvr->log->Info(full.dump());
+
+	cvr->network->APICall(cvr->GetCustomerId() + "/questionSets/" + fullResponse.questionSetName + "/" + fullResponse.questionSetVersion + "/responses", "answerSend", full.dump());
+
+	//send this as a transaction too
+	json properties = json();
+	properties["userId"] = cvr->UserId;
+	properties["questionSetId"] = fullResponse.questionSetId;
+	properties["hook"] = fullResponse.hook;
+
+	//add answers as properties
+	for (int i = 0; i < fullResponse.answers.size(); ++i)
+	{
+		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::String)
+		{
+			//strings are only for voice responses. these do not show up in dash
+			properties["Answer" + std::to_string(i)] = 0;
+		}
+		else //bool(0-1), null(-32768),number(0-10)
+		{
+			properties["Answer" + std::to_string(i)] = fullResponse.answers[i].numberValue;
+		}
+	}
+
+	cvr->transaction->BeginEndPosition("cvr.exitpoll", pos, properties);
 
 	ClearQuestionSet();
 }

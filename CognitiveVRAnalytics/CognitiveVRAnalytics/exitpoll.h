@@ -24,6 +24,16 @@ enum EAnswerValueTypeReturn
 	Null
 };
 
+enum EQuestionType
+{
+	HAPPYSAD,
+	SCALE,
+	MULTIPLE,
+	VOICE,
+	THUMBS,
+	QBOOL //BOOLEAN defined elsewhere with typedef
+};
+
 struct FExitPollAnswer
 {
 public:
@@ -54,28 +64,44 @@ public:
 			}
 		}*/
 
-		FExitPollAnswer(std::string questionType, int number)
+		FExitPollAnswer(EQuestionType questionType, int number)
 		{
-			type = questionType;
+			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::Number;
 			numberValue = number;
 		}
-		FExitPollAnswer(std::string questionType)
+		FExitPollAnswer(EQuestionType questionType)
 		{
-			type = questionType;
+			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::Null;
 		}
-		FExitPollAnswer(std::string questionType, bool boolean)
+		FExitPollAnswer(EQuestionType questionType, bool boolean)
 		{
-			type = questionType;
+			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::Bool;
 			boolValue = boolean;
 		}
-		FExitPollAnswer(std::string questionType, std::string string)
+		FExitPollAnswer(EQuestionType questionType, std::string string)
 		{
-			type = questionType;
+			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::String;
 			stringValue = string;
+		}
+
+		std::string GetQuestionTypeString(EQuestionType questionType)
+		{
+			if (questionType == EQuestionType::QBOOL)
+				return "BOOLEAN";
+			if (questionType == EQuestionType::HAPPYSAD)
+				return "HAPPYSAD";
+			if (questionType == EQuestionType::THUMBS)
+				return "THUMBS";
+			if (questionType == EQuestionType::SCALE)
+				return "SCALE";
+			if (questionType == EQuestionType::MULTIPLE)
+				return "MULTIPLE";
+			if (questionType == EQuestionType::VOICE)
+				return "VOICE";
 		}
 };
 
@@ -149,6 +175,7 @@ public:
 	void AddAnswer(FExitPollAnswer answer);
 
 	void SendAllAnswers();
+	void SendAllAnswers(std::vector<float> position);
 
 	//called after SendQuestionResponse. clears the currentQuestionSetData and response
 	void ClearQuestionSet();

@@ -499,27 +499,27 @@ TEST(Scenes, InitSetInvalidNoScene) {
 
 //----------------------EXITPOLL
 
-TEST(DISABLED_ExitPoll, RequestSetNoInit) {
+TEST(ExitPoll, RequestSetNoInit) {
 	WebRequest fp = &DoWebStuff;
 
 	auto cog = CognitiveVRAnalyticsCore(fp);
 
-	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+	cog.exitpoll->RequestQuestionSet("player_died");
 
 	cog.StartSession();
 }
 
-TEST(DISABLED_ExitPoll, BasicRequest) {
+TEST(ExitPoll, BasicRequest) {
 	WebRequest fp = &DoWebStuff;
 
 	auto cog = CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+	cog.exitpoll->RequestQuestionSet("player_died");
 	cog.EndSession();
 }
 
-TEST(DISABLED_ExitPoll, GetThenRequest) {
+TEST(ExitPoll, GetThenRequest) {
 	WebRequest fp = &DoWebStuff;
 
 	auto cog = CognitiveVRAnalyticsCore(fp);
@@ -527,7 +527,7 @@ TEST(DISABLED_ExitPoll, GetThenRequest) {
 
 	cog.StartSession();
 	cog.exitpoll->GetQuestionSet();
-	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+	cog.exitpoll->RequestQuestionSet("player_died");
 	cog.EndSession();
 }
 
@@ -538,7 +538,7 @@ TEST(ExitPoll, RequestThenGet) {
 
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+	cog.exitpoll->RequestQuestionSet("player_died");
 	cog.exitpoll->GetQuestionSet();
 	cog.EndSession();
 }
@@ -548,10 +548,24 @@ TEST(ExitPoll, InvalidRequestThenGet) {
 
 	auto cog = CognitiveVRAnalyticsCore(fp);
 
+	cog.StartSession();
+	cog.exitpoll->RequestQuestionSet("question-does-not-exist");
+	cog.exitpoll->GetQuestionSet();
+	cog.EndSession();
+}
+
+TEST(ExitPoll, RequestThenGetAnswers) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("extreme_questions");
+	cog.exitpoll->RequestQuestionSet("player_died");
 	cog.exitpoll->GetQuestionSet();
+	cog.exitpoll->AddAnswer(FExitPollAnswer(EQuestionType::HAPPYSAD, false));
+	cog.exitpoll->AddAnswer(FExitPollAnswer(EQuestionType::MULTIPLE, 0));
+	cog.exitpoll->AddAnswer(FExitPollAnswer(EQuestionType::SCALE, 1));
+	cog.exitpoll->SendAllAnswers();
 	cog.EndSession();
 }
 
