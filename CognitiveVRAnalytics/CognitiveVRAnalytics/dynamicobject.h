@@ -54,8 +54,8 @@ public:
 	std::vector<float> Rotation;
 	double Time = -1;
 	int Id = 0;
-	json Properties;
-	json Engagements;
+	json Properties = json();
+	json Engagements = json();
 
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId);
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId, json properties);
@@ -110,8 +110,8 @@ public:
 	int RegisterObject(std::string name, std::string meshname);
 
 	//append engagement from list if still active
-	void Snapshot(std::vector<float> position, std::vector<float> rotation, int objectId);
-	void Snapshot(std::vector<float> position, std::vector<float> rotation, int objectId, json properties);
+	void Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation);
+	void Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation, json properties);
 
 	//add engagement to list
 	void BeginEngagement(int objectId, std::string name);

@@ -102,6 +102,8 @@ public:
 				return "MULTIPLE";
 			if (questionType == EQuestionType::VOICE)
 				return "VOICE";
+			
+			return "BOOLEAN";
 		}
 };
 

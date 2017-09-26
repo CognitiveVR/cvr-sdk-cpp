@@ -79,7 +79,7 @@ bool isInactive(DynamicObjectEngagementEvent engagement)
 	return engagement.isActive == false;
 }
 
-void DynamicObject::Snapshot(std::vector<float> position, std::vector<float> rotation, int objectId)
+void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation)
 {
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId);
 	
@@ -114,7 +114,7 @@ void DynamicObject::Snapshot(std::vector<float> position, std::vector<float> rot
 	}
 }
 
-void DynamicObject::Snapshot(std::vector<float> position, std::vector<float> rotation, int objectId, json properties)
+void DynamicObject::Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation, json properties)
 {
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId, properties);
 
@@ -202,8 +202,7 @@ void DynamicObject::SendData()
 		entryValues["name"] = element.Name;
 		entryValues["mesh"] = element.MeshName;
 
-		entry[element.Id] = entryValues;
-		manifest.emplace_back(entry);
+		manifest[std::to_string(element.Id)] = entryValues;
 	}
 	sendJson["manifest"] = manifest;
 
@@ -216,7 +215,7 @@ void DynamicObject::SendData()
 		entry["time"] = element.Time;
 		entry["p"] = element.Position;
 		entry["r"] = element.Rotation;
-		data.emplace_back(data);
+		data.emplace_back(entry);
 	}
 	sendJson["data"] = data;
 

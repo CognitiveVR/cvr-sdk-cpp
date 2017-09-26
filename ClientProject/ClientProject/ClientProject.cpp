@@ -76,6 +76,33 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 //===========================TESTS
 //----------------------INITIALIZATION
 
+TEST(Initialization, MultipleStartSessions) {
+	
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	bool first = cog.StartSession();
+	EXPECT_EQ(first, true);
+	bool second = cog.StartSession();
+	EXPECT_EQ(second, false);
+	bool third = cog.StartSession();
+	EXPECT_EQ(third, false);
+}
+
+TEST(Initialization, MultipleStartEndSessions) {
+
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	bool first = cog.StartSession();
+	EXPECT_EQ(first, true);
+	cog.EndSession();
+	bool second = cog.StartSession();
+	EXPECT_EQ(second, true);
+	cog.EndSession();
+	bool third = cog.StartSession();
+	EXPECT_EQ(third, true);
+	cog.EndSession();
+}
+
 TEST(Initialization, SessionFullStartEnd) {
 	WebRequest fp = &DoWebStuff;
 	std::vector<float> pos = { 0,0,0 };
@@ -571,9 +598,221 @@ TEST(ExitPoll, RequestThenGetAnswers) {
 
 //----------------------GAZE
 
+TEST(Gaze, GazeThenInit) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	for (int i = 0; i < 10; ++i)
+	{
+		pos[1] = i;
+		cog.gaze->RecordGaze(pos, rot);
+	}
+	
+	cog.StartSession();
+	cog.EndSession();
+}
+
+TEST(Gaze, GazeThenInitSetScene) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["gazescene"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	for (int i = 0; i < 10; ++i)
+	{
+		pos[1] = i;
+		cog.gaze->RecordGaze(pos, rot);
+	}
+
+	cog.StartSession();
+	cog.SetScene("gazescene");
+	cog.EndSession();
+}
+
+TEST(Gaze, InitThenGazeThenSetScene) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["gazescene"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	cog.StartSession();
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	for (int i = 0; i < 10; ++i)
+	{
+		pos[1] = i;
+		cog.gaze->RecordGaze(pos, rot);
+	}
+
+	cog.SetScene("gazescene");
+	cog.EndSession();
+}
+
+TEST(Gaze, InitThenGazeThenSendThenSetScene) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["gazescene"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	cog.StartSession();
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	for (int i = 0; i < 10; ++i)
+	{
+		pos[1] = i;
+		cog.gaze->RecordGaze(pos, rot);
+	}
+	cog.SendData();
+	cog.SetScene("gazescene");
+	cog.EndSession();
+}
+
 //----------------------SENSORS
 
+TEST(Sensors, SenseThenInit) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	for (int i = 0; i < 10; ++i)
+	{
+		cog.sensor->RecordSensor("test-sensor",i);
+	}
+
+	cog.StartSession();
+	cog.EndSession();
+}
+
+TEST(Sensors, SenseThenInitSetScene) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["sensescene"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	for (int i = 0; i < 10; ++i)
+	{
+		cog.sensor->RecordSensor("test-sensor", i);
+	}
+
+	cog.StartSession();
+	cog.SetScene("sensescene");
+	cog.EndSession();
+}
+
+TEST(Sensors, InitThenGazeThenSetScene) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["sensescene"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	cog.StartSession();
+	for (int i = 0; i < 10; ++i)
+	{
+		cog.sensor->RecordSensor("test-sensor", i);
+	}
+
+	cog.SetScene("sensescene");
+	cog.EndSession();
+}
+
+TEST(Sensors, InitThenGazeThenSendThenSetScene) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["sensescene"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	cog.StartSession();
+	for (int i = 0; i < 10; ++i)
+	{
+		cog.sensor->RecordSensor("test-sensor", i);
+	}
+	cog.SendData();
+	cog.SetScene("sensescene");
+	cog.EndSession();
+}
+
 //----------------------DYNAMICS
+
+TEST(DISABLED_Dynamics, InitRegisterSend) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+	cog.StartSession();
+
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
+
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	pos = { 0,0,5 };
+	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	pos = { 0,1,6 };
+	cog.dynamicobject->Snapshot(object2id, pos, rot);
+
+	pos = { 0,0,7 };
+	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	pos = { 0,2,8 };
+	cog.dynamicobject->Snapshot(object2id, pos, rot);
+
+	pos = { 0,0,9 };
+	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	pos = { 0,3,10 };
+	cog.dynamicobject->Snapshot(object2id, pos, rot);
+
+	cog.SendData();
+	cog.EndSession();
+}
+
+TEST(Dynamics, InitRegisterSceneSend) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["dynamicscene"] = "DELETE_ME_2";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+	cog.StartSession();
+
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
+
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	pos = { 0,0,5 };
+	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	pos = { 0,1,6 };
+	cog.dynamicobject->Snapshot(object2id, pos, rot);
+
+	pos = { 0,0,7 };
+	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	pos = { 0,2,8 };
+	cog.dynamicobject->Snapshot(object2id, pos, rot);
+
+	pos = { 0,0,9 };
+	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	pos = { 0,3,10 };
+	cog.dynamicobject->Snapshot(object2id, pos, rot);
+	
+	cog.SetScene("dynamicscene");
+	cog.SendData();
+	cog.EndSession();
+}
+
 
 
 int main(int argc, char **argv)
