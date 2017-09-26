@@ -10,6 +10,14 @@ ExitPoll::ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 
 void ExitPoll::RequestQuestionSet(std::string Hook)
 {
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("ExitPoll::RequestQuestionSet failed: init not successful"); return; }
+
+	if (!cvr->HasStartedSession())
+	{
+		cvr->log->Warning("ExitPoll::RequestQuestionSet failed: Session not started!");
+		return;
+	}
+
 	cvr->network->APICall("questionSetHooks/" + Hook + "/questionSet","exitpollget");
 
 	fullResponse.user = cvr->UserId;
@@ -37,10 +45,13 @@ void ExitPoll::ReceiveQuestionSet(json questionset)
 	currentQuestionSet = questionset;
 }
 
-
-
 json ExitPoll::GetQuestionSet()
 {
+	if (currentQuestionSet.size() == 0)
+	{
+		cvr->log->Warning("ExitPoll:GetQuestionSet no active question set. Returning empty json");
+	}
+
 	return currentQuestionSet;
 }
 

@@ -66,6 +66,12 @@ void InitCallback(std::string body)
 		
 		//TODO begin session transaction
 
+		json props;
+
+		std::vector<float> beginPos = { 0,0,0 };
+
+		cvr->transaction->BeginPosition("cvr.session", beginPos, props);
+
 		//cvr->log->Info("user " + jsonresponse["data"]["userid"].get<std::string>());
 	}
 }
@@ -75,22 +81,38 @@ void ExitPollCallback(std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
-	//cvr->log->Info(body);
-
 	//check that body can be parsed to json
 	if (body.empty())
 	{
+		cvr->log->Error("ExitPoll Callback Error: no response body");
 		return;
 	}
 
-	cvr->exitpoll->ReceiveQuestionSet(json::parse(body));
+	json jsonresponse = json::parse(body);
 
-	//call cvr->exitpoll->GetQuestionSet to return json formatted to display question after this callback has been called
+	int errorcode = 0;
+	if (jsonresponse.find("code") != jsonresponse.end())
+	{
+		errorcode = jsonresponse["code"].get<int>();
+	}
+
+	if (errorcode == 0)
+	{
+		cvr->log->Info("ExitPollCallback callback successful");
+
+		cvr->exitpoll->ReceiveQuestionSet(json::parse(body));
+	}
+	else
+	{
+		std::string message = jsonresponse["message"].get<std::string>();
+
+		cvr->log->Error("ExitPoll Callback Error: " + message);
+	}
 }
 
 void Network::DashboardCall(std::string suburl, std::string content)
 {
-	cvr->log->Info("Network Dashboard call");
+	cvr->log->Info("Network Dashboard call: " + suburl);
 
 	//std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
 	std::string path = "/isos-personalization/ws/interface/" + suburl;
@@ -110,7 +132,7 @@ void Network::DashboardCall(std::string suburl, std::string content)
 
 	std::string finalurl = cvr->config->kNetworkHost + path + query;
 
-	WebResponse wr = &Callback;
+	WebResponse wr = NULL;// = &Callback;
 
 	if (suburl == "application_init")
 	{
@@ -122,10 +144,12 @@ void Network::DashboardCall(std::string suburl, std::string content)
 
 void Network::APICall(std::string suburl, std::string callType, std::string content)
 {
+	cvr->log->Info("API call: " + suburl);
+
 	//TODO shoudl use api.networkhost from config
 	std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
 
-	WebResponse wr = &Callback;
+	WebResponse wr = NULL;// &Callback;
 	if (callType == "exitpollget") //does exitpoll call this query? does it call sceneexplorer?
 	{
 		wr = &ExitPollCallback;
@@ -139,12 +163,16 @@ void Network::SceneExplorerCall(std::string suburl, std::string content)
 	std::string scenekey = cvr->GetSceneKey();
 	if (scenekey.empty())
 	{
-		cvr->log->Warning("Scene key not set. Cannot upload to Scene Explorer");
+		cvr->log->Warning("SceneExplorer failed: Scene key not set");
 		return;
 	}
 
+	cvr->log->Info("SceneExplorer call: " + suburl);
+	cvr->log->Info("SceneExplorer scenekey: " + scenekey);
+	cvr->log->Info("SceneExplorer body " + content);
+
 	std::string finalurl = "https://sceneexplorer.com/api/" + suburl + "/" + scenekey;
 
-	WebResponse wr = &Callback;
+	WebResponse wr = NULL;// &Callback;
 	cvr->sendFunctionPointer(finalurl, content, wr);
 }

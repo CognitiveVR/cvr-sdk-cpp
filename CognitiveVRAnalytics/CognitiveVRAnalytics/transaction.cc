@@ -18,12 +18,12 @@ void Transaction::BeginPosition(std::string category, std::vector<float> &Positi
 
 void Transaction::BeginPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginPosition failed. init not successful"); return; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginPosition failed: init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
 		// this should still be added to the batch, but not sent
-		cvr->log->Warning("Transaction::Begin - Session not started!");
+		cvr->log->Warning("Transaction::Begin failed: Session not started!");
 	}
 
 	std::string trans = std::string("TXN");
@@ -63,11 +63,11 @@ void Transaction::UpdatePosition(std::string category, std::vector<float> &Posit
 
 void Transaction::UpdatePosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, double progress)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::UpdatePosition failed. init not successful"); return; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::UpdatePosition failed: init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Transaction::UpdatePosition - Session not started!");
+		cvr->log->Warning("Transaction::UpdatePosition failed: Session not started!");
 	}
 
 	double ts = cvr->GetTimestamp();
@@ -104,11 +104,11 @@ void Transaction::EndPosition(std::string category, std::vector<float> &Position
 
 void Transaction::EndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, std::string result)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::EndPosition failed. init not successful"); return; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::EndPosition failed: init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Transaction::EndPosition - Session not started!");
+		cvr->log->Warning("Transaction::EndPosition failed: Session not started!");
 	}
 
 	double ts = cvr->GetTimestamp();
@@ -145,11 +145,11 @@ void Transaction::BeginEndPosition(std::string category, std::vector<float> &Pos
 
 void Transaction::BeginEndPosition(std::string category, std::vector<float> &Position, json properties, std::string transaction_id, std::string result)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginEndPosition failed. init not successful"); return; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginEndPosition failed: init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Transaction::BeginEndPosition - Session not started!");
+		cvr->log->Warning("Transaction::BeginEndPosition failed: Session not started!");
 	}
 
 	this->EndPosition(category, Position, properties, transaction_id, result);
@@ -174,11 +174,11 @@ void Transaction::AddToBatch(std::string method, json args)
 
 void Transaction::SendData()
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::SendData. init not successful"); return; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::SendData failed: init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Transaction::SendData - Session not started!");
+		cvr->log->Warning("Transaction::SendData failed: Session not started!");
 		return;
 	}
 

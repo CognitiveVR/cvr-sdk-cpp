@@ -86,7 +86,7 @@ public:
 		std::string questionSetId = "";
 		std::string sessionId = "";
 		std::string hook = "";
-		std::vector<FExitPollAnswer> answers;
+		std::vector<FExitPollAnswer> answers = std::vector<FExitPollAnswer>();
 
 		std::string questionSetName = "";
 		std::string questionSetVersion = "";
@@ -128,7 +128,7 @@ class COGNITIVEVRANALYTICS_API ExitPoll
 private:
 	std::string lastHook = "";
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
-	json currentQuestionSet;
+	json currentQuestionSet = json();
 
 	FExitPollResponse fullResponse = FExitPollResponse();
 

@@ -173,11 +173,11 @@ void DynamicObject::EndEngagement(int objectId, std::string name)
 
 void DynamicObject::SendData()
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("DynamicObject::SendData. init not successful"); return; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("DynamicObject::SendData failed: init not successful"); return; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("DynamicObject::SendData - Session not started!");
+		cvr->log->Warning("DynamicObject::SendData failed: Session not started!");
 		return;
 	}
 

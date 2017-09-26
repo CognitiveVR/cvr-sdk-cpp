@@ -37,7 +37,6 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 		just as well be a https:// URL if that is what should receive the
 		data. */
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-		//curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
 		//verbose output
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -48,15 +47,15 @@ void DoWebStuff(std::string url, std::string content, WebResponse response)
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
 		}
 
-		//curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, response);
+		//if (response != NULL)
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &handle);
-		//curl_easy_setopt(curl, CURLOPT_WRITEDATA, &temp);
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
 
 		//call response
-		response(temp);
+		if (response != NULL)
+			response(temp);
 
 		/* Check for errors */
 		if (res != CURLE_OK)
@@ -375,7 +374,186 @@ TEST(Tuning, TuningGetInvalidCastBool) {
 	cog.EndSession();
 }
 
+//----------------------SETTING SCENE KEYS FOR SCENE EXPLORER
+
+TEST(Scenes, NoScenes) {
+	WebRequest fp = &DoWebStuff;
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.StartSession();
+
+	std::vector<float> pos = { 1,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+	pos[0] = 2;
+	cog.transaction->BeginEndPosition("testing2", pos);
+	pos[0] = 3;
+	cog.transaction->BeginEndPosition("testing3", pos);
+
+	cog.SendData();
+	cog.EndSession();
+}
+
+TEST(Scenes, InitScenes) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["tutorial"] = "DELETE_ME_1";
+	scenes["menu"] = "DELETE_ME_2";
+	scenes["finalboss"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp,scenes);
+
+	cog.StartSession();
+
+	std::vector<float> pos = { 1,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+	pos[0] = 2;
+	cog.transaction->BeginEndPosition("testing2", pos);
+	pos[0] = 3;
+	cog.transaction->BeginEndPosition("testing3", pos);
+
+	cog.SendData();
+	cog.EndSession();
+}
+
+TEST(Scenes, InitSetScenes) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["tutorial"] = "DELETE_ME_1";
+	scenes["menu"] = "DELETE_ME_2";
+	scenes["finalboss"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	cog.StartSession();
+	cog.SetScene("tutorial");
+
+	std::vector<float> pos = { 1,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+	pos[0] = 2;
+	cog.transaction->BeginEndPosition("testing2", pos);
+	pos[0] = 3;
+	cog.transaction->BeginEndPosition("testing3", pos);
+
+	cog.SendData();
+	cog.EndSession();
+}
+
+TEST(Scenes, InitSetSceneSwitch) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["tutorial"] = "DELETE_ME_1";
+	scenes["menu"] = "DELETE_ME_2";
+	scenes["finalboss"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	cog.StartSession();
+	cog.SetScene("tutorial");
+
+	std::vector<float> pos = { 1,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.SetScene("menu");
+	pos[0] = 2;
+	cog.transaction->BeginEndPosition("testing2", pos);
+	cog.SetScene("finalboss");
+	pos[0] = 3;
+	cog.transaction->BeginEndPosition("testing3", pos);
+
+	cog.SendData();
+	cog.EndSession();
+}
+
+TEST(Scenes, InitSetInvalidScene) {
+	WebRequest fp = &DoWebStuff;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["tutorial"] = "DELETE_ME_1";
+	scenes["menu"] = "DELETE_ME_2";
+	scenes["finalboss"] = "DELETE_ME_3";
+	auto cog = CognitiveVRAnalyticsCore(fp, scenes);
+
+	cog.StartSession();
+	cog.SetScene("non-existent");
+
+	std::vector<float> pos = { 1,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+
+	cog.SendData();
+	cog.EndSession();
+}
+
+TEST(Scenes, InitSetInvalidNoScene) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.StartSession();
+	cog.SetScene("non-existent");
+
+	std::vector<float> pos = { 1,0,0 };
+	cog.transaction->BeginEndPosition("testing1", pos);
+
+	cog.SendData();
+	cog.EndSession();
+}
+
 //----------------------EXITPOLL
+
+TEST(DISABLED_ExitPoll, RequestSetNoInit) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+
+	cog.StartSession();
+}
+
+TEST(DISABLED_ExitPoll, BasicRequest) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+	cog.StartSession();
+	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+	cog.EndSession();
+}
+
+TEST(DISABLED_ExitPoll, GetThenRequest) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+
+	cog.StartSession();
+	cog.exitpoll->GetQuestionSet();
+	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+	cog.EndSession();
+}
+
+TEST(ExitPoll, RequestThenGet) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+
+	cog.StartSession();
+	cog.exitpoll->RequestQuestionSet("pre_experience_questions");
+	cog.exitpoll->GetQuestionSet();
+	cog.EndSession();
+}
+
+TEST(ExitPoll, InvalidRequestThenGet) {
+	WebRequest fp = &DoWebStuff;
+
+	auto cog = CognitiveVRAnalyticsCore(fp);
+
+
+	cog.StartSession();
+	cog.exitpoll->RequestQuestionSet("extreme_questions");
+	cog.exitpoll->GetQuestionSet();
+	cog.EndSession();
+}
 
 //----------------------GAZE
 
@@ -389,47 +567,9 @@ int main(int argc, char **argv)
 	::testing::InitGoogleTest(&argc, argv);
 
 	RUN_ALL_TESTS();
-
 	system("pause");
-
 	return 0;
+
+	//should use only this in a build
+	//return RUN_ALL_TESTS();
 }
-
-/*
-WebRequest fp = &DoWebStuff;
-
-auto cog = CognitiveVRAnalyticsCore(fp);
-
-nlohmann::json user = nlohmann::json();
-user["age"] = 21;
-user["location"] = "vancouver";
-
-cog.SetUser("john", user);
-
-
-nlohmann::json device = nlohmann::json();
-device["os"] = "chrome";
-device["retail value"] = 79.95;
-device["ram"] = 4;
-
-cog.SetDevice("chromebook", device);
-
-cog.StartSession();
-
-std::vector<float> pos = { 0,0,0 };
-cog.transaction->BeginEndPosition("testing1", pos);
-cog.transaction->BeginEndPosition("testing2", pos);
-cog.transaction->BeginEndPosition("testing3", pos);
-
-cog.exitpoll->RequestQuestionSet("pre_experience_questions");
-
-cog.sensor->RecordSensor("comfort", 9);
-cog.sensor->RecordSensor("fps", 60);
-cog.sensor->RecordSensor("fps", 55);
-cog.sensor->RecordSensor("comfort", 8);
-cog.sensor->RecordSensor("fps", 30);
-cog.sensor->RecordSensor("fps", 25);
-cog.sensor->RecordSensor("comfort", 5);
-
-cog.SendData();
-*/

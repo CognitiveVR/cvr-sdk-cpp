@@ -15,7 +15,7 @@ void Tuning::ReceiveValues(json jsonvalues)
 	//TODO error check - json count should be > 0
 	if (jsonvalues.size() == 0)
 	{
-		cvr->log->Info("Tuning::ReceiveValues josn value count is 0 elements");
+		cvr->log->Info("Tuning::ReceiveValues json value count is 0 elements");
 		return;
 	}
 
@@ -47,11 +47,11 @@ void Tuning::CacheValues(std::string entity_id, json values, EntityType entity_t
 
 bool Tuning::GetValue(std::string name, bool defaultValue, EntityType entity_type)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
 		return defaultValue;
 	}
 
@@ -124,11 +124,11 @@ bool Tuning::GetValue(std::string name, bool defaultValue, EntityType entity_typ
 
 int Tuning::GetValue(std::string name, int defaultValue, EntityType entity_type)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
 		return defaultValue;
 	}
 
@@ -191,11 +191,11 @@ int Tuning::GetValue(std::string name, int defaultValue, EntityType entity_type)
 
 float Tuning::GetValue(std::string name, float defaultValue, EntityType entity_type)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
 		return defaultValue;
 	}
 
@@ -258,11 +258,11 @@ float Tuning::GetValue(std::string name, float defaultValue, EntityType entity_t
 
 std::string Tuning::GetValue(std::string name, std::string defaultValue, EntityType entity_type)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
 		return defaultValue;
 	}
 
@@ -295,11 +295,11 @@ std::string Tuning::GetValue(std::string name, std::string defaultValue, EntityT
 
 std::string Tuning::GetValue(std::string name, char* defaultValue, EntityType entity_type)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue. init not successful"); return defaultValue; }
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
 	if (!cvr->HasStartedSession())
 	{
-		cvr->log->Warning("Tuning::GetValue - Session not started!");
+		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
 		return defaultValue;
 	}
 

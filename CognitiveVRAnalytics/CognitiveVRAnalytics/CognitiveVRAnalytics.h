@@ -46,9 +46,9 @@ private:
 
 	std::string CurrentSceneKey = "";
 	std::string UserId = "";
-	json UserProperties;
+	json UserProperties = json();
 	std::string DeviceId = "";
-	json DeviceProperties;
+	json DeviceProperties = json();
 	std::string SessionId = "";
 
 	WebRequest sendFunctionPointer = NULL;
@@ -65,6 +65,7 @@ public:
 	std::unique_ptr<ExitPoll> exitpoll = NULL;
 
 	CognitiveVRAnalyticsCore(WebRequest sendFunc);
+	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::map<std::string, std::string> sceneids);
 	CognitiveVRAnalyticsCore(WebRequest sendFunc, std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, std::map < std::string, std::string> sceneids);
 	CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&);
 	//CognitiveVRAnalyticsCore& operator=(CognitiveVRAnalyticsCore&&) = default;
