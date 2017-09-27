@@ -17,10 +17,10 @@ void Sensor::RecordSensor(::std::string Name, float value)
 	auto search = allsensors.find(Name);
 	if (search == allsensors.end())
 	{
-		allsensors[Name] = json::array();
+		allsensors[Name] = nlohmann::json::array();
 	}
 
-	json data = json::array();
+	nlohmann::json data = nlohmann::json::array();
 	data.emplace_back(cvr->GetTimestamp());
 	data.emplace_back(value);
 
@@ -83,7 +83,7 @@ void Sensor::SendData()
 	}
 
 	//put together all json
-	json data = json();
+	nlohmann::json data = nlohmann::json();
 
 	data["name"] = cvr->UserId;
 	data["sessionid"] = cvr->GetSessionID();
@@ -91,11 +91,11 @@ void Sensor::SendData()
 	data["part"] = jsonPart;
 	jsonPart++;
 
-	json sensors = json::array();
+	nlohmann::json sensors = nlohmann::json::array();
 	
 	for (auto const &ent1 : allsensors)
 	{
-		json obj = json();
+		nlohmann::json obj = nlohmann::json();
 		obj["name"] = ent1.first;
 		obj["data"] = ent1.second;
 		sensors.emplace_back(obj);

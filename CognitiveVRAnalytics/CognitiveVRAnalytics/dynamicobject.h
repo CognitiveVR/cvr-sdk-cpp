@@ -5,8 +5,9 @@
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
-using json = nlohmann::json;
+
 namespace cognitive {
+	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
 enum CommonMeshName
@@ -55,11 +56,11 @@ public:
 	std::vector<float> Rotation;
 	double Time = -1;
 	int Id = 0;
-	json Properties = json();
-	json Engagements = json();
+	nlohmann::json Properties = nlohmann::json();
+	nlohmann::json Engagements = nlohmann::json();
 
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId);
-	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId, json properties);
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId, nlohmann::json properties);
 };
 
 struct DynamicObjectEngagementEvent
@@ -112,7 +113,7 @@ public:
 
 	//append engagement from list if still active
 	void Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation);
-	void Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation, json properties);
+	void Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
 
 	//add engagement to list
 	void BeginEngagement(int objectId, std::string name);

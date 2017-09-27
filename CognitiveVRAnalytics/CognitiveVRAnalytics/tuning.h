@@ -14,9 +14,9 @@
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
 
-using json = nlohmann::json;
-namespace cognitive {
 
+namespace cognitive {
+	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
 enum EntityType
@@ -58,21 +58,21 @@ class COGNITIVEVRANALYTICS_API Tuning
 
         //std::map< std::string, std::map<std::string, TuningValue*> > users_value_cache;
 
-		json user_value_cache = json();
+		nlohmann::json user_value_cache = nlohmann::json();
         //std::map< std::string, std::map<std::string, TuningValue*> > devices_value_cache;
 
-		json device_value_cache = json();
+		nlohmann::json device_value_cache = nlohmann::json();
         //long getallval_cache_ttl;
 
         ::std::string GetEntityTypeString(EntityType entity_type);
-        void CacheValues(::std::string entity_id, json object, EntityType entity_type, bool getallc = false);
+        void CacheValues(::std::string entity_id, nlohmann::json object, EntityType entity_type, bool getallc = false);
 
     public:
         Tuning(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
         //~Tuning();
 
 		//pass in string response from init. try to parse as json then put into cache using CacheValues
-		void ReceiveValues(json jsonvalues);
+		void ReceiveValues(nlohmann::json jsonvalues);
 		void ReceiveValues(::std::string rawvalues);
 		
 		bool GetValue(::std::string name, bool defaultValue, EntityType entity_type = EntityType::kEntityTypeDevice);

@@ -46,7 +46,7 @@ void InitCallback(::std::string body)
 
 		int errorcode = -1;
 
-		auto jsonresponse = json::parse(body);
+		auto jsonresponse = nlohmann::json::parse(body);
 
 		errorcode = jsonresponse["error"].get<int>();
 
@@ -67,7 +67,7 @@ void InitCallback(::std::string body)
 		
 		//TODO begin session transaction
 
-		json props;
+		nlohmann::json props;
 
 		::std::vector<float> beginPos = { 0,0,0 };
 
@@ -89,7 +89,7 @@ void ExitPollCallback(::std::string body)
 		return;
 	}
 
-	json jsonresponse = json::parse(body);
+	nlohmann::json jsonresponse = nlohmann::json::parse(body);
 
 	int errorcode = 0;
 	if (jsonresponse.find("code") != jsonresponse.end())
@@ -101,7 +101,7 @@ void ExitPollCallback(::std::string body)
 	{
 		cvr->log->Info("ExitPollCallback callback successful");
 
-		cvr->exitpoll->ReceiveQuestionSet(json::parse(body));
+		cvr->exitpoll->ReceiveQuestionSet(nlohmann::json::parse(body));
 	}
 	else
 	{

@@ -27,7 +27,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 	//TODO put some kind of lookup/conversion table into config for xyz = -xzy or whatever
 
-	json data = json();
+	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
@@ -53,7 +53,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 	//TODO put some kind of lookup/conversion table into config for xyz = -xzy or whatever
 
-	json data = json();
+	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
@@ -83,7 +83,7 @@ void GazeTracker::SendData()
 	}
 
 	//send to sceneexplorer
-	json se = json();
+	nlohmann::json se = nlohmann::json();
 	se["userid"] = cvr->UserId;
 	se["timestamp"] = (int)cvr->GetTimestamp();
 	se["sessionid"] = cvr->GetSessionID();

@@ -11,7 +11,7 @@ Tuning::Tuning(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 }
 
 //response received values, split by user and device
-void Tuning::ReceiveValues(json jsonvalues)
+void Tuning::ReceiveValues(nlohmann::json jsonvalues)
 {
 	//TODO error check - json count should be > 0
 	if (jsonvalues.size() == 0)
@@ -34,10 +34,10 @@ void Tuning::ReceiveValues(json jsonvalues)
 
 void Tuning::ReceiveValues(::std::string rawvalues)
 {
-	ReceiveValues(json::parse(rawvalues));
+	ReceiveValues(nlohmann::json::parse(rawvalues));
 }
 
-void Tuning::CacheValues(::std::string entity_id, json values, EntityType entity_type, bool getallc)
+void Tuning::CacheValues(::std::string entity_id, nlohmann::json values, EntityType entity_type, bool getallc)
 {
 	if (!cvr->HasStartedSession())
 	{
@@ -335,7 +335,7 @@ void Tuning::RecordValueAccess(::std::string name, ::std::string default_value, 
 {
 	double ts = cvr->GetSessionTimestamp();
 
-	json content = json::array();
+	nlohmann::json content = nlohmann::json::array();
 	content.emplace_back(ts);
 	content.emplace_back(ts);
 	content.emplace_back(cvr->UserId);

@@ -13,7 +13,7 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::st
 	Id = objectId;
 }
 
-DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, int objectId, json properties)
+DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, int objectId, nlohmann::json properties)
 {
 	Position = position;
 	Rotation = rotation;
@@ -94,7 +94,7 @@ void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std:
 		{
 			if (e.isActive)
 			{
-				json engagementEvent = json();
+				nlohmann::json engagementEvent = nlohmann::json();
 				engagementEvent["engagementparent"] = objectId;
 				engagementEvent["engagement_count"] = e.EngagementNumber;
 				engagementEvent["engagement_time"] = cvr->GetTimestamp() - e.startTime;
@@ -116,7 +116,7 @@ void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std:
 	}
 }
 
-void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation, json properties)
+void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation, nlohmann::json properties)
 {
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId, properties);
 
@@ -129,7 +129,7 @@ void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std:
 		{
 			if (e.isActive)
 			{
-				json engagementEvent = json();
+				nlohmann::json engagementEvent = nlohmann::json();
 				engagementEvent["engagementparent"] = objectId;
 				engagementEvent["engagement_count"] = e.EngagementNumber;
 				engagementEvent["engagement_time"] = cvr->GetTimestamp() - e.startTime;
@@ -188,19 +188,19 @@ void DynamicObject::SendData()
 		return;
 	}
 
-	json sendJson = json();
+	nlohmann::json sendJson = nlohmann::json();
 
 	sendJson["userid"] = cvr->UserId;
 	sendJson["timestamp"] = cvr->GetTimestamp();
 	sendJson["sessionid"] = cvr->GetSessionID();
 	sendJson["part"] = jsonpart;
 
-	json manifest = json();
+	nlohmann::json manifest = nlohmann::json();
 
 	for (auto& element : manifestEntries)
 	{
-		json entry = json();
-		json entryValues = json();
+		nlohmann::json entry = nlohmann::json();
+		nlohmann::json entryValues = nlohmann::json();
 		entryValues["name"] = element.Name;
 		entryValues["mesh"] = element.MeshName;
 
@@ -208,11 +208,11 @@ void DynamicObject::SendData()
 	}
 	sendJson["manifest"] = manifest;
 
-	json data = json::array();
+	nlohmann::json data = nlohmann::json::array();
 
 	for (auto& element : snapshots)
 	{
-		json entry = json();
+		nlohmann::json entry = nlohmann::json();
 		entry["id"] = element.Id;
 		entry["time"] = element.Time;
 		entry["p"] = element.Position;

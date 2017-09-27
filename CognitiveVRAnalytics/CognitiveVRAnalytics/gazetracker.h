@@ -12,8 +12,9 @@
 #else  
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
-using json = nlohmann::json;
+
 namespace cognitive {
+	//using json = nlohmann::json;
 	
 class CognitiveVRAnalyticsCore;
 
@@ -24,7 +25,7 @@ private:
 	long lastIntervalTime = -1;
 	int jsonPart = 1;
 	int gazeCount = 0;
-	json BatchedGazeSE;
+	nlohmann::json BatchedGazeSE;
 	//set from config
 	float PlayerSnapshotInterval = 0.1f;
 	::std::string HMDType = "";

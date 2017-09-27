@@ -6,7 +6,7 @@
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
-using json = nlohmann::json;
+
 
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)   
@@ -14,6 +14,7 @@ using json = nlohmann::json;
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
 namespace cognitive {
+	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API Sensor
@@ -28,7 +29,7 @@ class COGNITIVEVRANALYTICS_API Sensor
 		//int sensorDataCount = 0;
 		//int SensorThreshold = 16;
 
-		::std::map<::std::string, json> allsensors = ::std::map<::std::string,json>();
+		::std::map<::std::string, nlohmann::json> allsensors = ::std::map<::std::string, nlohmann::json>();
 		int sensorCount = 0;
 		int jsonPart = 1;
 

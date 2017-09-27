@@ -37,7 +37,7 @@ void ExitPoll::RequestQuestionSet(::std::string Hook)
 	return tokens;
 }
 
-void ExitPoll::ReceiveQuestionSet(json questionset)
+void ExitPoll::ReceiveQuestionSet(nlohmann::json questionset)
 {
 	fullResponse.questionSetId = questionset["id"].get<::std::string>();
 	auto splitquestionid = split(fullResponse.questionSetId, ':');
@@ -46,7 +46,7 @@ void ExitPoll::ReceiveQuestionSet(json questionset)
 	currentQuestionSet = questionset;
 }
 
-json ExitPoll::GetQuestionSet()
+nlohmann::json ExitPoll::GetQuestionSet()
 {
 	if (currentQuestionSet.size() == 0)
 	{
@@ -76,7 +76,7 @@ void ExitPoll::SendAllAnswers()
 {
 	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
 
-	json full = fullResponse.to_json();
+	nlohmann::json full = fullResponse.to_json();
 
 	//cvr->log->Info(full.dump());
 
@@ -84,7 +84,7 @@ void ExitPoll::SendAllAnswers()
 
 	//send this as a transaction too
 	std::vector<float> pos = { 0,0,0 };
-	json properties = json();
+	nlohmann::json properties = nlohmann::json();
 	properties["userId"] = cvr->UserId;
 	properties["questionSetId"] = fullResponse.questionSetId;
 	properties["hook"] = fullResponse.hook;
@@ -113,14 +113,14 @@ void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 {
 	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
 
-	json full = fullResponse.to_json();
+	nlohmann::json full = fullResponse.to_json();
 
 	//cvr->log->Info(full.dump());
 
 	cvr->network->APICall(cvr->GetCustomerId() + "/questionSets/" + fullResponse.questionSetName + "/" + fullResponse.questionSetVersion + "/responses", "answerSend", full.dump());
 
 	//send this as a transaction too
-	json properties = json();
+	nlohmann::json properties = nlohmann::json();
 	properties["userId"] = cvr->UserId;
 	properties["questionSetId"] = fullResponse.questionSetId;
 	properties["hook"] = fullResponse.hook;

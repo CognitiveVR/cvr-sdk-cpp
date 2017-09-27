@@ -12,7 +12,7 @@
 #include "cognitive_log.h"
 #include "config.h"
 #include <chrono>
-using json = nlohmann::json;
+
 
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)
@@ -20,10 +20,10 @@ using json = nlohmann::json;
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
 
+namespace cognitive {
+	//using json = nlohmann::json;
 typedef void(*WebResponse) (::std::string content);
 typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
-
-namespace cognitive {
 
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
@@ -49,9 +49,9 @@ private:
 
 	::std::string CurrentSceneKey = "";
 	::std::string UserId = "";
-	json UserProperties = json();
+	nlohmann::json UserProperties = nlohmann::json();
 	::std::string DeviceId = "";
-	json DeviceProperties = json();
+	nlohmann::json DeviceProperties = nlohmann::json();
 	::std::string SessionId = "";
 
 	WebRequest sendFunctionPointer = NULL;
@@ -75,8 +75,8 @@ public:
 	
 	~CognitiveVRAnalyticsCore();
 
-	void SetUser(::std::string user_id, json properties);
-	void SetDevice(::std::string device_id, json properties);
+	void SetUser(::std::string user_id, nlohmann::json properties);
+	void SetDevice(::std::string device_id, nlohmann::json properties);
 	::std::string GetCustomerId();
 
 	double GetSessionTimestamp();

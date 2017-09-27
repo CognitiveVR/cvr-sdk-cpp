@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
-using json = nlohmann::json;
+
 
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)   
@@ -15,6 +15,7 @@ using json = nlohmann::json;
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
 namespace cognitive {
+	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
 enum EAnswerValueTypeReturn
@@ -121,28 +122,28 @@ public:
 		::std::string questionSetVersion = "";
 
 		//TODO proper override of nlohmann::to_json and from_json
-		json to_json()
+		nlohmann::json to_json()
 		{
-			json j = json{ { "userId", user },{ "questionSetId", questionSetId },{ "sessionId", sessionId },{ "hook", hook } };
-			json janswers = json::array();
+			nlohmann::json j = nlohmann::json{ { "userId", user },{ "questionSetId", questionSetId },{ "sessionId", sessionId },{ "hook", hook } };
+			nlohmann::json janswers = nlohmann::json::array();
 			for (auto& an : answers)
 			{
-				json tempAnswer = json();
+				nlohmann::json tempAnswer = nlohmann::json();
 				if (an.AnswerValueType == EAnswerValueTypeReturn::Bool)
 				{
-					tempAnswer = json{ { "name", an.type },{ "value", an.boolValue ? 1 : 0 } };
+					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.boolValue ? 1 : 0 } };
 				}
 				else if (an.AnswerValueType == EAnswerValueTypeReturn::Number)
 				{
-					tempAnswer = json{ { "name", an.type },{ "value", an.numberValue } };
+					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.numberValue } };
 				}
 				else if (an.AnswerValueType == EAnswerValueTypeReturn::Null)
 				{
-					tempAnswer = json{ { "name", an.type },{ "value", -32768 } };
+					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", -32768 } };
 				}
 				else if (an.AnswerValueType == EAnswerValueTypeReturn::String)
 				{
-					tempAnswer = json{ { "name", an.type },{ "value", an.stringValue } };
+					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.stringValue } };
 				}
 
 				janswers.push_back(tempAnswer);
@@ -157,7 +158,7 @@ class COGNITIVEVRANALYTICS_API ExitPoll
 private:
 	::std::string lastHook = "";
 	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
-	json currentQuestionSet = json();
+	nlohmann::json currentQuestionSet = nlohmann::json();
 
 	FExitPollResponse fullResponse = FExitPollResponse();
 
@@ -166,10 +167,10 @@ public:
 	ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 	void RequestQuestionSet(::std::string Hook);
-	void ReceiveQuestionSet(json questionset);
+	void ReceiveQuestionSet(nlohmann::json questionset);
 
 	//can return empty json if request failed
-	json GetQuestionSet();
+	nlohmann::json GetQuestionSet();
 	bool HasQuestionSet()
 	{
 		return currentQuestionSet.size() > 0;

@@ -129,12 +129,12 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	if (UserId.empty())
 	{
-		SetUser("anonymous", json());
+		SetUser("anonymous", nlohmann::json());
 	}
 
 	if (DeviceId.empty())
 	{
-		SetDevice("unknown", json());
+		SetDevice("unknown", nlohmann::json());
 	}
 
 	GetSessionTimestamp();
@@ -144,7 +144,7 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	double ts = GetSessionTimestamp();
 
-	json content = json::array();
+	nlohmann::json content = nlohmann::json::array();
 	content.emplace_back(ts);
 	content.emplace_back(ts);
 	content.emplace_back(UserId);
@@ -186,7 +186,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 {
 	log->Info("CognitiveVRAnalytics::EndSession");
 
-	json props;
+	nlohmann::json props = nlohmann::json();
 
 	::std::vector<float> endPos = { 0,0,0 };
 
@@ -244,14 +244,14 @@ void CognitiveVRAnalyticsCore::SendData()
 	dynamicobject->SendData();
 }
 
-void CognitiveVRAnalyticsCore::SetUser(::std::string user_id, json properties)
+void CognitiveVRAnalyticsCore::SetUser(::std::string user_id, nlohmann::json properties)
 {
 	log->Info("CognitiveVRAnalytics::set user");
 	
 	UserId = user_id;
 	double ts = GetTimestamp();
 
-	json args = json::array();
+	nlohmann::json args = nlohmann::json::array();
 
 	args.emplace_back(ts);
 	args.emplace_back(ts);
@@ -267,13 +267,13 @@ void CognitiveVRAnalyticsCore::SetUser(::std::string user_id, json properties)
 	}
 	else
 	{
-		UserProperties = json::array();
+		UserProperties = nlohmann::json::array();
 		args.emplace_back(nullptr);
 		transaction->AddToBatch("datacollector_updateUserState", args);
 	}
 }
 
-void CognitiveVRAnalyticsCore::SetDevice(::std::string device_id, json properties)
+void CognitiveVRAnalyticsCore::SetDevice(::std::string device_id, nlohmann::json properties)
 {
 	log->Info("CognitiveVRAnalytics::set device");
 	//requires timestamp, timestamp,userid, deviceid,deviceproperties
@@ -281,7 +281,7 @@ void CognitiveVRAnalyticsCore::SetDevice(::std::string device_id, json propertie
 	DeviceId = device_id;
 	double ts = GetTimestamp();
 
-	json args = json::array();
+	nlohmann::json args = nlohmann::json::array();
 
 	args.emplace_back(ts);
 	args.emplace_back(ts);
@@ -297,7 +297,7 @@ void CognitiveVRAnalyticsCore::SetDevice(::std::string device_id, json propertie
 	}
 	else
 	{
-		DeviceProperties = json::array();
+		DeviceProperties = nlohmann::json::array();
 		args.emplace_back(nullptr);
 		transaction->AddToBatch("datacollector_updateDeviceState", args);
 	}

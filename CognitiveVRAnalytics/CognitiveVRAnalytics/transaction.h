@@ -13,10 +13,10 @@
 #else  
 #define COGNITIVEVRANALYTICS_API __declspec(dllimport)
 #endif
-using json = nlohmann::json;
+
 
 namespace cognitive {
-	
+	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API Transaction
@@ -26,9 +26,9 @@ class COGNITIVEVRANALYTICS_API Transaction
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
 		//the array of objects {method:"whatever",args:json} to send to dashboard
-		json BatchedTransactions;
+		nlohmann::json BatchedTransactions;
 		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
-		json BatchedTransactionsSE;
+		nlohmann::json BatchedTransactionsSE;
 
 		
 
@@ -49,7 +49,7 @@ class COGNITIVEVRANALYTICS_API Transaction
         */
 		//void Begin(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "");
 		void BeginPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "");
-		void BeginPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "");
+		void BeginPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "");
 
         /** Update an existing transaction.
 
@@ -63,7 +63,7 @@ class COGNITIVEVRANALYTICS_API Transaction
         */
 		//void Update(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", double progress = 0);
 		void UpdatePosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", double progress = 0);
-		void UpdatePosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "", double progress = 0);
+		void UpdatePosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "", double progress = 0);
 
         /** End an existing transaction.
 
@@ -77,7 +77,7 @@ class COGNITIVEVRANALYTICS_API Transaction
         */
 		//void End(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
 		void EndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", ::std::string result = "");
-		void EndPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "", ::std::string result = "");
+		void EndPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "", ::std::string result = "");
 
         /** Begin and end new transaction.
 
@@ -91,9 +91,9 @@ class COGNITIVEVRANALYTICS_API Transaction
         */
 		//void BeginEnd(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
 		void BeginEndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", ::std::string result = "");
-		void BeginEndPosition(::std::string category, ::std::vector<float> &Position, json properties, ::std::string transaction_id = "", ::std::string result = "");
+		void BeginEndPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "", ::std::string result = "");
 
-		void AddToBatch(::std::string method, json args);
+		void AddToBatch(::std::string method, nlohmann::json args);
 
 		void SendData();
 };
