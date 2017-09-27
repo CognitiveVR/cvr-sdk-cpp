@@ -1,4 +1,4 @@
-node("build-node" {
+node("build-node") {
 	stage("Build") {
 		checkout scm
 		echo 'Building..'
