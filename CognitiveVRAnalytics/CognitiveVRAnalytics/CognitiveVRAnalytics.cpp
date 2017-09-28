@@ -12,9 +12,15 @@ static ::std::shared_ptr<CognitiveVRAnalyticsCore> instance;
 	return instance;
 }
 
+struct D {
+	void operator() (CognitiveVRAnalyticsCore* cvr) {
+		//custom deleter for cognitiveanalyticscore. does nothing!
+	}
+};
+
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 {
-	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
+	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
@@ -35,7 +41,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids)
 {
-	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
+	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;
@@ -57,7 +63,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::m
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, ::std::map<::std::string, ::std::string> sceneids)
 {
-	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, [](auto p) {});
+	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
 
 	sendFunctionPointer = sendFunc;
 	bHasSessionStarted = false;

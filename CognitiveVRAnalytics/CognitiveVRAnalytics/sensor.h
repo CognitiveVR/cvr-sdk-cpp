@@ -43,7 +43,7 @@ class COGNITIVEVRANALYTICS_API Sensor
 		//int sensorDataCount = 0;
 		//int SensorThreshold = 16;
 
-		::std::map<::std::string, nlohmann::json> allsensors = ::std::map<::std::string, nlohmann::json>();
+		::std::map<::std::string, nlohmann::json> allsensors;// = ::std::map<::std::string, nlohmann::json>();
 		int sensorCount = 0;
 		int jsonPart = 1;
 

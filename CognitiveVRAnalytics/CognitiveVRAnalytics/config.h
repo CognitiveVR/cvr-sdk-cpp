@@ -63,7 +63,7 @@ class Config {
 		//vive, rift, gear, mobile
 		::std::string HMDType = "vive";
 
-		::std::map < ::std::string, ::std::string> sceneIds = ::std::map<::std::string, ::std::string>();
+		::std::map < ::std::string, ::std::string> sceneIds;// = ::std::map<::std::string, ::std::string>();
 
 
 		#pragma warning(pop)
