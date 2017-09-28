@@ -5038,7 +5038,7 @@ class binary_reader
                 return get_number<int16_t>();
 
             case 0xd2: // int 32
-                return get_number<int_t>();
+                return get_number<int32_t>();
 
             case 0xd3: // int 64
                 return get_number<int64_t>();
@@ -5789,12 +5789,12 @@ class binary_writer
                         oa->write_character(static_cast<CharType>(0xd1));
                         write_number(static_cast<int16_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_integer >= (std::numeric_limits<int_t>::min)() and
-                             j.m_value.number_integer <= (std::numeric_limits<int_t>::max)())
+                    else if (j.m_value.number_integer >= (std::numeric_limits<int32_t>::min)() and
+                             j.m_value.number_integer <= (std::numeric_limits<int32_t>::max)())
                     {
                         // int 32
                         oa->write_character(static_cast<CharType>(0xd2));
-                        write_number(static_cast<int_t>(j.m_value.number_integer));
+                        write_number(static_cast<int32_t>(j.m_value.number_integer));
                     }
                     else if (j.m_value.number_integer >= (std::numeric_limits<int64_t>::min)() and
                              j.m_value.number_integer <= (std::numeric_limits<int64_t>::max)())
