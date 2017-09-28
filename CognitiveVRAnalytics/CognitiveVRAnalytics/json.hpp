@@ -63,7 +63,7 @@ SOFTWARE.
     #endif
 #elif defined(__GNUC__)
     #if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) < 40900
-        #error "unsupported GCC version - see https://github.com/nlohmann/json#supported-compilers"
+        //#error "unsupported GCC version - see https://github.com/nlohmann/json#supported-compilers"
     #endif
 #endif
 
@@ -4511,8 +4511,8 @@ class binary_reader
             case 0x19: // Unsigned integer (two-byte uint16_t follows)
                 return get_number<uint16_t>();
 
-            case 0x1a: // Unsigned integer (four-byte uint_t follows)
-                return get_number<uint_t>();
+            case 0x1a: // Unsigned integer (four-byte uint32_t follows)
+                return get_number<uint32_t>();
 
             case 0x1b: // Unsigned integer (eight-byte uint64_t follows)
                 return get_number<uint64_t>();
@@ -4555,9 +4555,9 @@ class binary_reader
                 return static_cast<number_integer_t>(-1) - get_number<uint16_t>();
             }
 
-            case 0x3a: // Negative integer -1-n (four-byte uint_t follows)
+            case 0x3a: // Negative integer -1-n (four-byte uint32_t follows)
             {
-                return static_cast<number_integer_t>(-1) - get_number<uint_t>();
+                return static_cast<number_integer_t>(-1) - get_number<uint32_t>();
             }
 
             case 0x3b: // Negative integer -1-n (eight-byte uint64_t follows)
@@ -4593,7 +4593,7 @@ class binary_reader
             case 0x77:
             case 0x78: // UTF-8 string (one-byte uint8_t for n follows)
             case 0x79: // UTF-8 string (two-byte uint16_t for n follow)
-            case 0x7a: // UTF-8 string (four-byte uint_t for n follow)
+            case 0x7a: // UTF-8 string (four-byte uint32_t for n follow)
             case 0x7b: // UTF-8 string (eight-byte uint64_t for n follow)
             case 0x7f: // UTF-8 string (indefinite length)
             {
@@ -4639,9 +4639,9 @@ class binary_reader
                 return get_cbor_array(get_number<uint16_t>());
             }
 
-            case 0x9a: // array (four-byte uint_t for n follow)
+            case 0x9a: // array (four-byte uint32_t for n follow)
             {
-                return get_cbor_array(get_number<uint_t>());
+                return get_cbor_array(get_number<uint32_t>());
             }
 
             case 0x9b: // array (eight-byte uint64_t for n follow)
@@ -4698,9 +4698,9 @@ class binary_reader
                 return get_cbor_object(get_number<uint16_t>());
             }
 
-            case 0xba: // map (four-byte uint_t for n follow)
+            case 0xba: // map (four-byte uint32_t for n follow)
             {
-                return get_cbor_object(get_number<uint_t>());
+                return get_cbor_object(get_number<uint32_t>());
             }
 
             case 0xbb: // map (eight-byte uint64_t for n follow)
@@ -5026,7 +5026,7 @@ class binary_reader
                 return get_number<uint16_t>();
 
             case 0xce: // uint 32
-                return get_number<uint_t>();
+                return get_number<uint32_t>();
 
             case 0xcf: // uint 64
                 return get_number<uint64_t>();
@@ -5055,7 +5055,7 @@ class binary_reader
 
             case 0xdd: // array 32
             {
-                return get_msgpack_array(get_number<uint_t>());
+                return get_msgpack_array(get_number<uint32_t>());
             }
 
             case 0xde: // map 16
@@ -5065,7 +5065,7 @@ class binary_reader
 
             case 0xdf: // map 32
             {
-                return get_msgpack_object(get_number<uint_t>());
+                return get_msgpack_object(get_number<uint32_t>());
             }
 
             // positive fixint
@@ -5250,9 +5250,9 @@ class binary_reader
                 return get_string(get_number<uint16_t>());
             }
 
-            case 0x7a: // UTF-8 string (four-byte uint_t for n follow)
+            case 0x7a: // UTF-8 string (four-byte uint32_t for n follow)
             {
-                return get_string(get_number<uint_t>());
+                return get_string(get_number<uint32_t>());
             }
 
             case 0x7b: // UTF-8 string (eight-byte uint64_t for n follow)
@@ -5373,7 +5373,7 @@ class binary_reader
 
             case 0xdb: // str 32
             {
-                return get_string(get_number<uint_t>());
+                return get_string(get_number<uint32_t>());
             }
 
             default:
@@ -5508,10 +5508,10 @@ class binary_writer
                         oa->write_character(static_cast<CharType>(0x19));
                         write_number(static_cast<uint16_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_integer <= (std::numeric_limits<uint_t>::max)())
+                    else if (j.m_value.number_integer <= (std::numeric_limits<uint32_t>::max)())
                     {
                         oa->write_character(static_cast<CharType>(0x1a));
-                        write_number(static_cast<uint_t>(j.m_value.number_integer));
+                        write_number(static_cast<uint32_t>(j.m_value.number_integer));
                     }
                     else
                     {
@@ -5538,10 +5538,10 @@ class binary_writer
                         oa->write_character(static_cast<CharType>(0x39));
                         write_number(static_cast<uint16_t>(positive_number));
                     }
-                    else if (positive_number <= (std::numeric_limits<uint_t>::max)())
+                    else if (positive_number <= (std::numeric_limits<uint32_t>::max)())
                     {
                         oa->write_character(static_cast<CharType>(0x3a));
-                        write_number(static_cast<uint_t>(positive_number));
+                        write_number(static_cast<uint32_t>(positive_number));
                     }
                     else
                     {
@@ -5568,10 +5568,10 @@ class binary_writer
                     oa->write_character(static_cast<CharType>(0x19));
                     write_number(static_cast<uint16_t>(j.m_value.number_unsigned));
                 }
-                else if (j.m_value.number_unsigned <= (std::numeric_limits<uint_t>::max)())
+                else if (j.m_value.number_unsigned <= (std::numeric_limits<uint32_t>::max)())
                 {
                     oa->write_character(static_cast<CharType>(0x1a));
-                    write_number(static_cast<uint_t>(j.m_value.number_unsigned));
+                    write_number(static_cast<uint32_t>(j.m_value.number_unsigned));
                 }
                 else
                 {
@@ -5609,7 +5609,7 @@ class binary_writer
                 else if (N <= 0xffffffff)
                 {
                     oa->write_character(static_cast<CharType>(0x7a));
-                    write_number(static_cast<uint_t>(N));
+                    write_number(static_cast<uint32_t>(N));
                 }
                 // LCOV_EXCL_START
                 else if (N <= 0xffffffffffffffff)
@@ -5647,7 +5647,7 @@ class binary_writer
                 else if (N <= 0xffffffff)
                 {
                     oa->write_character(static_cast<CharType>(0x9a));
-                    write_number(static_cast<uint_t>(N));
+                    write_number(static_cast<uint32_t>(N));
                 }
                 // LCOV_EXCL_START
                 else if (N <= 0xffffffffffffffff)
@@ -5686,7 +5686,7 @@ class binary_writer
                 else if (N <= 0xffffffff)
                 {
                     oa->write_character(static_cast<CharType>(0xba));
-                    write_number(static_cast<uint_t>(N));
+                    write_number(static_cast<uint32_t>(N));
                 }
                 // LCOV_EXCL_START
                 else if (N <= 0xffffffffffffffff)
@@ -5755,11 +5755,11 @@ class binary_writer
                         oa->write_character(static_cast<CharType>(0xcd));
                         write_number(static_cast<uint16_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_unsigned <= (std::numeric_limits<uint_t>::max)())
+                    else if (j.m_value.number_unsigned <= (std::numeric_limits<uint32_t>::max)())
                     {
                         // uint 32
                         oa->write_character(static_cast<CharType>(0xce));
-                        write_number(static_cast<uint_t>(j.m_value.number_integer));
+                        write_number(static_cast<uint32_t>(j.m_value.number_integer));
                     }
                     else if (j.m_value.number_unsigned <= (std::numeric_limits<uint64_t>::max)())
                     {
@@ -5826,11 +5826,11 @@ class binary_writer
                     oa->write_character(static_cast<CharType>(0xcd));
                     write_number(static_cast<uint16_t>(j.m_value.number_integer));
                 }
-                else if (j.m_value.number_unsigned <= (std::numeric_limits<uint_t>::max)())
+                else if (j.m_value.number_unsigned <= (std::numeric_limits<uint32_t>::max)())
                 {
                     // uint 32
                     oa->write_character(static_cast<CharType>(0xce));
-                    write_number(static_cast<uint_t>(j.m_value.number_integer));
+                    write_number(static_cast<uint32_t>(j.m_value.number_integer));
                 }
                 else if (j.m_value.number_unsigned <= (std::numeric_limits<uint64_t>::max)())
                 {
@@ -5873,7 +5873,7 @@ class binary_writer
                 {
                     // str 32
                     oa->write_character(static_cast<CharType>(0xdb));
-                    write_number(static_cast<uint_t>(N));
+                    write_number(static_cast<uint32_t>(N));
                 }
 
                 // step 2: write the string
@@ -5902,7 +5902,7 @@ class binary_writer
                 {
                     // array 32
                     oa->write_character(static_cast<CharType>(0xdd));
-                    write_number(static_cast<uint_t>(N));
+                    write_number(static_cast<uint32_t>(N));
                 }
 
                 // step 2: write each element
@@ -5932,7 +5932,7 @@ class binary_writer
                 {
                     // map 32
                     oa->write_character(static_cast<CharType>(0xdf));
-                    write_number(static_cast<uint_t>(N));
+                    write_number(static_cast<uint32_t>(N));
                 }
 
                 // step 2: write each element
