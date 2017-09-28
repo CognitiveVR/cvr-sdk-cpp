@@ -37,6 +37,12 @@
 
 
 namespace cognitive {
+
+	template<typename T, typename... Args>
+	std::unique_ptr<T> make_unique(Args&&... args) {
+		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+	}
+
 	//using json = nlohmann::json;
 typedef void(*WebResponse) (::std::string content);
 typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
