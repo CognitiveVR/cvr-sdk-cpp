@@ -1,11 +1,5 @@
-node("build-node") {
-	stage("Find GCC")
-	{
-		whereis gcc
-		which gcc
-		gcc --version
-	}
-
+node("build-node")
+{
 	stage("Build DLL") {
 		echo 'Building DLL..'
 		checkout scm
