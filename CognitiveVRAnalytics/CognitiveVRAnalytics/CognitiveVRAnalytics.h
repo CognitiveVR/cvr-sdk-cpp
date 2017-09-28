@@ -14,11 +14,27 @@
 #include <chrono>
 
 
-#ifdef COGNITIVEVRANALYTICS_EXPORTS  
-#define COGNITIVEVRANALYTICS_API __declspec(dllexport)
-#else  
-#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+#if defined(_MSC_VER)
+	//  Microsoft 
+	#ifdef COGNITIVEVRANALYTICS_EXPORTS  
+		#define COGNITIVEVRANALYTICS_API __declspec(dllexport)
+	#else  
+		#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+	#endif
+#elif defined(__GNUC__)
+	//  GCC
+	#ifdef COGNITIVEVRANALYTICS_EXPORTS  
+		#define COGNITIVEVRANALYTICS_API __attribute__((visibility("default")))
+	#else  
+		#define COGNITIVEVRANALYTICS_API
+	#endif
+#else
+	//  do nothing and hope for the best?
+	#define COGNITIVEVRANALYTICS_EXPORTS
+	#pragma warning Unknown dynamic link import/export semantics.
 #endif
+
+
 
 namespace cognitive {
 	//using json = nlohmann::json;
