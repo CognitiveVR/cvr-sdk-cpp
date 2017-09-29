@@ -91,7 +91,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\CognitiveVRAnalytics\CognitiveVRAnalytics;%(AdditionalLibraryDirectories);C:\Users\calder\Documents\GitHub\googletest-master\googletest\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\CognitiveVRAnalytics\CognitiveVRAnalytics;%(AdditionalLibraryDirectories);C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\curl;C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\googletest\include\gtest</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>

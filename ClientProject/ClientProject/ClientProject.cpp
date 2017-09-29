@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
-#include "include\curl\curl.h"
-#include "gtest\gtest.h"
+#include "curl.h"
+#include "gtest.h"
 
 std::string temp;
 
