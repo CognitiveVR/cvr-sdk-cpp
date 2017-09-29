@@ -36,7 +36,7 @@ class CognitiveVRAnalyticsCore;
 class Network
 {
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
     public:
         Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);

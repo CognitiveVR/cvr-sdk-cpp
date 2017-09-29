@@ -21,7 +21,7 @@ class CognitiveLog
 {
 	private:
 		LoggingLevel logLevel = LoggingLevel::All;
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
     public:
 		CognitiveLog(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);

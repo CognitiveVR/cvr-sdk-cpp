@@ -172,7 +172,7 @@ class COGNITIVEVRANALYTICS_API ExitPoll
 {
 private:
 	::std::string lastHook = "";
-	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	nlohmann::json currentQuestionSet = nlohmann::json();
 
 	FExitPollResponse fullResponse = FExitPollResponse();

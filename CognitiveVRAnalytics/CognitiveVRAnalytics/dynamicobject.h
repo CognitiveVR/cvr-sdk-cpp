@@ -79,7 +79,7 @@ public:
 class COGNITIVEVRANALYTICS_API DynamicObject
 {
 private:
-	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	std::vector<DynamicObjectId> objectIds; //cumulative
 	std::vector<DynamicObjectSnapshot> snapshots; //cleared on send
 	std::vector<DynamicObjectManifestEntry> manifestEntries; //cleared on send

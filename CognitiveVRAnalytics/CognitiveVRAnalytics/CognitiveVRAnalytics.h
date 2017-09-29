@@ -62,8 +62,8 @@ class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 
 private:
 	
-	::std::unique_ptr<Network> network = NULL;
-	::std::unique_ptr<Config> config = NULL;
+	::std::unique_ptr<Network> network = nullptr;
+	::std::unique_ptr<Config> config = nullptr;
 	
 
 	bool bHasSessionStarted = false;
@@ -77,18 +77,18 @@ private:
 	nlohmann::json DeviceProperties = nlohmann::json();
 	::std::string SessionId = "";
 
-	WebRequest sendFunctionPointer = NULL;
+	WebRequest sendFunctionPointer = nullptr;
 
 public:
 
 	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
-	::std::unique_ptr<CognitiveLog> log = NULL;
-	::std::unique_ptr<Transaction> transaction = NULL;
-	::std::unique_ptr<Sensor> sensor = NULL;
-	::std::unique_ptr<Tuning> tuning = NULL;
-	::std::unique_ptr<GazeTracker> gaze = NULL;
-	::std::unique_ptr<DynamicObject> dynamicobject = NULL;
-	::std::unique_ptr<ExitPoll> exitpoll = NULL;
+	::std::unique_ptr<CognitiveLog> log = nullptr;
+	::std::unique_ptr<Transaction> transaction = nullptr;
+	::std::unique_ptr<Sensor> sensor = nullptr;
+	::std::unique_ptr<Tuning> tuning = nullptr;
+	::std::unique_ptr<GazeTracker> gaze = nullptr;
+	::std::unique_ptr<DynamicObject> dynamicobject = nullptr;
+	::std::unique_ptr<ExitPoll> exitpoll = nullptr;
 
 	CognitiveVRAnalyticsCore(WebRequest sendFunc);
 	CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids);

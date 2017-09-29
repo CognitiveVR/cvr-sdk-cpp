@@ -68,7 +68,7 @@ class COGNITIVEVRANALYTICS_API Tuning
 {
 
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
         //std::map< std::string, std::map<std::string, TuningValue*> > users_value_cache;
 

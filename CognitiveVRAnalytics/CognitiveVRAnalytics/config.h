@@ -20,7 +20,7 @@ class CognitiveVRAnalyticsCore;
 class Config {
 
 	private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
     public:
 		#pragma warning(push)

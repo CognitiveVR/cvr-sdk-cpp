@@ -34,7 +34,7 @@ class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API Sensor
 {
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
 		//std::map<std::string, std::string> somedatapoints;
 		

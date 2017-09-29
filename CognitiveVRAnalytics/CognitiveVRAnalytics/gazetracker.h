@@ -35,7 +35,7 @@ class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API GazeTracker
 {
 private:
-	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = NULL;
+	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	long lastIntervalTime = -1;
 	int jsonPart = 1;
 	int gazeCount = 0;

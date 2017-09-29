@@ -133,7 +133,7 @@ void Network::DashboardCall(::std::string suburl, ::std::string content)
 
 	::std::string finalurl = cvr->config->kNetworkHost + path + query;
 
-	WebResponse wr = NULL;// = &Callback;
+	WebResponse wr = nullptr;// = &Callback;
 
 	if (suburl == "application_init")
 	{
@@ -150,7 +150,7 @@ void Network::APICall(::std::string suburl, ::std::string callType, ::std::strin
 	//TODO shoudl use api.networkhost from config
 	::std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
 
-	WebResponse wr = NULL;// &Callback;
+	WebResponse wr = nullptr;// &Callback;
 	if (callType == "exitpollget") //does exitpoll call this query? does it call sceneexplorer?
 	{
 		wr = &ExitPollCallback;
@@ -174,7 +174,7 @@ void Network::SceneExplorerCall(::std::string suburl, ::std::string content)
 
 	::std::string finalurl = "https://sceneexplorer.com/api/" + suburl + "/" + scenekey;
 
-	WebResponse wr = NULL;// &Callback;
+	WebResponse wr = nullptr;// &Callback;
 	cvr->sendFunctionPointer(finalurl, content, wr);
 }
 }
