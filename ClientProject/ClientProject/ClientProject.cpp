@@ -4,7 +4,12 @@
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 #include "curl.h"
+
+#if defined(_MSC_VER)
 #include "gtest.h"
+#else
+#include "include/gtest/gtest.h"
+#endif
 
 std::string temp;
 
