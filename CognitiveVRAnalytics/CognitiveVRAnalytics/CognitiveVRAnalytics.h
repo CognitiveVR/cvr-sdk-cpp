@@ -48,6 +48,15 @@ namespace cognitive {
 typedef void(*WebResponse) (::std::string content);
 typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
 
+class DynamicObject;
+class ExitPoll;
+class CognitiveLog;
+class GazeTracker;
+class Network;
+class Tuning;
+class Transaction;
+class Sensor;
+
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
 	friend class CognitiveLog;
