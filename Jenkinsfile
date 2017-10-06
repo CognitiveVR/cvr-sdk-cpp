@@ -16,7 +16,7 @@ node("build-node")
 		echo 'Testing..'
 		dir('ClientProject/ClientProject')
 		{
-		sh -e './a.out'
+		sh './a.out'
 		echo $?
 		}
 	}
