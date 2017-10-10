@@ -20,11 +20,4 @@ node("build-node")
 		//sh 'sudo -S ./a.out --gtest_output=xml'
 		}
 	}
-	
-	post {
-        always {
-            //archive 'ClientProject/ClientProject/test_detail.xml'
-            //junit 'ClientProject/ClientProject/test_detail.xml'
-        }
-    }
 }
