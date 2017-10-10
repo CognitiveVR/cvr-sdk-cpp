@@ -16,7 +16,7 @@ node("build-node")
 		echo 'Testing..'
 		dir('ClientProject/ClientProject')
 		{
-		sh 'sudo ./a.out -gtest_output=xml'
+		sh './a.out -gtest_output=xml'
 		}
 	}
 	
