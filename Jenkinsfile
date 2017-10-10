@@ -16,9 +16,7 @@ node("build-node")
 		echo 'Testing..'
 		dir('ClientProject/ClientProject')
 		{
-		del test_detail.xml
-		sh 'sudo ./a.out --gtest_output=xml'
-		echo $?
+		sh 'sudo ./a.out -gtest_output=xml'
 		}
 	}
 	
