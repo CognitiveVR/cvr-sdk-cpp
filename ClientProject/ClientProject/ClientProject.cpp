@@ -346,6 +346,9 @@ TEST(Tuning, TuningGetValue) {
 	cognitive::WebRequest fp = &DoWebStuff;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
+	//DEBUG
+	return;
+
 	cog.StartSession();
 
 	if (cog.WasInitSuccessful())
@@ -380,6 +383,7 @@ TEST(Tuning, TuningGetValueNoSession) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
 
 	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", cognitive::EntityType::kEntityTypeDevice);
+	EXPECT_EQ(snow_attitude, "mellow");
 	std::cout << snow_attitude << std::endl;
 }
 
