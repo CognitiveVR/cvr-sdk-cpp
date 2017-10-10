@@ -16,8 +16,16 @@ node("build-node")
 		echo 'Testing..'
 		dir('ClientProject/ClientProject')
 		{
-		sh './a.out'
+		del test_detail.xml
+		sh 'sudo ./a.out --gtest_output=xml'
 		echo $?
 		}
 	}
+	
+	post {
+        always {
+            archive 'ClientProject/ClientProject/test_detail.xml'
+            junit 'ClientProject/ClientProject/test_detail.xml'
+        }
+    }
 }
