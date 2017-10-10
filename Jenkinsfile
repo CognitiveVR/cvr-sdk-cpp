@@ -17,6 +17,7 @@ node("build-node")
 		dir('ClientProject/ClientProject')
 		{
 		sh 'whoami'
+		sh 'echo "Sudo_password" | sudo -S pwd' //echo password into sudo
 		sh 'sudo -S ./a.out --gtest_output=xml'
 		}
 	}
