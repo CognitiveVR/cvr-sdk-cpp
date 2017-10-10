@@ -17,14 +17,14 @@ node("build-node")
 		dir('ClientProject/ClientProject')
 		{
 		sh 'whoami'
-		sh 'sudo -S ./a.out --gtest_output=xml'
+		//sh 'sudo -S ./a.out --gtest_output=xml'
 		}
 	}
 	
 	post {
         always {
-            archive 'ClientProject/ClientProject/test_detail.xml'
-            junit 'ClientProject/ClientProject/test_detail.xml'
+            //archive 'ClientProject/ClientProject/test_detail.xml'
+            //junit 'ClientProject/ClientProject/test_detail.xml'
         }
     }
 }
