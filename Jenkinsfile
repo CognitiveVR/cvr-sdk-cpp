@@ -17,7 +17,7 @@ node("build-node")
 		dir('ClientProject/ClientProject')
 		{
 		sh 'whoami'
-		//sh 'sudo -S ./a.out --gtest_output=xml'
+		sh 'sudo -S ./a.out --gtest_output=xml'
 		}
 	}
 }
