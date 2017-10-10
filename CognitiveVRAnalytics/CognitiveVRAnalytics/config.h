@@ -52,7 +52,7 @@ class Config {
 		long kNetworkTimeout = 5;
 
 		//which product to send data to. Ex companyname1234-productname-test
-		::std::string CustomerId = "companyname1234-productname-test";
+		::std::string CustomerId = "altimagegames59340-unitywanderdemo-test";
 
 		int SensorDataLimit = 64;
 		int DynamicDataLimit = 64;
