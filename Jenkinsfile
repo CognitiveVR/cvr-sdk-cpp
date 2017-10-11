@@ -25,7 +25,9 @@ node("build-node")
 	stage("Cleanup")
 	{
 		//archive xml file
-		archive 'ClientProject/ClientProject/test_details.xml'
+		//archive 'ClientProject/ClientProject/test_details.xml'
+		
+		sh 'ls'
 		
 		//test junit
 		junit 'ClientProject/ClientProject/test_details.xml'
