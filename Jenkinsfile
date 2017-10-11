@@ -27,10 +27,10 @@ node("build-node")
 		//archive xml file
 		//archive 'ClientProject/ClientProject/test_details.xml'
 		
-		sh 'ls'
+		sh 'rm ClientProject/ClientProject/test_details.xml'
 		
 		//test junit
-		junit 'ClientProject/ClientProject/test_details.xml'
+		//junit 'ClientProject/ClientProject/test_details.xml'
 		
 		//remove xml file
 		//remove a.out
