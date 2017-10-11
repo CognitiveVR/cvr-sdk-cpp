@@ -21,6 +21,7 @@ node("build-node")
 		//sh 'sudo ./a.out --gtest_output=xml'
 		//sh 'sudo -S ./a.out --gtest_output=xml'
 		}
+		echo 'testing complete'
 	}
 	stage("Cleanup")
 	{
