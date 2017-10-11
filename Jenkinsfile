@@ -24,13 +24,14 @@ node("build-node")
 	}
 	stage("Cleanup")
 	{
-		//archive xml file
-		//archive 'ClientProject/ClientProject/test_details.xml'
+		//archive
+		archive 'ClientProject/ClientProject/test_detail.xml'
 		
-		sh 'rm ClientProject/ClientProject/test_details.xml'
+		//test
+		junit 'ClientProject/ClientProject/test_detail.xml'
 		
-		//test junit
-		//junit 'ClientProject/ClientProject/test_details.xml'
+		//remove
+		sh 'rm ClientProject/ClientProject/test_detail.xml'
 		
 		//remove xml file
 		//remove a.out
