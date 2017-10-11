@@ -4,6 +4,9 @@ node("build-node")
 	{
 		echo 'Building Client..'
 		
+		//if test_detail exists, remove test_detail
+		sh '[ ! -f ClientProject/ClientProject/test_detail.xml] || rm ClientProject/ClientProject/test_detail.xml'
+		
 		checkout scm
 		dir('ClientProject/ClientProject')
 		{
@@ -17,7 +20,7 @@ node("build-node")
 		dir('ClientProject/ClientProject')
 		{
 		//sh 'whoami'
-		sh './a.out --gtest_output=xml'
+		sh './a.out --gtest_output=xml || true'
 		//sh 'sudo ./a.out --gtest_output=xml'
 		//sh 'sudo -S ./a.out --gtest_output=xml'
 		}
