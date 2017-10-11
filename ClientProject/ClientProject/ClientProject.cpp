@@ -94,7 +94,9 @@ TEST(DISABLED_Initialization, MultipleStartSessions) {
 	EXPECT_EQ(third, false);
 }
 
-TEST(DISABLED_Initialization, MultipleStartEndSessions) {
+TEST(Initialization, MultipleStartEndSessions) {
+
+	EXPECT_EQ(true, false);
 
 	cognitive::WebRequest fp = &DoWebStuff;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(fp);
