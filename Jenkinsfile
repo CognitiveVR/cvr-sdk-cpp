@@ -5,7 +5,7 @@ node("build-node")
 		echo 'Building Client..'
 		
 		//if test_detail exists, remove test_detail
-		sh '[ ! -f ClientProject/ClientProject/test_detail.xml] || rm ClientProject/ClientProject/test_detail.xml'
+		sh '[ -f ClientProject/ClientProject/test_detail.xml] || rm ClientProject/ClientProject/test_detail.xml'
 		
 		checkout scm
 		dir('ClientProject/ClientProject')
