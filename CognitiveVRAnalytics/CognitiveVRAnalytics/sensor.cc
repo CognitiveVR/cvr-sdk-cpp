@@ -102,10 +102,11 @@ void Sensor::SendData()
 	}
 	data["data"] = sensors;
 
-	cvr->network->SceneExplorerCall("sensor", data.dump());
-
-	sensorCount = 0;
-	allsensors.clear();
+	if (cvr->network->SceneExplorerCall("sensor", data.dump()))
+	{
+		sensorCount = 0;
+		allsensors.clear();
+	}
 
 	//send to sceneexplorer
 	//cvr->network->Call("someurl2", "somecontent");

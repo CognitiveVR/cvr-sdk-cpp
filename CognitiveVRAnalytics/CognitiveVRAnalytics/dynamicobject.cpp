@@ -222,10 +222,11 @@ void DynamicObject::SendData()
 	sendJson["data"] = data;
 
 	//send to sceneexplorer
-	cvr->network->SceneExplorerCall("dynamic", sendJson.dump());
-
-	snapshots.clear();
-	manifest.clear();
+	if (cvr->network->SceneExplorerCall("dynamic", sendJson.dump()))
+	{
+		snapshots.clear();
+		manifest.clear();
+	}
 }
 
 void DynamicObject::RemoveObject(int objectid)

@@ -59,9 +59,10 @@ class Config {
 		int TransactionBatchSize = 64;
 		int GazeBatchSize = 64;
 
+		//only holds the value between core construction and session begin. use cvr.gaze.PlayerSnapshotInterval
 		float GazeInterval = 0.1f;
-		//vive, rift, gear, mobile
-		::std::string HMDType = "vive";
+		::std::string HMDType = "";
+
 
 		::std::map < ::std::string, ::std::string> sceneIds;// = ::std::map<::std::string, ::std::string>();
 

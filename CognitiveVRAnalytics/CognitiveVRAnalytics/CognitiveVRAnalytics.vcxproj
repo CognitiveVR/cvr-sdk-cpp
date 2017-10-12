@@ -145,6 +145,7 @@
     <ClInclude Include="CognitiveVRAnalytics.h" />
     <ClInclude Include="cognitive_log.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="coresettings.h" />
     <ClInclude Include="dynamicobject.h" />
     <ClInclude Include="exitpoll.h" />
     <ClInclude Include="gazetracker.h" />

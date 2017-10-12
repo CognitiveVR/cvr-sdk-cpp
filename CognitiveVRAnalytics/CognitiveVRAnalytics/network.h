@@ -55,6 +55,7 @@ class Network
 		void APICall(::std::string suburl, ::std::string callType, ::std::string content = "");
 
 		//sub url is dynamic/sensor/gaze/event. for sending stuff to sceneexplorer
-		void SceneExplorerCall(::std::string suburl, ::std::string content);
+		//returns true if successfully called. false if scene not set or webrequest not set
+		bool SceneExplorerCall(::std::string suburl, ::std::string content);
 };
 }

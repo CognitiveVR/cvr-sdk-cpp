@@ -92,10 +92,10 @@ void GazeTracker::SendData()
 	se["hmdtype"] = HMDType;
 	se["interval"] = PlayerSnapshotInterval;
 	se["data"] = BatchedGazeSE;
-	cvr->network->SceneExplorerCall("gaze", se.dump());
-
-	BatchedGazeSE.clear();
-
-	gazeCount = 0;
+	if (cvr->network->SceneExplorerCall("gaze", se.dump()))
+	{
+		BatchedGazeSE.clear();
+		gazeCount = 0;
+	}
 }
 }

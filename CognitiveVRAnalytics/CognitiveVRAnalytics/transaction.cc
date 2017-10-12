@@ -204,10 +204,10 @@ void Transaction::SendData()
 	se["part"] = jsonPart;
 	jsonPart++;
 	se["data"] = BatchedTransactionsSE;
-	cvr->network->SceneExplorerCall("events", se.dump());
-
-	BatchedTransactionsSE.clear();
-
-	transactionCount = 0;
+	if (cvr->network->SceneExplorerCall("events", se.dump()))
+	{
+		BatchedTransactionsSE.clear();
+		transactionCount = 0;
+	}
 }
 }

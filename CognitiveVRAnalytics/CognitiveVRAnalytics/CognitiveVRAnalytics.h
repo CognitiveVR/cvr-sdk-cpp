@@ -11,6 +11,7 @@
 #include "dynamicobject.h"
 #include "cognitive_log.h"
 #include "config.h"
+#include "coresettings.h"
 #include <chrono>
 
 
@@ -38,13 +39,37 @@
 
 namespace cognitive {
 
-	//std::make_unique is added in c++14. this is a rough implementation for c++11
-	template<typename T, typename... Args>
-	std::unique_ptr<T> make_unique_cognitive(Args&&... args) {
-		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-	}
+//std::make_unique is added in c++14. this is a rough implementation for c++11
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique_cognitive(Args&&... args) {
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
 
-	//using json = nlohmann::json;
+enum EDeviceProperty
+{
+	APPNAME, //(string) your app name
+	APPVERSION, //(string) 1.0
+	APPENGINE, //(string) custom cpp engine
+	APPENGINEVERSION, //(string) v1.1.25a
+
+	DEVICETYPE, //(string) mobile, desktop
+	DEVICEMODEL, //(string) iphone 7, pixel
+	DEVICEMEMORY, //(int) 8
+	DEVICEOS, //(string) ios 11.0, 6.0.1
+
+	DEVICECPUCORES, //(int) 4
+	DEVICECPU, //(string) i7-4770 CPU @ 3.40GHz
+	DEVICECPUVENDOR, //(string) intel
+
+	DEVICEGPU, //(string) GeForce GTX 970
+	DEVICEGPUDRIVER, //(string) 382.05
+	DEVICEGPUVENDOR, //(string) nvidia, amd
+	DEVICEGPUMEMORY, //(int) 6103
+
+	VRMODEL, //(string) oculus rift dk2
+	VRVENDOR //(string) oculus
+};
+
 typedef void(*WebResponse) (::std::string content);
 typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
 
@@ -56,6 +81,7 @@ class Network;
 class Tuning;
 class Transaction;
 class Sensor;
+class CoreSettings;
 
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
@@ -68,6 +94,7 @@ class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 	friend class DynamicObject;
 	friend class GazeTracker;
 	friend class ExitPoll;
+	friend class CoreSettings;
 
 private:
 	
@@ -87,6 +114,7 @@ private:
 	::std::string SessionId = "";
 
 	WebRequest sendFunctionPointer = nullptr;
+	::std::string DevicePropertyToString(EDeviceProperty propertyType);
 
 public:
 
@@ -99,16 +127,28 @@ public:
 	::std::unique_ptr<DynamicObject> dynamicobject = nullptr;
 	::std::unique_ptr<ExitPoll> exitpoll = nullptr;
 
-	CognitiveVRAnalyticsCore(WebRequest sendFunc);
-	CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids);
-	CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, ::std::map < ::std::string, ::std::string> sceneids);
+	//CognitiveVRAnalyticsCore(WebRequest sendFunc);
+	//CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids);
+	//CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, ::std::map < ::std::string, ::std::string> sceneids);
+	CognitiveVRAnalyticsCore(CoreSettings settings);
 	CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&);
 	//CognitiveVRAnalyticsCore& operator=(CognitiveVRAnalyticsCore&&) = default;
 	
 	~CognitiveVRAnalyticsCore();
 
-	void SetUser(::std::string user_id, nlohmann::json properties);
-	void SetDevice(::std::string device_id, nlohmann::json properties);
+	void SetUserId(::std::string user_id);
+	void SetUserProperties(nlohmann::json properties);
+	void SetUserProperty(::std::string propertyType, int value);
+	void SetUserProperty(::std::string propertyType, float value);
+	void SetUserProperty(::std::string propertyType, ::std::string value);
+	void UpdateUserState();
+
+	void SetDeviceId(::std::string device_id);
+	void SetDeviceProperty(EDeviceProperty propertyType, int value);
+	void SetDeviceProperty(EDeviceProperty propertyType, ::std::string value);
+	void UpdateDeviceState();
+
+
 	::std::string GetCustomerId();
 
 	double GetSessionTimestamp();

@@ -159,13 +159,18 @@ void Network::APICall(::std::string suburl, ::std::string callType, ::std::strin
 	cvr->sendFunctionPointer(path, content, wr);
 }
 
-void Network::SceneExplorerCall(::std::string suburl, ::std::string content)
+bool Network::SceneExplorerCall(::std::string suburl, ::std::string content)
 {
 	::std::string scenekey = cvr->GetSceneKey();
 	if (scenekey.empty())
 	{
 		cvr->log->Warning("SceneExplorer failed: Scene key not set");
-		return;
+		return false;
+	}
+	if (cvr->sendFunctionPointer == nullptr)
+	{
+		cvr->log->Warning("SceneExplorer failed: WebRequest not set");
+		return false;
 	}
 
 	cvr->log->Info("SceneExplorer call: " + suburl);
@@ -176,5 +181,6 @@ void Network::SceneExplorerCall(::std::string suburl, ::std::string content)
 
 	WebResponse wr = nullptr;// &Callback;
 	cvr->sendFunctionPointer(finalurl, content, wr);
+	return true;
 }
 }

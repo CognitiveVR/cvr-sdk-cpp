@@ -18,7 +18,43 @@ struct D {
 	}
 };
 
-CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
+CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
+{
+	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
+
+	//INIT EVERYTHING	
+	sendFunctionPointer = settings.webRequest;
+	bHasSessionStarted = false;
+
+	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
+	log->Info("CognitiveVRAnalyticsCore()");
+
+	config = make_unique_cognitive<Config>(Config(instance));
+	network = make_unique_cognitive<Network>(Network(instance));
+
+	tuning = make_unique_cognitive<Tuning>(Tuning(instance));
+	transaction = make_unique_cognitive<Transaction>(Transaction(instance));
+	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
+	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
+	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
+	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
+
+	//SET VALUES FROM SETTINGS
+	config->HMDType = settings.GetHMDType();
+	config->CustomerId = settings.CustomerId;
+	config->GazeBatchSize = settings.GazeBatchSize;
+	config->TransactionBatchSize = settings.TransactionBatchSize;
+	config->SensorDataLimit = settings.SensorDataLimit;
+	config->DynamicDataLimit = settings.DynamicDataLimit;
+	config->GazeInterval = settings.GazeInterval;
+	config->kNetworkTimeout = settings.kNetworkTimeout;
+
+	//set scenes
+	config->sceneIds = settings.sceneIds;
+	SetScene(settings.DefaultSceneName);
+}
+
+/*CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
 {
 	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
 
@@ -86,7 +122,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::s
 	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
 	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
 	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
-}
+}*/
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
@@ -135,12 +171,12 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	if (UserId.empty())
 	{
-		SetUser("anonymous", nlohmann::json());
+		SetUserId("anonymous");
 	}
 
 	if (DeviceId.empty())
 	{
-		SetDevice("unknown", nlohmann::json());
+		SetDeviceId("unknown");
 	}
 
 	GetSessionTimestamp();
@@ -250,11 +286,49 @@ void CognitiveVRAnalyticsCore::SendData()
 	dynamicobject->SendData();
 }
 
-void CognitiveVRAnalyticsCore::SetUser(::std::string user_id, nlohmann::json properties)
+void CognitiveVRAnalyticsCore::SetUserId(::std::string user_id)
 {
 	log->Info("CognitiveVRAnalytics::set user");
 	
 	UserId = user_id;
+}
+
+void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, int value)
+{
+	UserProperties[propertyType] = value;
+}
+
+void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, ::std::string value)
+{
+	UserProperties[propertyType] = value;
+}
+
+void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, float value)
+{
+	UserProperties[propertyType] = value;
+}
+
+void CognitiveVRAnalyticsCore::SetUserProperties(nlohmann::json properties)
+{
+	for (nlohmann::json::iterator it = properties.begin(); it != properties.end(); ++it) {
+
+		if (it.value().is_string())
+		{
+			SetUserProperty(it.key(), it.value().dump());
+		}
+		else if (it.value().is_number_integer())
+		{
+			SetUserProperty(it.key(), (int)it.value());
+		}
+		else if (it.value().is_number_float())
+		{
+			SetUserProperty(it.key(), (float)it.value());
+		}
+	}
+}
+
+void CognitiveVRAnalyticsCore::UpdateUserState()
+{
 	double ts = GetTimestamp();
 
 	nlohmann::json args = nlohmann::json::array();
@@ -264,27 +338,41 @@ void CognitiveVRAnalyticsCore::SetUser(::std::string user_id, nlohmann::json pro
 	args.emplace_back(UserId);
 	args.emplace_back(DeviceId);
 
-	if (properties.size() > 0)
+	if (UserProperties.size() > 0)
 	{
-		UserProperties = properties;
+		//UserProperties = properties;
 		//add this to transactions batch
-		args.emplace_back(properties);
+		args.emplace_back(UserProperties);
 		transaction->AddToBatch("datacollector_updateUserState", args);
 	}
 	else
 	{
-		UserProperties = nlohmann::json::array();
+		//UserProperties = nlohmann::json::array();
 		args.emplace_back(nullptr);
 		transaction->AddToBatch("datacollector_updateUserState", args);
 	}
 }
 
-void CognitiveVRAnalyticsCore::SetDevice(::std::string device_id, nlohmann::json properties)
+void CognitiveVRAnalyticsCore::SetDeviceId(::std::string device_id)
 {
 	log->Info("CognitiveVRAnalytics::set device");
 	//requires timestamp, timestamp,userid, deviceid,deviceproperties
 
 	DeviceId = device_id;
+}
+
+void CognitiveVRAnalyticsCore::SetDeviceProperty(EDeviceProperty propertyType, int value)
+{
+	DeviceProperties[DevicePropertyToString(propertyType)] = value;
+}
+
+void CognitiveVRAnalyticsCore::SetDeviceProperty(EDeviceProperty propertyType, ::std::string value)
+{
+	DeviceProperties[DevicePropertyToString(propertyType)] = value;
+}
+
+void CognitiveVRAnalyticsCore::UpdateDeviceState()
+{
 	double ts = GetTimestamp();
 
 	nlohmann::json args = nlohmann::json::array();
@@ -294,16 +382,16 @@ void CognitiveVRAnalyticsCore::SetDevice(::std::string device_id, nlohmann::json
 	args.emplace_back(UserId);
 	args.emplace_back(DeviceId);
 
-	if (properties.size() > 0)
+	if (DeviceProperties.size() > 0)
 	{
-		DeviceProperties = properties;
+		//DeviceProperties = properties;
 		//add this to transactions batch
-		args.emplace_back(properties);
+		args.emplace_back(DeviceProperties);
 		transaction->AddToBatch("datacollector_updateDeviceState", args);
 	}
 	else
 	{
-		DeviceProperties = nlohmann::json::array();
+		//DeviceProperties = nlohmann::json::array();
 		args.emplace_back(nullptr);
 		transaction->AddToBatch("datacollector_updateDeviceState", args);
 	}
@@ -333,5 +421,32 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 ::std::string CognitiveVRAnalyticsCore::GetSceneKey()
 {
 	return CurrentSceneKey;
+}
+
+::std::string CognitiveVRAnalyticsCore::DevicePropertyToString(EDeviceProperty propertyType)
+{
+	if (propertyType == EDeviceProperty::APPNAME) { return"cvr.app.name"; }
+	if (propertyType == EDeviceProperty::APPVERSION) { return"cvr.app.version"; }
+	if (propertyType == EDeviceProperty::APPENGINE) { return"cvr.app.engine"; }
+	if (propertyType == EDeviceProperty::APPENGINEVERSION) { return"cvr.app.engine.version"; }
+
+	if (propertyType == EDeviceProperty::DEVICETYPE) { return"cvr.device.type"; }
+	if (propertyType == EDeviceProperty::DEVICEMODEL) { return"cvr.device.model"; }
+	if (propertyType == EDeviceProperty::DEVICEMEMORY) { return"cvr.device.memory"; }
+	if (propertyType == EDeviceProperty::DEVICEOS) { return"cvr.device.os"; }
+	
+	if (propertyType == EDeviceProperty::DEVICECPU) { return"cvr.device.cpu"; }
+	if (propertyType == EDeviceProperty::DEVICECPUCORES) { return"cvr.device.cpu.cores"; }
+	if (propertyType == EDeviceProperty::DEVICECPUVENDOR) { return"cvr.device.cpu.vendor"; }
+
+	if (propertyType == EDeviceProperty::DEVICEGPU) { return"cvr.device.gpu"; }
+	if (propertyType == EDeviceProperty::DEVICEGPUDRIVER) { return"cvr.device.gpu.driver"; }
+	if (propertyType == EDeviceProperty::DEVICEGPUVENDOR) { return"cvr.device.gpu.vendor"; }
+	if (propertyType == EDeviceProperty::DEVICEGPUMEMORY) { return"cvr.device.gpu.memory"; }
+
+	if (propertyType == EDeviceProperty::VRMODEL) { return"cvr.vr.model"; }
+	if (propertyType == EDeviceProperty::VRVENDOR) { return"cvr.vr.vendor"; }
+
+	return "unknown.property";
 }
 }

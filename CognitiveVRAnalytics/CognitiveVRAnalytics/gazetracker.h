@@ -27,9 +27,8 @@
 #pragma warning Unknown dynamic link import/export semantics.
 #endif
 
-namespace cognitive {
-	//using json = nlohmann::json;
-	
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API GazeTracker
