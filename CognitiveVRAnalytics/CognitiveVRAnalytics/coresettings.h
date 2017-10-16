@@ -19,7 +19,6 @@ enum ECognitiveHMDType
 	HMDGEAR,
 	HMDMOBILE
 };
-enum LoggingLevel; //defined in cognitive_log.h
 
 typedef void(*WebResponse) (::std::string content);
 typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);

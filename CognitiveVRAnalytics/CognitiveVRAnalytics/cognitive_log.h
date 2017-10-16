@@ -8,12 +8,6 @@
 #include "CognitiveVRAnalytics.h"
 
 namespace cognitive{
-enum LoggingLevel
-{
-	All = 0,
-	ErrorsOnly = -1,
-	None = -2
-};
 
 class CognitiveVRAnalyticsCore;
 

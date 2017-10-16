@@ -17,4 +17,13 @@
 #include <memory>
 #include <array>
 #include "json.hpp"
-//#include <iostream> //this should only be used by cognitivevr log
+
+namespace cognitive
+{
+	enum LoggingLevel
+	{
+		All = 0,
+		ErrorsOnly = -1,
+		None = -2
+	};
+}
