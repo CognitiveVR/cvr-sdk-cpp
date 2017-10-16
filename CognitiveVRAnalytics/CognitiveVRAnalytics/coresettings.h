@@ -61,7 +61,7 @@ class CoreSettings {
 			return "unknown";
 		}
 
-		::std::map < ::std::string, ::std::string> sceneIds = ::std::map<::std::string, ::std::string>();
+		::std::map < ::std::string, ::std::string> sceneIds;// = ::std::map<::std::string, ::std::string>();
 		::std::string DefaultSceneName = "";
 
 		WebRequest webRequest;
