@@ -105,7 +105,7 @@ TEST(Initialization, MultipleStartSessions) {
 	EXPECT_EQ(third, false);
 }
 
-TEST(DISABLED_Initialization, MultipleStartEndSessions) {
+TEST(Initialization, MultipleStartEndSessions) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -125,7 +125,7 @@ TEST(DISABLED_Initialization, MultipleStartEndSessions) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Initialization, SessionFullStartEnd) {
+TEST(Initialization, SessionFullStartEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 	
@@ -141,7 +141,7 @@ TEST(DISABLED_Initialization, SessionFullStartEnd) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Initialization, SessionStart) {
+TEST(Initialization, SessionStart) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -153,7 +153,7 @@ TEST(DISABLED_Initialization, SessionStart) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_Initialization, Initialization) {
+TEST(Initialization, Initialization) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -167,7 +167,7 @@ TEST(DISABLED_Initialization, Initialization) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_Initialization, SessionEnd) {
+TEST(Initialization, SessionEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -179,7 +179,7 @@ TEST(DISABLED_Initialization, SessionEnd) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Initialization, SessionStartEnd) {
+TEST(Initialization, SessionStartEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -194,7 +194,7 @@ TEST(DISABLED_Initialization, SessionStartEnd) {
 
 //----------------------SET USER
 
-TEST(DISABLED_UserSettings, UserPreSession) {
+TEST(UserSettings, UserPreSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -212,7 +212,7 @@ TEST(DISABLED_UserSettings, UserPreSession) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_UserSettings, UserPostSession) {
+TEST(UserSettings, UserPostSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -230,7 +230,7 @@ TEST(DISABLED_UserSettings, UserPostSession) {
 	cog.UpdateUserState();
 }
 
-TEST(DISABLED_UserSettings, UserNullPreSession) {
+TEST(UserSettings, UserNullPreSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -245,7 +245,7 @@ TEST(DISABLED_UserSettings, UserNullPreSession) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_UserSettings, UserNullPostSession) {
+TEST(UserSettings, UserNullPostSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -262,7 +262,7 @@ TEST(DISABLED_UserSettings, UserNullPostSession) {
 
 //----------------------SET DEVICE
 
-TEST(DISABLED_DeviceSettings, DevicePreSession) {
+TEST(DeviceSettings, DevicePreSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -278,7 +278,7 @@ TEST(DISABLED_DeviceSettings, DevicePreSession) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_DeviceSettings, DevicePostSession) {
+TEST(DeviceSettings, DevicePostSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -296,7 +296,7 @@ TEST(DISABLED_DeviceSettings, DevicePostSession) {
 	cog.UpdateDeviceState();
 }
 
-TEST(DISABLED_DeviceSettings, DeviceNullPreSession) {
+TEST(DeviceSettings, DeviceNullPreSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -310,7 +310,7 @@ TEST(DISABLED_DeviceSettings, DeviceNullPreSession) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_DeviceSettings, DeviceNullPostSession) {
+TEST(DeviceSettings, DeviceNullPostSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -323,7 +323,7 @@ TEST(DISABLED_DeviceSettings, DeviceNullPostSession) {
 	cog.UpdateDeviceState();
 }
 
-TEST(DISABLED_DeviceSettings, DeviceNullPreEnd) {
+TEST(DeviceSettings, DeviceNullPreEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -341,7 +341,7 @@ TEST(DISABLED_DeviceSettings, DeviceNullPreEnd) {
 }
 
 //----------------------SET USER DEVICE
-TEST(DISABLED_UserDeviceSettings, UserDevicePostSession) {
+TEST(UserDeviceSettings, UserDevicePostSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -367,7 +367,7 @@ TEST(DISABLED_UserDeviceSettings, UserDevicePostSession) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_UserDeviceSettings, UserDevicePreSession) {
+TEST(UserDeviceSettings, UserDevicePreSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -394,7 +394,7 @@ TEST(DISABLED_UserDeviceSettings, UserDevicePreSession) {
 
 //----------------------TRANSACTIONS
 
-TEST(DISABLED_Transaction, PreSessionNoEnd) {
+TEST(Transaction, PreSessionNoEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -409,7 +409,7 @@ TEST(DISABLED_Transaction, PreSessionNoEnd) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_Transaction, PreSessionEnd) {
+TEST(Transaction, PreSessionEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -425,7 +425,7 @@ TEST(DISABLED_Transaction, PreSessionEnd) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Transaction, PreSessionSend) {
+TEST(Transaction, PreSessionSend) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -441,7 +441,7 @@ TEST(DISABLED_Transaction, PreSessionSend) {
 	cog.SendData();
 }
 
-TEST(DISABLED_Transaction, PreSessionPropsSend) {
+TEST(Transaction, PreSessionPropsSend) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -462,7 +462,7 @@ TEST(DISABLED_Transaction, PreSessionPropsSend) {
 	cog.SendData();
 }
 
-TEST(DISABLED_Transaction, SessionEnd) {
+TEST(Transaction, SessionEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -484,7 +484,7 @@ TEST(DISABLED_Transaction, SessionEnd) {
 
 //----------------------TUNING
 
-TEST(DISABLED_Tuning, TuningGetValue) {
+TEST(Tuning, TuningGetValue) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -514,7 +514,7 @@ TEST(DISABLED_Tuning, TuningGetValue) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Tuning, TuningGetValueNoSession) {
+TEST(Tuning, TuningGetValueNoSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -528,7 +528,7 @@ TEST(DISABLED_Tuning, TuningGetValueNoSession) {
 	std::cout << snow_attitude << std::endl;
 }
 
-TEST(DISABLED_Tuning, TuningGetInvalidValue) {
+TEST(Tuning, TuningGetInvalidValue) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -544,7 +544,7 @@ TEST(DISABLED_Tuning, TuningGetInvalidValue) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Tuning, TuningGetInvalidCast) {
+TEST(Tuning, TuningGetInvalidCast) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -560,7 +560,7 @@ TEST(DISABLED_Tuning, TuningGetInvalidCast) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Tuning, TuningGetInvalidCastBool) {
+TEST(Tuning, TuningGetInvalidCastBool) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -578,7 +578,7 @@ TEST(DISABLED_Tuning, TuningGetInvalidCastBool) {
 
 //----------------------SETTING SCENE KEYS FOR SCENE EXPLORER
 
-TEST(DISABLED_Scenes, NoScenes) {
+TEST(Scenes, NoScenes) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -600,7 +600,7 @@ TEST(DISABLED_Scenes, NoScenes) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Scenes, InitScenes) {
+TEST(Scenes, InitScenes) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -628,7 +628,7 @@ TEST(DISABLED_Scenes, InitScenes) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Scenes, InitSetScenes) {
+TEST(Scenes, InitSetScenes) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -657,7 +657,7 @@ TEST(DISABLED_Scenes, InitSetScenes) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Scenes, InitSetSceneSwitch) {
+TEST(Scenes, InitSetSceneSwitch) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -688,7 +688,7 @@ TEST(DISABLED_Scenes, InitSetSceneSwitch) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Scenes, InitSetInvalidScene) {
+TEST(Scenes, InitSetInvalidScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -713,7 +713,7 @@ TEST(DISABLED_Scenes, InitSetInvalidScene) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Scenes, InitSetInvalidNoScene) {
+TEST(Scenes, InitSetInvalidNoScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -734,7 +734,7 @@ TEST(DISABLED_Scenes, InitSetInvalidNoScene) {
 
 //----------------------EXITPOLL
 
-TEST(DISABLED_ExitPoll, RequestSetNoInit) {
+TEST(ExitPoll, RequestSetNoInit) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -748,7 +748,7 @@ TEST(DISABLED_ExitPoll, RequestSetNoInit) {
 	cog.StartSession();
 }
 
-TEST(DISABLED_ExitPoll, BasicRequest) {
+TEST(ExitPoll, BasicRequest) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -762,7 +762,7 @@ TEST(DISABLED_ExitPoll, BasicRequest) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_ExitPoll, GetThenRequest) {
+TEST(ExitPoll, GetThenRequest) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -778,7 +778,7 @@ TEST(DISABLED_ExitPoll, GetThenRequest) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_ExitPoll, RequestThenGet) {
+TEST(ExitPoll, RequestThenGet) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -794,7 +794,7 @@ TEST(DISABLED_ExitPoll, RequestThenGet) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_ExitPoll, InvalidRequestThenGet) {
+TEST(ExitPoll, InvalidRequestThenGet) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -809,7 +809,7 @@ TEST(DISABLED_ExitPoll, InvalidRequestThenGet) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_ExitPoll, RequestThenGetAnswersJson) {
+TEST(ExitPoll, RequestThenGetAnswersJson) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -829,7 +829,7 @@ TEST(DISABLED_ExitPoll, RequestThenGetAnswersJson) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_ExitPoll, RequestThenGetAnswersString) {
+TEST(ExitPoll, RequestThenGetAnswersString) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -851,7 +851,7 @@ TEST(DISABLED_ExitPoll, RequestThenGetAnswersString) {
 
 //----------------------GAZE
 
-TEST(DISABLED_Gaze, GazeThenInit) {
+TEST(Gaze, GazeThenInit) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -873,7 +873,7 @@ TEST(DISABLED_Gaze, GazeThenInit) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Gaze, GazeThenInitSetScene) {
+TEST(Gaze, GazeThenInitSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -901,7 +901,7 @@ TEST(DISABLED_Gaze, GazeThenInitSetScene) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Gaze, InitThenGazeThenSetScene) {
+TEST(Gaze, InitThenGazeThenSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -928,7 +928,7 @@ TEST(DISABLED_Gaze, InitThenGazeThenSetScene) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Gaze, InitThenGazeThenSendThenSetScene) {
+TEST(Gaze, InitThenGazeThenSendThenSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -958,7 +958,7 @@ TEST(DISABLED_Gaze, InitThenGazeThenSendThenSetScene) {
 
 //----------------------SENSORS
 
-TEST(DISABLED_Sensors, SenseThenInit) {
+TEST(Sensors, SenseThenInit) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -977,7 +977,7 @@ TEST(DISABLED_Sensors, SenseThenInit) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Sensors, SenseThenInitSetScene) {
+TEST(Sensors, SenseThenInitSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -1000,7 +1000,7 @@ TEST(DISABLED_Sensors, SenseThenInitSetScene) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Sensors, InitThenGazeThenSetScene) {
+TEST(Sensors, InitThenGazeThenSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -1023,7 +1023,7 @@ TEST(DISABLED_Sensors, InitThenGazeThenSetScene) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Sensors, InitThenGazeThenSendThenSetScene) {
+TEST(Sensors, InitThenGazeThenSendThenSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -1048,7 +1048,7 @@ TEST(DISABLED_Sensors, InitThenGazeThenSendThenSetScene) {
 
 //----------------------DYNAMICS
 
-TEST(DISABLED_Dynamics, InitRegisterSend) {
+TEST(Dynamics, InitRegisterSend) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -1084,7 +1084,7 @@ TEST(DISABLED_Dynamics, InitRegisterSend) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_Dynamics, InitRegisterSceneSend) {
+TEST(Dynamics, InitRegisterSceneSend) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
