@@ -349,9 +349,9 @@ void Tuning::RecordValueAccess(::std::string name, ::std::string default_value, 
 ::std::string Tuning::GetEntityTypeString(EntityType entity_type)
 {
     switch (entity_type) {
-        case kEntityTypeUser:
+	case EntityType::kEntityTypeUser:
             return "USER";
-        case kEntityTypeDevice:
+        case EntityType::kEntityTypeDevice:
             return "DEVICE";
     }
     return "UNKNOWN";

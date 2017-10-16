@@ -45,29 +45,29 @@ std::unique_ptr<T> make_unique_cognitive(Args&&... args) {
 	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
-enum EDeviceProperty
+enum class EDeviceProperty
 {
-	APPNAME, //(string) your app name
-	APPVERSION, //(string) 1.0
-	APPENGINE, //(string) custom cpp engine
-	APPENGINEVERSION, //(string) v1.1.25a
-
-	DEVICETYPE, //(string) mobile, desktop
-	DEVICEMODEL, //(string) iphone 7, pixel
-	DEVICEMEMORY, //(int) 8
-	DEVICEOS, //(string) ios 11.0, 6.0.1
-
-	DEVICECPUCORES, //(int) 4
-	DEVICECPU, //(string) i7-4770 CPU @ 3.40GHz
-	DEVICECPUVENDOR, //(string) intel
-
-	DEVICEGPU, //(string) GeForce GTX 970
-	DEVICEGPUDRIVER, //(string) 382.05
-	DEVICEGPUVENDOR, //(string) nvidia, amd
-	DEVICEGPUMEMORY, //(int) 6103
-
-	VRMODEL, //(string) oculus rift dk2
-	VRVENDOR //(string) oculus
+	kAppName, //(string) your app name
+	kAppVersion, //(string) 1.0
+	kAppEngine, //(string) custom cpp engine
+	kAppEngineVersion, //(string) v1.1.25a
+	
+	kDeviceType, //(string) mobile, desktop
+	kDeviceModel, //(string) iphone 7, pixel
+	kDeviceMemory, //(int) 8
+	kDeviceOS, //(string) ios 11.0, 6.0.1
+	
+	kDeviceCPUCores, //(int) 4
+	kDeviceCPU, //(string) i7-4770 CPU @ 3.40GHz
+	kDeviceCPUVendor, //(string) intel
+	
+	kDeviceGPU, //(string) GeForce GTX 970
+	kDeviceGPUDriver, //(string) 382.05
+	kDeviceGPUVendor, //(string) nvidia, amd
+	kDeviceGPUMemory, //(int) 6103
+	
+	kVRModel, //(string) oculus rift dk2
+	kVRVendor //(string) oculus
 };
 
 typedef void(*WebResponse) (::std::string content);

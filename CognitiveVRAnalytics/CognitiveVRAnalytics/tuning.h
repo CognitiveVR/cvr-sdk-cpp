@@ -33,7 +33,7 @@ namespace cognitive {
 	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
-enum EntityType
+enum class EntityType
 {
 	kEntityTypeUser,
 	kEntityTypeDevice

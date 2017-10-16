@@ -353,27 +353,27 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 
 ::std::string CognitiveVRAnalyticsCore::DevicePropertyToString(EDeviceProperty propertyType)
 {
-	if (propertyType == EDeviceProperty::APPNAME) { return"cvr.app.name"; }
-	if (propertyType == EDeviceProperty::APPVERSION) { return"cvr.app.version"; }
-	if (propertyType == EDeviceProperty::APPENGINE) { return"cvr.app.engine"; }
-	if (propertyType == EDeviceProperty::APPENGINEVERSION) { return"cvr.app.engine.version"; }
+	if (propertyType == EDeviceProperty::kAppName) { return"cvr.app.name"; }
+	if (propertyType == EDeviceProperty::kAppVersion) { return"cvr.app.version"; }
+	if (propertyType == EDeviceProperty::kAppEngine) { return"cvr.app.engine"; }
+	if (propertyType == EDeviceProperty::kAppEngineVersion) { return"cvr.app.engine.version"; }
 
-	if (propertyType == EDeviceProperty::DEVICETYPE) { return"cvr.device.type"; }
-	if (propertyType == EDeviceProperty::DEVICEMODEL) { return"cvr.device.model"; }
-	if (propertyType == EDeviceProperty::DEVICEMEMORY) { return"cvr.device.memory"; }
-	if (propertyType == EDeviceProperty::DEVICEOS) { return"cvr.device.os"; }
+	if (propertyType == EDeviceProperty::kDeviceType) { return"cvr.device.type"; }
+	if (propertyType == EDeviceProperty::kDeviceModel) { return"cvr.device.model"; }
+	if (propertyType == EDeviceProperty::kDeviceMemory) { return"cvr.device.memory"; }
+	if (propertyType == EDeviceProperty::kDeviceOS) { return"cvr.device.os"; }
 	
-	if (propertyType == EDeviceProperty::DEVICECPU) { return"cvr.device.cpu"; }
-	if (propertyType == EDeviceProperty::DEVICECPUCORES) { return"cvr.device.cpu.cores"; }
-	if (propertyType == EDeviceProperty::DEVICECPUVENDOR) { return"cvr.device.cpu.vendor"; }
+	if (propertyType == EDeviceProperty::kDeviceCPU) { return"cvr.device.cpu"; }
+	if (propertyType == EDeviceProperty::kDeviceCPUCores) { return"cvr.device.cpu.cores"; }
+	if (propertyType == EDeviceProperty::kDeviceCPUVendor) { return"cvr.device.cpu.vendor"; }
 
-	if (propertyType == EDeviceProperty::DEVICEGPU) { return"cvr.device.gpu"; }
-	if (propertyType == EDeviceProperty::DEVICEGPUDRIVER) { return"cvr.device.gpu.driver"; }
-	if (propertyType == EDeviceProperty::DEVICEGPUVENDOR) { return"cvr.device.gpu.vendor"; }
-	if (propertyType == EDeviceProperty::DEVICEGPUMEMORY) { return"cvr.device.gpu.memory"; }
+	if (propertyType == EDeviceProperty::kDeviceGPU) { return"cvr.device.gpu"; }
+	if (propertyType == EDeviceProperty::kDeviceGPUDriver) { return"cvr.device.gpu.driver"; }
+	if (propertyType == EDeviceProperty::kDeviceGPUVendor) { return"cvr.device.gpu.vendor"; }
+	if (propertyType == EDeviceProperty::kDeviceGPUMemory) { return"cvr.device.gpu.memory"; }
 
-	if (propertyType == EDeviceProperty::VRMODEL) { return"cvr.vr.model"; }
-	if (propertyType == EDeviceProperty::VRVENDOR) { return"cvr.vr.vendor"; }
+	if (propertyType == EDeviceProperty::kVRModel) { return"cvr.vr.model"; }
+	if (propertyType == EDeviceProperty::kVRVendor) { return"cvr.vr.vendor"; }
 
 	return "unknown.property";
 }

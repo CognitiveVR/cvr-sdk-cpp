@@ -105,7 +105,7 @@ void ExitPoll::SendAllAnswers()
 	//add answers as properties
 	for (int i = 0; i < fullResponse.answers.size(); ++i)
 	{
-		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::String)
+		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::kString)
 		{
 			//strings are only for voice responses. these do not show up in dash
 			properties["Answer" + ::std::to_string(i)] = 0;
@@ -141,7 +141,7 @@ void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 	//add answers as properties
 	for (int i = 0; i < fullResponse.answers.size(); ++i)
 	{
-		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::String)
+		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::kString)
 		{
 			//strings are only for voice responses. these do not show up in dash
 			properties["Answer" + ::std::to_string(i)] = 0;

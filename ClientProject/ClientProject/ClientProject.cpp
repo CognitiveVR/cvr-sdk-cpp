@@ -18,7 +18,7 @@
 std::string temp;
 
 std::string TESTINGCUSTOMER = "altimagegames59340-unitywanderdemo-test";
-long TestDelay = 2;
+long TestDelay = 5;
 
 size_t handle(char* buf, size_t size, size_t nmemb, void* up)
 {
@@ -272,8 +272,8 @@ TEST(DeviceSettings, DevicePreSession) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.SetDeviceId("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEMEMORY, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEOS, "chrome os 16.9f");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
 	cog.UpdateDeviceState();
 	cog.StartSession();
 }
@@ -289,10 +289,10 @@ TEST(DeviceSettings, DevicePostSession) {
 
 	cog.StartSession();
 	cog.SetDeviceId("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEMEMORY, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEOS, "chrome os 16.9f");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEGPU, "GeForce GTX 970");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICECPU, "i7-4770 CPU @ 3.40GHz");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 970");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i7-4770 CPU @ 3.40GHz");
 	cog.UpdateDeviceState();
 }
 
@@ -334,8 +334,8 @@ TEST(DeviceSettings, DeviceNullPreEnd) {
 
 
 	cog.SetDeviceId("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEMEMORY, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEOS, "chrome os 16.9f");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
 	cog.UpdateDeviceState();
 	cog.EndSession();
 }
@@ -353,8 +353,8 @@ TEST(UserDeviceSettings, UserDevicePostSession) {
 	cog.StartSession();
 
 	cog.SetDeviceId("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEMEMORY, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEOS, "chrome os 16.9f");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
 	cog.UpdateDeviceState();
 
 	cognitive::nlohmann::json user = cognitive::nlohmann::json();
@@ -384,8 +384,8 @@ TEST(UserDeviceSettings, UserDevicePreSession) {
 	cog.UpdateUserState();
 
 	cog.SetDeviceId("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEMEMORY, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEOS, "chrome os 16.9f");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
 	cog.UpdateDeviceState();
 
 	cog.StartSession();
@@ -822,9 +822,9 @@ TEST(ExitPoll, RequestThenGetAnswersJson) {
 	cog.exitpoll->RequestQuestionSet("player_died");
 	cognitive::nlohmann::json questions = cog.exitpoll->GetQuestionSet();
 
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::HAPPYSAD, false));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::MULTIPLE, 0));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::SCALE, 1));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kScale, 1));
 	cog.exitpoll->SendAllAnswers();
 	cog.EndSession();
 }
@@ -842,9 +842,9 @@ TEST(ExitPoll, RequestThenGetAnswersString) {
 	cog.exitpoll->RequestQuestionSet("player_died");
 	std::string questionString = cog.exitpoll->GetQuestionSetString();
 
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::HAPPYSAD, false));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::MULTIPLE, 0));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::SCALE, 1));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kScale, 1));
 	cog.exitpoll->SendAllAnswers();
 	cog.EndSession();
 }

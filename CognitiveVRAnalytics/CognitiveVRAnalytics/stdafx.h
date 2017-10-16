@@ -20,10 +20,10 @@
 
 namespace cognitive
 {
-	enum LoggingLevel
+	enum class LoggingLevel
 	{
-		All = 0,
-		ErrorsOnly = -1,
-		None = -2
+		kAll = 0,
+		kErrorsOnly = -1,
+		kNone = -2
 	};
 }

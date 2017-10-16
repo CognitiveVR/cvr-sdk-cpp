@@ -10,12 +10,12 @@ namespace cognitive {
 	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
-enum CommonMeshName
+enum classCommonMeshName
 {
-	ViveController,
-	OculusTouchLeft,
-	OculusTouchRight,
-	ViveTracker
+	kViveController,
+	kOculusTouchLeft,
+	kOculusTouchRight,
+	kViveTracker
 };
 
 //created when registering dynamic objects

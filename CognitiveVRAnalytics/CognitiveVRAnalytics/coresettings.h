@@ -11,13 +11,13 @@
 namespace cognitive {
 class CognitiveVRAnalyticsCore;
 
-enum ECognitiveHMDType
+enum class ECognitiveHMDType
 {
-	HMDUNKNOWN,
-	HMDVIVE,
-	HMDRIFT,
-	HMDGEAR,
-	HMDMOBILE
+	kUnknown,
+	kVive,
+	kRift,
+	kGear,
+	kMobile
 };
 
 typedef void(*WebResponse) (::std::string content);
@@ -50,14 +50,14 @@ class CoreSettings {
 
 		float GazeInterval = 0.1f;
 
-		ECognitiveHMDType HMDType = ECognitiveHMDType::HMDUNKNOWN;
+		ECognitiveHMDType HMDType = ECognitiveHMDType::kUnknown;
 		::std::string GetHMDType()
 		{
-			if (HMDType == ECognitiveHMDType::HMDUNKNOWN) { return "unknown"; }
-			if (HMDType == ECognitiveHMDType::HMDGEAR) { return "gear"; }
-			if (HMDType == ECognitiveHMDType::HMDMOBILE) { return "mobile"; }
-			if (HMDType == ECognitiveHMDType::HMDVIVE) { return "vive"; }
-			if (HMDType == ECognitiveHMDType::HMDRIFT) { return "rift"; }
+			if (HMDType == ECognitiveHMDType::kUnknown) { return "unknown"; }
+			if (HMDType == ECognitiveHMDType::kGear) { return "gear"; }
+			if (HMDType == ECognitiveHMDType::kMobile) { return "mobile"; }
+			if (HMDType == ECognitiveHMDType::kVive) { return "vive"; }
+			if (HMDType == ECognitiveHMDType::kRift) { return "rift"; }
 			return "unknown";
 		}
 

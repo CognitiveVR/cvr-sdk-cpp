@@ -33,30 +33,30 @@ namespace cognitive {
 	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
-enum EAnswerValueTypeReturn
+enum class EAnswerValueTypeReturn
 {
-	Number,
-	Bool,
-	String, //used for voice
-	Null
+	kNumber,
+	kBool,
+	kString, //used for voice
+	kNull
 };
 
-enum EQuestionType
+enum class EQuestionType
 {
-	HAPPYSAD,
-	SCALE,
-	MULTIPLE,
-	VOICE,
-	THUMBS,
-	QBOOL //BOOLEAN defined elsewhere with typedef
+	kHappySad,
+	kScale,
+	kMultiple,
+	kVoice,
+	kThumbs,
+	kBoolean
 };
 
 struct FExitPollAnswer
 {
 public:
-		//question type. TODO make this an enum. HAPPYSAD,SCALE,MULTIPLE,VOICE,THUMBS,BOOLEAN
+		//this is only used internally. use one of the constructors and an enum
 		::std::string type = "";
-		EAnswerValueTypeReturn AnswerValueType = EAnswerValueTypeReturn::Null;
+		EAnswerValueTypeReturn AnswerValueType = EAnswerValueTypeReturn::kNull;
 		int numberValue = -1;
 		bool boolValue = false; //converted to 0 or 1
 		::std::string stringValue = "";; //for base64 voice
@@ -84,40 +84,40 @@ public:
 		FExitPollAnswer(EQuestionType questionType, int number)
 		{
 			type = GetQuestionTypeString(questionType);
-			AnswerValueType = EAnswerValueTypeReturn::Number;
+			AnswerValueType = EAnswerValueTypeReturn::kNumber;
 			numberValue = number;
 		}
 		FExitPollAnswer(EQuestionType questionType)
 		{
 			type = GetQuestionTypeString(questionType);
-			AnswerValueType = EAnswerValueTypeReturn::Null;
+			AnswerValueType = EAnswerValueTypeReturn::kNull;
 		}
 		FExitPollAnswer(EQuestionType questionType, bool boolean)
 		{
 			type = GetQuestionTypeString(questionType);
-			AnswerValueType = EAnswerValueTypeReturn::Bool;
+			AnswerValueType = EAnswerValueTypeReturn::kBool;
 			boolValue = boolean;
 		}
 		FExitPollAnswer(EQuestionType questionType, ::std::string string)
 		{
 			type = GetQuestionTypeString(questionType);
-			AnswerValueType = EAnswerValueTypeReturn::String;
+			AnswerValueType = EAnswerValueTypeReturn::kString;
 			stringValue = string;
 		}
 
 		::std::string GetQuestionTypeString(EQuestionType questionType)
 		{
-			if (questionType == EQuestionType::QBOOL)
+			if (questionType == EQuestionType::kBoolean)
 				return "BOOLEAN";
-			if (questionType == EQuestionType::HAPPYSAD)
+			if (questionType == EQuestionType::kHappySad)
 				return "HAPPYSAD";
-			if (questionType == EQuestionType::THUMBS)
+			if (questionType == EQuestionType::kThumbs)
 				return "THUMBS";
-			if (questionType == EQuestionType::SCALE)
+			if (questionType == EQuestionType::kScale)
 				return "SCALE";
-			if (questionType == EQuestionType::MULTIPLE)
+			if (questionType == EQuestionType::kMultiple)
 				return "MULTIPLE";
-			if (questionType == EQuestionType::VOICE)
+			if (questionType == EQuestionType::kVoice)
 				return "VOICE";
 			
 			return "BOOLEAN";
@@ -144,19 +144,19 @@ public:
 			for (auto& an : answers)
 			{
 				nlohmann::json tempAnswer = nlohmann::json();
-				if (an.AnswerValueType == EAnswerValueTypeReturn::Bool)
+				if (an.AnswerValueType == EAnswerValueTypeReturn::kBool)
 				{
 					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.boolValue ? 1 : 0 } };
 				}
-				else if (an.AnswerValueType == EAnswerValueTypeReturn::Number)
+				else if (an.AnswerValueType == EAnswerValueTypeReturn::kNumber)
 				{
 					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.numberValue } };
 				}
-				else if (an.AnswerValueType == EAnswerValueTypeReturn::Null)
+				else if (an.AnswerValueType == EAnswerValueTypeReturn::kNull)
 				{
 					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", -32768 } };
 				}
-				else if (an.AnswerValueType == EAnswerValueTypeReturn::String)
+				else if (an.AnswerValueType == EAnswerValueTypeReturn::kString)
 				{
 					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.stringValue } };
 				}
