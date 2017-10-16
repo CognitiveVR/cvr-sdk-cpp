@@ -174,6 +174,7 @@ private:
 	::std::string lastHook = "";
 	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	nlohmann::json currentQuestionSet = nlohmann::json();
+	::std::string currentQuestionSetString = "";
 
 	FExitPollResponse fullResponse = FExitPollResponse();
 
@@ -182,10 +183,12 @@ public:
 	ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 	void RequestQuestionSet(::std::string Hook);
-	void ReceiveQuestionSet(nlohmann::json questionset);
+	void ReceiveQuestionSet(::std::string questionsetstring, nlohmann::json questionset);
 
 	//can return empty json if request failed
 	nlohmann::json GetQuestionSet();
+	::std::string GetQuestionSetString();
+
 	bool HasQuestionSet()
 	{
 		return currentQuestionSet.size() > 0;

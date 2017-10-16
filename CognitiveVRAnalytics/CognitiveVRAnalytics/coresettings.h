@@ -19,6 +19,7 @@ enum ECognitiveHMDType
 	HMDGEAR,
 	HMDMOBILE
 };
+enum LoggingLevel; //defined in cognitive_log.h
 
 typedef void(*WebResponse) (::std::string content);
 typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
@@ -34,6 +35,8 @@ class CoreSettings {
 		{
 
 		}
+
+		LoggingLevel loggingLevel;
 
         //Network call timeout, measured in seconds. Ex. 5
 		long kNetworkTimeout = 5;
@@ -59,7 +62,7 @@ class CoreSettings {
 			return "unknown";
 		}
 
-		::std::map < ::std::string, ::std::string> sceneIds;// = ::std::map<::std::string, ::std::string>();
+		::std::map < ::std::string, ::std::string> sceneIds = ::std::map<::std::string, ::std::string>();
 		::std::string DefaultSceneName = "";
 
 		WebRequest webRequest;

@@ -5,6 +5,10 @@
 #include "CognitiveVRAnalytics.h"
 #include "curl.h"
 
+//for testing delay
+#include <chrono>
+#include <thread>
+
 #if defined(_MSC_VER)
 #include "gtest.h"
 #else
@@ -14,6 +18,7 @@
 std::string temp;
 
 std::string TESTINGCUSTOMER = "altimagegames59340-unitywanderdemo-test";
+long TestDelay = 2;
 
 size_t handle(char* buf, size_t size, size_t nmemb, void* up)
 {
@@ -84,7 +89,9 @@ void DoWebStuff(std::string url, std::string content, cognitive::WebResponse res
 //----------------------INITIALIZATION
 
 TEST(Initialization, MultipleStartSessions) {
-	
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -99,6 +106,8 @@ TEST(Initialization, MultipleStartSessions) {
 }
 
 TEST(DISABLED_Initialization, MultipleStartEndSessions) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
@@ -117,6 +126,8 @@ TEST(DISABLED_Initialization, MultipleStartEndSessions) {
 }
 
 TEST(DISABLED_Initialization, SessionFullStartEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 	
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
@@ -131,6 +142,9 @@ TEST(DISABLED_Initialization, SessionFullStartEnd) {
 }
 
 TEST(DISABLED_Initialization, SessionStart) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -140,6 +154,9 @@ TEST(DISABLED_Initialization, SessionStart) {
 }
 
 TEST(DISABLED_Initialization, Initialization) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -151,6 +168,9 @@ TEST(DISABLED_Initialization, Initialization) {
 }
 
 TEST(DISABLED_Initialization, SessionEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -160,6 +180,9 @@ TEST(DISABLED_Initialization, SessionEnd) {
 }
 
 TEST(DISABLED_Initialization, SessionStartEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -172,6 +195,9 @@ TEST(DISABLED_Initialization, SessionStartEnd) {
 //----------------------SET USER
 
 TEST(DISABLED_UserSettings, UserPreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -187,6 +213,9 @@ TEST(DISABLED_UserSettings, UserPreSession) {
 }
 
 TEST(DISABLED_UserSettings, UserPostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -202,6 +231,9 @@ TEST(DISABLED_UserSettings, UserPostSession) {
 }
 
 TEST(DISABLED_UserSettings, UserNullPreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -214,6 +246,9 @@ TEST(DISABLED_UserSettings, UserNullPreSession) {
 }
 
 TEST(DISABLED_UserSettings, UserNullPostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -228,6 +263,9 @@ TEST(DISABLED_UserSettings, UserNullPostSession) {
 //----------------------SET DEVICE
 
 TEST(DISABLED_DeviceSettings, DevicePreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -241,6 +279,9 @@ TEST(DISABLED_DeviceSettings, DevicePreSession) {
 }
 
 TEST(DISABLED_DeviceSettings, DevicePostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -250,10 +291,15 @@ TEST(DISABLED_DeviceSettings, DevicePostSession) {
 	cog.SetDeviceId("7741345684915735");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEMEMORY, 128);
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEOS, "chrome os 16.9f");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICEGPU, "GeForce GTX 970");
+	cog.SetDeviceProperty(cognitive::EDeviceProperty::DEVICECPU, "i7-4770 CPU @ 3.40GHz");
 	cog.UpdateDeviceState();
 }
 
 TEST(DISABLED_DeviceSettings, DeviceNullPreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -265,6 +311,9 @@ TEST(DISABLED_DeviceSettings, DeviceNullPreSession) {
 }
 
 TEST(DISABLED_DeviceSettings, DeviceNullPostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -275,6 +324,9 @@ TEST(DISABLED_DeviceSettings, DeviceNullPostSession) {
 }
 
 TEST(DISABLED_DeviceSettings, DeviceNullPreEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -290,6 +342,9 @@ TEST(DISABLED_DeviceSettings, DeviceNullPreEnd) {
 
 //----------------------SET USER DEVICE
 TEST(DISABLED_UserDeviceSettings, UserDevicePostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -313,6 +368,9 @@ TEST(DISABLED_UserDeviceSettings, UserDevicePostSession) {
 }
 
 TEST(DISABLED_UserDeviceSettings, UserDevicePreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -337,6 +395,9 @@ TEST(DISABLED_UserDeviceSettings, UserDevicePreSession) {
 //----------------------TRANSACTIONS
 
 TEST(DISABLED_Transaction, PreSessionNoEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -349,6 +410,9 @@ TEST(DISABLED_Transaction, PreSessionNoEnd) {
 }
 
 TEST(DISABLED_Transaction, PreSessionEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -362,6 +426,9 @@ TEST(DISABLED_Transaction, PreSessionEnd) {
 }
 
 TEST(DISABLED_Transaction, PreSessionSend) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -375,6 +442,9 @@ TEST(DISABLED_Transaction, PreSessionSend) {
 }
 
 TEST(DISABLED_Transaction, PreSessionPropsSend) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -393,6 +463,9 @@ TEST(DISABLED_Transaction, PreSessionPropsSend) {
 }
 
 TEST(DISABLED_Transaction, SessionEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -412,6 +485,9 @@ TEST(DISABLED_Transaction, SessionEnd) {
 //----------------------TUNING
 
 TEST(DISABLED_Tuning, TuningGetValue) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -439,6 +515,9 @@ TEST(DISABLED_Tuning, TuningGetValue) {
 }
 
 TEST(DISABLED_Tuning, TuningGetValueNoSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -450,6 +529,9 @@ TEST(DISABLED_Tuning, TuningGetValueNoSession) {
 }
 
 TEST(DISABLED_Tuning, TuningGetInvalidValue) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -463,6 +545,9 @@ TEST(DISABLED_Tuning, TuningGetInvalidValue) {
 }
 
 TEST(DISABLED_Tuning, TuningGetInvalidCast) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -476,6 +561,9 @@ TEST(DISABLED_Tuning, TuningGetInvalidCast) {
 }
 
 TEST(DISABLED_Tuning, TuningGetInvalidCastBool) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -491,6 +579,9 @@ TEST(DISABLED_Tuning, TuningGetInvalidCastBool) {
 //----------------------SETTING SCENE KEYS FOR SCENE EXPLORER
 
 TEST(DISABLED_Scenes, NoScenes) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -510,6 +601,9 @@ TEST(DISABLED_Scenes, NoScenes) {
 }
 
 TEST(DISABLED_Scenes, InitScenes) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -535,6 +629,9 @@ TEST(DISABLED_Scenes, InitScenes) {
 }
 
 TEST(DISABLED_Scenes, InitSetScenes) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -561,6 +658,9 @@ TEST(DISABLED_Scenes, InitSetScenes) {
 }
 
 TEST(DISABLED_Scenes, InitSetSceneSwitch) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -589,6 +689,9 @@ TEST(DISABLED_Scenes, InitSetSceneSwitch) {
 }
 
 TEST(DISABLED_Scenes, InitSetInvalidScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -611,6 +714,9 @@ TEST(DISABLED_Scenes, InitSetInvalidScene) {
 }
 
 TEST(DISABLED_Scenes, InitSetInvalidNoScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -629,6 +735,9 @@ TEST(DISABLED_Scenes, InitSetInvalidNoScene) {
 //----------------------EXITPOLL
 
 TEST(DISABLED_ExitPoll, RequestSetNoInit) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -640,6 +749,9 @@ TEST(DISABLED_ExitPoll, RequestSetNoInit) {
 }
 
 TEST(DISABLED_ExitPoll, BasicRequest) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -651,6 +763,9 @@ TEST(DISABLED_ExitPoll, BasicRequest) {
 }
 
 TEST(DISABLED_ExitPoll, GetThenRequest) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -664,6 +779,9 @@ TEST(DISABLED_ExitPoll, GetThenRequest) {
 }
 
 TEST(DISABLED_ExitPoll, RequestThenGet) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -677,6 +795,9 @@ TEST(DISABLED_ExitPoll, RequestThenGet) {
 }
 
 TEST(DISABLED_ExitPoll, InvalidRequestThenGet) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -688,7 +809,10 @@ TEST(DISABLED_ExitPoll, InvalidRequestThenGet) {
 	cog.EndSession();
 }
 
-TEST(DISABLED_ExitPoll, RequestThenGetAnswers) {
+TEST(DISABLED_ExitPoll, RequestThenGetAnswersJson) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -696,7 +820,28 @@ TEST(DISABLED_ExitPoll, RequestThenGetAnswers) {
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("player_died");
-	cog.exitpoll->GetQuestionSet();
+	cognitive::nlohmann::json questions = cog.exitpoll->GetQuestionSet();
+
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::HAPPYSAD, false));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::MULTIPLE, 0));
+	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::SCALE, 1));
+	cog.exitpoll->SendAllAnswers();
+	cog.EndSession();
+}
+
+TEST(DISABLED_ExitPoll, RequestThenGetAnswersString) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.CustomerId = TESTINGCUSTOMER;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	cog.StartSession();
+	cog.exitpoll->RequestQuestionSet("player_died");
+	std::string questionString = cog.exitpoll->GetQuestionSetString();
+
 	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::HAPPYSAD, false));
 	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::MULTIPLE, 0));
 	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::SCALE, 1));
@@ -707,6 +852,9 @@ TEST(DISABLED_ExitPoll, RequestThenGetAnswers) {
 //----------------------GAZE
 
 TEST(DISABLED_Gaze, GazeThenInit) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -715,7 +863,7 @@ TEST(DISABLED_Gaze, GazeThenInit) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
@@ -726,6 +874,9 @@ TEST(DISABLED_Gaze, GazeThenInit) {
 }
 
 TEST(DISABLED_Gaze, GazeThenInitSetScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -739,7 +890,7 @@ TEST(DISABLED_Gaze, GazeThenInitSetScene) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
@@ -751,6 +902,9 @@ TEST(DISABLED_Gaze, GazeThenInitSetScene) {
 }
 
 TEST(DISABLED_Gaze, InitThenGazeThenSetScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -764,7 +918,7 @@ TEST(DISABLED_Gaze, InitThenGazeThenSetScene) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
@@ -775,6 +929,9 @@ TEST(DISABLED_Gaze, InitThenGazeThenSetScene) {
 }
 
 TEST(DISABLED_Gaze, InitThenGazeThenSendThenSetScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -788,11 +945,12 @@ TEST(DISABLED_Gaze, InitThenGazeThenSendThenSetScene) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
 	}
+
 	cog.SendData();
 	cog.SetScene("gazescene");
 	cog.EndSession();
@@ -801,13 +959,16 @@ TEST(DISABLED_Gaze, InitThenGazeThenSendThenSetScene) {
 //----------------------SENSORS
 
 TEST(DISABLED_Sensors, SenseThenInit) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor",i);
 	}
@@ -817,6 +978,9 @@ TEST(DISABLED_Sensors, SenseThenInit) {
 }
 
 TEST(DISABLED_Sensors, SenseThenInitSetScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -826,7 +990,7 @@ TEST(DISABLED_Sensors, SenseThenInitSetScene) {
 	settings.sceneIds = scenes;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
@@ -837,6 +1001,9 @@ TEST(DISABLED_Sensors, SenseThenInitSetScene) {
 }
 
 TEST(DISABLED_Sensors, InitThenGazeThenSetScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -847,7 +1014,7 @@ TEST(DISABLED_Sensors, InitThenGazeThenSetScene) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
@@ -857,6 +1024,9 @@ TEST(DISABLED_Sensors, InitThenGazeThenSetScene) {
 }
 
 TEST(DISABLED_Sensors, InitThenGazeThenSendThenSetScene) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -867,7 +1037,7 @@ TEST(DISABLED_Sensors, InitThenGazeThenSendThenSetScene) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	for (int i = 0; i < 10; ++i)
+	for (float i = 0; i < 10; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
@@ -879,6 +1049,9 @@ TEST(DISABLED_Sensors, InitThenGazeThenSendThenSetScene) {
 //----------------------DYNAMICS
 
 TEST(DISABLED_Dynamics, InitRegisterSend) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;
@@ -912,6 +1085,9 @@ TEST(DISABLED_Dynamics, InitRegisterSend) {
 }
 
 TEST(DISABLED_Dynamics, InitRegisterSceneSend) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.CustomerId = TESTINGCUSTOMER;

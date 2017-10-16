@@ -9,6 +9,7 @@ static ::std::shared_ptr<CognitiveVRAnalyticsCore> instance;
 
 ::std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
 {
+	//TODO add an error if instance is nullptr. this may return null. developer should call this manually before referencing it!
 	return instance;
 }
 
@@ -27,6 +28,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	bHasSessionStarted = false;
 
 	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
+	log->SetLoggingLevel(settings.loggingLevel);
 	log->Info("CognitiveVRAnalyticsCore()");
 
 	config = make_unique_cognitive<Config>(Config(instance));
@@ -51,78 +53,9 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 
 	//set scenes
 	config->sceneIds = settings.sceneIds;
-	SetScene(settings.DefaultSceneName);
+	if (settings.DefaultSceneName.size() > 0)
+		SetScene(settings.DefaultSceneName);
 }
-
-/*CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc)
-{
-	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
-
-	sendFunctionPointer = sendFunc;
-	bHasSessionStarted = false;
-
-	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
-	log->Info("CognitiveVRAnalyticsCore()");
-	
-	config = make_unique_cognitive<Config>(Config(instance));
-	network = make_unique_cognitive<Network>(Network(instance));
-
-	tuning = make_unique_cognitive<Tuning>(Tuning(instance));
-	transaction = make_unique_cognitive<Transaction>(Transaction(instance));
-	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
-	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
-	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
-	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
-}
-
-CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids)
-{
-	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
-
-	sendFunctionPointer = sendFunc;
-	bHasSessionStarted = false;
-
-	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
-	log->Info("CognitiveVRAnalyticsCore()");
-
-	config = make_unique_cognitive<Config>(Config(instance));
-	config->sceneIds = sceneids;
-	network = make_unique_cognitive<Network>(Network(instance));
-
-	tuning = make_unique_cognitive<Tuning>(Tuning(instance));
-	transaction = make_unique_cognitive<Transaction>(Transaction(instance));
-	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
-	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
-	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
-	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
-}
-
-CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, ::std::map<::std::string, ::std::string> sceneids)
-{
-	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
-
-	sendFunctionPointer = sendFunc;
-	bHasSessionStarted = false;
-
-	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
-	log->Info("CognitiveVRAnalyticsCore()");
-
-	config = make_unique_cognitive<Config>(Config(instance));
-	config->CustomerId = customerid;
-	config->GazeBatchSize = gazecount;
-	config->TransactionBatchSize = eventcount;
-	config->SensorDataLimit = sensorcount;
-	config->DynamicDataLimit = dynamiccount;
-	config->sceneIds = sceneids;
-	network = make_unique_cognitive<Network>(Network(instance));
-
-	tuning = make_unique_cognitive<Tuning>(Tuning(instance));
-	transaction = make_unique_cognitive<Transaction>(Transaction(instance));
-	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
-	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
-	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
-	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
-}*/
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
@@ -288,8 +221,6 @@ void CognitiveVRAnalyticsCore::SendData()
 
 void CognitiveVRAnalyticsCore::SetUserId(::std::string user_id)
 {
-	log->Info("CognitiveVRAnalytics::set user");
-	
 	UserId = user_id;
 }
 
@@ -355,9 +286,6 @@ void CognitiveVRAnalyticsCore::UpdateUserState()
 
 void CognitiveVRAnalyticsCore::SetDeviceId(::std::string device_id)
 {
-	log->Info("CognitiveVRAnalytics::set device");
-	//requires timestamp, timestamp,userid, deviceid,deviceproperties
-
 	DeviceId = device_id;
 }
 
@@ -414,7 +342,7 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	}
 	else
 	{
-		log->Error("Config scene ids does not contain key for scene " + sceneName);
+		log->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
 	}
 }
 

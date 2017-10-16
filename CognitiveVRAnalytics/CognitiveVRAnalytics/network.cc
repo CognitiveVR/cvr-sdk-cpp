@@ -101,7 +101,7 @@ void ExitPollCallback(::std::string body)
 	{
 		cvr->log->Info("ExitPollCallback callback successful");
 
-		cvr->exitpoll->ReceiveQuestionSet(nlohmann::json::parse(body));
+		cvr->exitpoll->ReceiveQuestionSet(body,nlohmann::json::parse(body));
 	}
 	else
 	{

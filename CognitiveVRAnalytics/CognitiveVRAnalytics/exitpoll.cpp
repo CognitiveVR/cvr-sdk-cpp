@@ -37,13 +37,25 @@ void ExitPoll::RequestQuestionSet(::std::string Hook)
 	return tokens;
 }
 
-void ExitPoll::ReceiveQuestionSet(nlohmann::json questionset)
+void ExitPoll::ReceiveQuestionSet(::std::string questionsetstring, nlohmann::json questionset)
 {
+	currentQuestionSetString = questionsetstring;
+
 	fullResponse.questionSetId = questionset["id"].get<::std::string>();
 	auto splitquestionid = split(fullResponse.questionSetId, ':');
 	fullResponse.questionSetName = splitquestionid[0];
 	fullResponse.questionSetVersion = splitquestionid[1];
 	currentQuestionSet = questionset;
+}
+
+::std::string ExitPoll::GetQuestionSetString()
+{
+	if (currentQuestionSetString.size() == 0)
+	{
+		cvr->log->Warning("ExitPoll:currentQuestionSetString no active question set. Returning empty json string");
+	}
+
+	return currentQuestionSetString;
 }
 
 nlohmann::json ExitPoll::GetQuestionSet()
@@ -58,6 +70,7 @@ nlohmann::json ExitPoll::GetQuestionSet()
 
 void ExitPoll::ClearQuestionSet()
 {
+	currentQuestionSetString.clear();
 	currentQuestionSet.clear();
 
 	fullResponse.answers.clear();
