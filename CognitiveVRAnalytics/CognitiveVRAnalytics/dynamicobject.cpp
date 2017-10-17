@@ -38,6 +38,23 @@ DynamicObject::DynamicObject(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	cvr = cog;
 }
 
+int DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string meshname, int customid)
+{
+	DynamicObjectId registerId = DynamicObjectId(customid, meshname);
+	objectIds.emplace_back(registerId);
+
+	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
+
+	manifestEntries.emplace_back(dome);
+
+	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)
+	{
+		SendData();
+	}
+
+	return registerId.Id;
+}
+
 int DynamicObject::RegisterObject(::std::string name, ::std::string meshname)
 {
 	DynamicObjectId registerId = GetUniqueId(meshname);
@@ -57,10 +74,10 @@ int DynamicObject::RegisterObject(::std::string name, ::std::string meshname)
 
 DynamicObjectId DynamicObject::GetUniqueId(::std::string meshname)
 {
-	int nextObjectId = 0;
+	static int nextObjectId = generatedIdOffset;
 	for (auto& element : objectIds)
 	{
-		if (element.Id >= nextObjectId) { nextObjectId = element.Id + 1; }
+		if (element.Id == nextObjectId) { nextObjectId ++; continue; }
 		if (element.Used) { continue; }
 		if (element.MeshName == meshname)
 		{
@@ -167,10 +184,22 @@ void DynamicObject::EndEngagement(int objectId, ::std::string name)
 		if (e.Name == name)
 		{
 			e.isActive = false;
-			break;
+			return;
 		}
 	}
-	//TODO otherwise create and end the engagement
+	//otherwise create and end the engagement
+
+	BeginEngagement(objectId, name);
+
+	auto rit = dirtyEngagements[objectId].rbegin();
+	for (; rit != dirtyEngagements[objectId].rend(); ++rit)
+	{
+		if (rit->Name == name)
+		{
+			rit->isActive = false;
+			return;
+		}
+	}
 }
 
 void DynamicObject::SendData()
@@ -231,9 +260,18 @@ void DynamicObject::SendData()
 
 void DynamicObject::RemoveObject(int objectid)
 {
-	//TODO end any engagements if the object had any active
-	//TODO one final snapshot
+	//end any engagements if the object had any active
+	for (auto& element : dirtyEngagements[objectid])
+	{
+		if (element.isActive)
+		{
+			EndEngagement(objectid, element.Name);
+		}
+	}
 
+	//TODO one final snapshot. needs to know the last position of the object
+
+	//set the object as not used
 	for (auto& element : objectIds)
 	{
 		if (element.Id == objectid)
@@ -242,5 +280,10 @@ void DynamicObject::RemoveObject(int objectid)
 			return;
 		}
 	}
+}
+
+void DynamicObject::ClearObjectIds()
+{
+	objectIds.clear();
 }
 }

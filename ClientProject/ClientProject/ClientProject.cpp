@@ -18,7 +18,7 @@
 std::string temp;
 
 std::string TESTINGCUSTOMER = "altimagegames59340-unitywanderdemo-test";
-long TestDelay = 5;
+long TestDelay = 10;
 
 size_t handle(char* buf, size_t size, size_t nmemb, void* up)
 {

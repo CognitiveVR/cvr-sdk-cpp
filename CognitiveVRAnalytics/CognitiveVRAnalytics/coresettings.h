@@ -65,12 +65,5 @@ class CoreSettings {
 		::std::string DefaultSceneName = "";
 
 		WebRequest webRequest;
-
-		//TODO if user and/or device has anything set, set this after constructor
-		//::std::string UserId = "";
-		//should be able to set user properties here
-
-		//::std::string DeviceId = "";
-		//should be able to set device properties here
 };
 }

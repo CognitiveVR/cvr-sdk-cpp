@@ -6,11 +6,13 @@
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 
+//central class for registering / snapshotting all dynamic objects
+
 namespace cognitive {
 	//using json = nlohmann::json;
 class CognitiveVRAnalyticsCore;
 
-enum classCommonMeshName
+enum class CommonMeshName
 {
 	kViveController,
 	kOculusTouchLeft,
@@ -93,20 +95,29 @@ private:
 	DynamicObjectId GetUniqueId(std::string meshName);
 	int jsonpart = 1;
 
+	int generatedIdOffset = 1000;
+
 	//object id, engagement name, count
 	//std::map<int, std::map<std::string, int>> engagements;
 	//int GetEngagementCount(int objectid, std::string name);
 
 public:	
 
+
+	//bool UseCustomMeshName = false;
+	//::std::string CustomMeshName = "";
+
+	//CommonMeshName CommonMeshName = CommonMeshName::kViveController;
+
+	//int CustomUniqueId = -1;
+
 	//TODO put a bunch of the options above into the constructor
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 	void SendData();
 
-	
-	
-	
+	//put into dynamic manifest with an id. returns objectid
+	int RegisterObjectCustomId(std::string name, std::string meshname, int customid);
 
 	//put into dynamic manifest. reuses or creates new objectid. returns objectid
 	int RegisterObject(std::string name, std::string meshname);
@@ -121,6 +132,12 @@ public:
 	void EndEngagement(int objectId, std::string name);
 
 	//deregister. recycles objectid. don't need to do this for objects that don't share ids
+	//automatically ends all active engagements on this object
 	void RemoveObject(int objectid);
+
+	//TODO end all engagements on an object. to be used if the object is destroyed
+
+	//object ids must be cleared between scenes. otherwise reused objects will not be written to a manifest for the new scene
+	void ClearObjectIds();
 };
 }

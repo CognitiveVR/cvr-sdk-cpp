@@ -7,9 +7,9 @@
 namespace cognitive {
 static ::std::shared_ptr<CognitiveVRAnalyticsCore> instance;
 
+//this may return null. constructor should call this manually before referencing instance!
 ::std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
 {
-	//TODO add an error if instance is nullptr. this may return null. developer should call this manually before referencing it!
 	return instance;
 }
 
@@ -331,6 +331,7 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	{
 		//send any remaining data to current scene, if there is a current scene
 		SendData();
+		dynamicobject->ClearObjectIds();
 	}
 	//if no current scene, likely queuing up events/gaze/etc before setting the scene
 
