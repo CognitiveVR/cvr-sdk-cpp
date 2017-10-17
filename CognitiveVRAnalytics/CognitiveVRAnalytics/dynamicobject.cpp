@@ -7,6 +7,7 @@
 namespace cognitive {
 DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, int objectId)
 {
+	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
 	Rotation = rotation;
 	Time = CognitiveVRAnalyticsCore::Instance()->GetTimestamp();
@@ -15,6 +16,7 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::st
 
 DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, int objectId, nlohmann::json properties)
 {
+	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
 	Rotation = rotation;
 	Time = CognitiveVRAnalyticsCore::Instance()->GetTimestamp();
@@ -46,6 +48,7 @@ int DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mesh
 	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
 
 	manifestEntries.emplace_back(dome);
+	fullManifest.emplace_back(dome);
 
 	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)
 	{
@@ -63,6 +66,7 @@ int DynamicObject::RegisterObject(::std::string name, ::std::string meshname)
 	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
 
 	manifestEntries.emplace_back(dome);
+	fullManifest.emplace_back(dome);
 
 	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)
 	{
@@ -98,44 +102,33 @@ bool isInactive(DynamicObjectEngagementEvent engagement)
 	return engagement.isActive == false;
 }
 
-void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation)
+void DynamicObject::AddSnapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation)
 {
-	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId);
-	
-	if (allEngagements[objectId].size() > 0)
-	{
-		int i = 0;
-		
-		//add engagements to snapshot
-		for (auto& e : allEngagements[objectId])
-		{
-			if (e.isActive)
-			{
-				nlohmann::json engagementEvent = nlohmann::json();
-				engagementEvent["engagementparent"] = objectId;
-				engagementEvent["engagement_count"] = e.EngagementNumber;
-				engagementEvent["engagement_time"] = cvr->GetTimestamp() - e.startTime;
-				snapshot.Engagements.emplace_back(engagementEvent);
-			}
-		}
-
-		//remove inactive engagements
-		allEngagements[objectId].erase(::std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
-		
-		//TODO this could be improved. should loop through once https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
-	}
-
-	snapshots.emplace_back(snapshot);
-
-	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)
-	{
-		SendData();
-	}
+	AddSnapshot(objectId, position, rotation, cognitive::nlohmann::json());
 }
 
-void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation, nlohmann::json properties)
+void DynamicObject::AddSnapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation, nlohmann::json properties)
 {
-	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId, properties);
+	//if dynamic object id is not in manifest, add to manifest. likely object ids were cleared from scene change
+	bool foundId = false;
+	for (auto& element : objectIds)
+	{
+		if (objectId == element.Id)
+		{
+			foundId = true;
+			break;
+		}
+	}
+	if (!foundId)
+	{
+		cvr->log->Warning("DynamicObject::Snapshot cannot find objectId " + std::to_string(objectId) + " in full manifest. Did you Register this object?");
+	}
+
+	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId);
+	if (properties.size() > 0)
+	{
+		snapshot.Properties = properties;
+	}
 
 	if (allEngagements[objectId].size() > 0)
 	{
@@ -154,10 +147,8 @@ void DynamicObject::Snapshot(int objectId, ::std::vector<float> position, ::std:
 			}
 		}
 
-		//remove inactive engagements
+		//remove inactive engagements https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 		allEngagements[objectId].erase(::std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
-
-		//TODO this could be improved. should loop through once https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 	}
 
 	snapshots.emplace_back(snapshot);
@@ -258,9 +249,8 @@ void DynamicObject::SendData()
 	}
 }
 
-void DynamicObject::RemoveObject(int objectid)
+void DynamicObject::EndActiveEngagements(int objectid)
 {
-	//end any engagements if the object had any active
 	for (auto& element : dirtyEngagements[objectid])
 	{
 		if (element.isActive)
@@ -268,8 +258,15 @@ void DynamicObject::RemoveObject(int objectid)
 			EndEngagement(objectid, element.Name);
 		}
 	}
+}
 
-	//TODO one final snapshot. needs to know the last position of the object
+void DynamicObject::RemoveObject(int objectid, std::vector<float> position, std::vector<float> rotation)
+{
+	//end any engagements if the object had any active
+	EndActiveEngagements(objectid);
+
+	//one final snapshot to send all the ended engagements
+	AddSnapshot(objectid, position, rotation);
 
 	//set the object as not used
 	for (auto& element : objectIds)
@@ -282,8 +279,12 @@ void DynamicObject::RemoveObject(int objectid)
 	}
 }
 
-void DynamicObject::ClearObjectIds()
+//re add all manifest entries when a scene changes. otherwise there could be snapshots for dynamic objects without any identification in the new scene
+void DynamicObject::RefreshObjectManifest()
 {
-	objectIds.clear();
+	for (auto& element : fullManifest)
+	{
+		manifestEntries.emplace_back(element);
+	}
 }
 }

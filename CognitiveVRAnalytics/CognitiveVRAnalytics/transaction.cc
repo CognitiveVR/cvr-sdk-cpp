@@ -45,6 +45,8 @@ void Transaction::BeginPosition(::std::string category, ::std::vector<float> &Po
 
 	AddToBatch("datacollector_beginTransaction", args);
 
+	//TODO conversion for xyz = -xzy or whatever
+
 	nlohmann::json se = nlohmann::json();
 	se["name"] = category;
 	se["time"] = ts;
@@ -86,6 +88,8 @@ void Transaction::UpdatePosition(::std::string category, ::std::vector<float> &P
 
 	AddToBatch("datacollector_updateTransaction", args);
 
+	//TODO conversion for xyz = -xzy or whatever
+
 	nlohmann::json se = nlohmann::json();
 	se["name"] = category;
 	se["time"] = ts;
@@ -126,6 +130,8 @@ void Transaction::EndPosition(::std::string category, ::std::vector<float> &Posi
 	args.emplace_back(properties);
 
 	AddToBatch("datacollector_endTransaction", args);
+
+	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json se = nlohmann::json();
 	se["name"] = category;

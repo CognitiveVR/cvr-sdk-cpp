@@ -11,6 +11,8 @@ Network::Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
     cvr = cog;
 }
 
+::std::string query = "";
+
 //some random callback. use for debugging, otherwise nothing
 void Callback(::std::string body)
 {
@@ -54,8 +56,6 @@ void InitCallback(::std::string body)
 		{
 			cvr->log->Info("Applicaiton Init callback successful");
 
-			//cvr->log->Info(body);
-
 			cvr->tuning->ReceiveValues(jsonresponse);
 		}
 		else
@@ -65,15 +65,11 @@ void InitCallback(::std::string body)
 			cvr->SetHasStartedSession(false);
 		}
 		
-		//TODO begin session transaction
-
 		nlohmann::json props;
 
 		::std::vector<float> beginPos = { 0,0,0 };
 
 		cvr->transaction->BeginPosition("cvr.session", beginPos, props);
-
-		//cvr->log->Info("user " + jsonresponse["data"]["userid"].get<std::string>());
 	}
 }
 
@@ -118,18 +114,20 @@ void Network::DashboardCall(::std::string suburl, ::std::string content)
 	//std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
 	::std::string path = "/isos-personalization/ws/interface/" + suburl;
 
-	//TODO cache this query string
-	::std::string query = "?";
-	query.append("ssf_ws_version=");
-	query.append(cvr->config->kSsfVersion);
-	query.append("&ssf_cust_id=");
-	query.append(cvr->GetCustomerId());
-	query.append("&ssf_output=");
-	query.append(cvr->config->kSsfOutput);
-	query.append("&ssf_sdk=cpp");
-	//query.append(COGNITIVEVR_SDK_NAME);
-	query.append("&ssf_sdk_version=");
-	query.append(cvr->config->SdkVersion);
+	//TEST cache this query string
+	if (query.size() == 0)
+	{
+		query = "?";
+		query.append("ssf_ws_version=");
+		query.append(cvr->config->kSsfVersion);
+		query.append("&ssf_cust_id=");
+		query.append(cvr->GetCustomerId());
+		query.append("&ssf_output=");
+		query.append(cvr->config->kSsfOutput);
+		query.append("&ssf_sdk=cpp");
+		query.append("&ssf_sdk_version=");
+		query.append(cvr->config->SdkVersion);
+	}
 
 	::std::string finalurl = cvr->config->kNetworkHost + path + query;
 
@@ -147,11 +145,10 @@ void Network::APICall(::std::string suburl, ::std::string callType, ::std::strin
 {
 	cvr->log->Info("API call: " + suburl);
 
-	//TODO shoudl use api.networkhost from config
-	::std::string path = "https://api.cognitivevr.io/products/" + cvr->GetCustomerId() + "/" + suburl;
+	::std::string path = cvr->config->kNetworkHost + "/products/" + cvr->GetCustomerId() + "/" + suburl;
 
 	WebResponse wr = nullptr;// &Callback;
-	if (callType == "exitpollget") //does exitpoll call this query? does it call sceneexplorer?
+	if (callType == "exitpollget")
 	{
 		wr = &ExitPollCallback;
 	}

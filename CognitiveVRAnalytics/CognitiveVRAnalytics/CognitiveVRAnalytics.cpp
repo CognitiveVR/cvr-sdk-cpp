@@ -191,15 +191,11 @@ double CognitiveVRAnalyticsCore::GetTimestamp()
 {
 	//http://www.cplusplus.com/forum/general/43203/#msg234281
 	//https://stackoverflow.com/questions/9089842/c-chrono-system-time-in-milliseconds-time-operations
+	
+	//TODO get utc epoch time in milliseconds instead of steady_clock time
 
-	//std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
-
-	//TODO this should use gmt, not system clock
-	auto now = std::chrono::system_clock::now();
+	auto now = std::chrono::steady_clock::now();
 	return now.time_since_epoch().count()* 0.0000001;
-
-	//std::time_t t = std::time(nullptr);
-	//auto gmt = std::gmtime(&t);
 }
 
 ::std::string CognitiveVRAnalyticsCore::GetSessionID()
@@ -327,11 +323,12 @@ void CognitiveVRAnalyticsCore::UpdateDeviceState()
 
 void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 {
+	bool hasOldScene = false;
 	if (CurrentSceneKey.size() > 0)
 	{
 		//send any remaining data to current scene, if there is a current scene
 		SendData();
-		dynamicobject->ClearObjectIds();
+		hasOldScene = true;
 	}
 	//if no current scene, likely queuing up events/gaze/etc before setting the scene
 
@@ -344,6 +341,10 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	else
 	{
 		log->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
+	}
+	if (hasOldScene)
+	{
+		dynamicobject->RefreshObjectManifest();
 	}
 }
 

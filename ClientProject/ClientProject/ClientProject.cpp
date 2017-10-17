@@ -1066,19 +1066,19 @@ TEST(Dynamics, InitRegisterSend) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	pos = { 0,0,5 };
-	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,1,6 };
-	cog.dynamicobject->Snapshot(object2id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
 
 	pos = { 0,0,7 };
-	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,2,8 };
-	cog.dynamicobject->Snapshot(object2id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
 
 	pos = { 0,0,9 };
-	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,3,10 };
-	cog.dynamicobject->Snapshot(object2id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
 
 	cog.SendData();
 	cog.EndSession();
@@ -1107,25 +1107,64 @@ TEST(Dynamics, InitRegisterSceneSend) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	pos = { 0,0,5 };
-	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,1,6 };
-	cog.dynamicobject->Snapshot(object2id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
 
 	pos = { 0,0,7 };
-	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,2,8 };
-	cog.dynamicobject->Snapshot(object2id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
 
 	pos = { 0,0,9 };
-	cog.dynamicobject->Snapshot(object1id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,3,10 };
-	cog.dynamicobject->Snapshot(object2id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
 	
 	cog.SetScene("dynamicscene");
 	cog.SendData();
 	cog.EndSession();
 }
 
+TEST(Dynamics, ResetObjectIdsSceneChange) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.CustomerId = TESTINGCUSTOMER;
+
+	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
+	scenes["one"] = "DELETE_ME_1";
+	scenes["two"] = "DELETE_ME_2";
+	settings.sceneIds = scenes;
+	settings.DefaultSceneName = "one";
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.StartSession();
+
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
+
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
+
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
+
+	cog.SetScene("two");
+	EXPECT_EQ(0, cog.dynamicobject->manifestEntries.size());
+
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
+	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
+
+	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
+	cog.SendData();
+	EXPECT_EQ(0, cog.dynamicobject->manifestEntries.size());
+
+	cog.SendData();
+	cog.EndSession();
+}
 
 
 int main(int argc, char **argv)

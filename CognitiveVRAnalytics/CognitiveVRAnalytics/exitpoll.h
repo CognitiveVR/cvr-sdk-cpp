@@ -61,26 +61,6 @@ public:
 		bool boolValue = false; //converted to 0 or 1
 		::std::string stringValue = "";; //for base64 voice
 
-		//TODO some nice converting function to json
-		/*void to_json(json& j, const FExitPollAnswer& a) {
-			if (AnswerValueType == EAnswerValueTypeReturn::Bool)
-			{
-				j = json{ { "name", a.type },{ "value", a.boolValue?1:0 }};
-			}
-			else if (AnswerValueType == EAnswerValueTypeReturn::Number)
-			{
-				j = json{ { "name", a.type },{ "value", a.numberValue } };
-			}
-			else if (AnswerValueType == EAnswerValueTypeReturn::Null)
-			{
-				j = json{ { "name", a.type },{ "value", -32768 } };
-			}
-			else if (AnswerValueType == EAnswerValueTypeReturn::String)
-			{
-				j = json{ { "name", a.type },{ "value", a.stringValue } };
-			}
-		}*/
-
 		FExitPollAnswer(EQuestionType questionType, int number)
 		{
 			type = GetQuestionTypeString(questionType);
@@ -136,8 +116,8 @@ public:
 		::std::string questionSetName = "";
 		::std::string questionSetVersion = "";
 
-		//TODO proper override of nlohmann::to_json and from_json
-		nlohmann::json to_json()
+		//could use nlohmann::to_json and from_json
+		nlohmann::json ToJson()
 		{
 			nlohmann::json j = nlohmann::json{ { "userId", user },{ "questionSetId", questionSetId },{ "sessionId", sessionId },{ "hook", hook } };
 			nlohmann::json janswers = nlohmann::json::array();

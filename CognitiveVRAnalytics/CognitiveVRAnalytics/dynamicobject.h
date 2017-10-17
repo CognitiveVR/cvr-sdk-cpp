@@ -82,14 +82,6 @@ class COGNITIVEVRANALYTICS_API DynamicObject
 {
 private:
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-	std::vector<DynamicObjectId> objectIds; //cumulative
-	std::vector<DynamicObjectSnapshot> snapshots; //cleared on send
-	std::vector<DynamicObjectManifestEntry> manifestEntries; //cleared on send
-	
-	
-	std::map<int, std::vector<DynamicObjectEngagementEvent>> dirtyEngagements;
-	std::map<int, std::vector<DynamicObjectEngagementEvent>> allEngagements;
-	std::map<int, std::map < std::string, int >> engagementCounts;
 
 	//creates a unique id for an object. stored in this class, but can be referenced by unique number
 	DynamicObjectId GetUniqueId(std::string meshName);
@@ -97,21 +89,21 @@ private:
 
 	int generatedIdOffset = 1000;
 
-	//object id, engagement name, count
-	//std::map<int, std::map<std::string, int>> engagements;
-	//int GetEngagementCount(int objectid, std::string name);
+public:
 
-public:	
+	//public for testing, but shouldn't be used outside this class
+	std::vector<DynamicObjectId> objectIds; //cumulative. only used by sdk to assign unique ids
+	std::vector<DynamicObjectSnapshot> snapshots; //cleared on send
+	std::vector<DynamicObjectManifestEntry> fullManifest; //refreshed on scene change
+	std::vector<DynamicObjectManifestEntry> manifestEntries; //cleared on send
+
+	std::map<int, std::vector<DynamicObjectEngagementEvent>> dirtyEngagements; //engagements that are active
+	std::map<int, std::vector<DynamicObjectEngagementEvent>> allEngagements; //all engagements that need to be written to snapshots. inactive engagements are removed
+	std::map<int, std::map < std::string, int >> engagementCounts;
 
 
-	//bool UseCustomMeshName = false;
-	//::std::string CustomMeshName = "";
 
-	//CommonMeshName CommonMeshName = CommonMeshName::kViveController;
 
-	//int CustomUniqueId = -1;
-
-	//TODO put a bunch of the options above into the constructor
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 	void SendData();
@@ -123,8 +115,8 @@ public:
 	int RegisterObject(std::string name, std::string meshname);
 
 	//append engagement from list if still active
-	void Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation);
-	void Snapshot(int objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
+	void AddSnapshot(int objectId, std::vector<float> position, std::vector<float> rotation);
+	void AddSnapshot(int objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
 
 	//add engagement to list
 	void BeginEngagement(int objectId, std::string name);
@@ -132,12 +124,13 @@ public:
 	void EndEngagement(int objectId, std::string name);
 
 	//deregister. recycles objectid. don't need to do this for objects that don't share ids
-	//automatically ends all active engagements on this object
-	void RemoveObject(int objectid);
+	//also ends all active engagements on this object
+	void RemoveObject(int objectid, std::vector<float> position, std::vector<float> rotation);
 
-	//TODO end all engagements on an object. to be used if the object is destroyed
+	//end all engagements on an object. to be used if the object is destroyed
+	void EndActiveEngagements(int objectId);
 
-	//object ids must be cleared between scenes. otherwise reused objects will not be written to a manifest for the new scene
-	void ClearObjectIds();
+	//object ids must be refreshed between scenes. otherwise reused objects will not be written to a manifest for the new scene
+	void RefreshObjectManifest();
 };
 }

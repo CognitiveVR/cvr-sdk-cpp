@@ -25,7 +25,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 {
 	if (!cvr->WasInitSuccessful()) { return; }
 
-	//TODO put some kind of lookup/conversion table into config for xyz = -xzy or whatever
+	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
@@ -51,7 +51,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 {
 	if (!cvr->WasInitSuccessful()) { return; }
 
-	//TODO put some kind of lookup/conversion table into config for xyz = -xzy or whatever
+	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();

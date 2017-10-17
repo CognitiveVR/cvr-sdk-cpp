@@ -13,7 +13,6 @@ Tuning::Tuning(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 //response received values, split by user and device
 void Tuning::ReceiveValues(nlohmann::json jsonvalues)
 {
-	//TODO error check - json count should be > 0
 	if (jsonvalues.size() == 0)
 	{
 		cvr->log->Info("Tuning::ReceiveValues json value count is 0 elements");

@@ -49,7 +49,6 @@ public:
 	void SetInterval(float interval);
 	void SetHMDType(::std::string hmdtype);
 
-	//TODO limit snapshots to this interval. disregard all data that comes during this delay. should be able to just throw points at these functions and act intelligently
 	void RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId = -1);
 	void RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation);
 
