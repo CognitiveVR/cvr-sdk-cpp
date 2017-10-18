@@ -9,9 +9,8 @@ namespace cognitive {
 Network::Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
     cvr = cog;
+	query = "";
 }
-
-::std::string query = "";
 
 //some random callback. use for debugging, otherwise nothing
 void Callback(::std::string body)
@@ -33,18 +32,18 @@ void InitCallback(::std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
 
+	cvr->SetPendingInit(false);
+
 	//check that body can be parsed to json
 	if (body.empty())
 	{
 		cvr->log->Info("Application Init response has no body");
 		cvr->SetInitSuccessful(false);
-		cvr->SetHasStartedSession(false);
+		//cvr->SetHasStartedSession(false);
 	}
 	else
 	{
 		//try parsing body response to json
-		cvr->SetInitSuccessful(true);
-		cvr->SetHasStartedSession(true);
 
 		int errorcode = -1;
 
@@ -54,7 +53,10 @@ void InitCallback(::std::string body)
 
 		if (errorcode == 0)
 		{
-			cvr->log->Info("Applicaiton Init callback successful");
+			//cvr->SetHasStartedSession(true);
+			cvr->SetInitSuccessful(true);
+			cvr->log->Info("Application Init callback successful");
+			//cvr->log->Info(body);
 
 			cvr->tuning->ReceiveValues(jsonresponse);
 			nlohmann::json props;
@@ -67,7 +69,7 @@ void InitCallback(::std::string body)
 		{
 			cvr->log->Info("Init Error " + ::std::to_string(errorcode));
 			cvr->SetInitSuccessful(false);
-			cvr->SetHasStartedSession(false);
+			//cvr->SetHasStartedSession(false);
 		}
 	}
 }
@@ -146,7 +148,9 @@ void Network::APICall(::std::string suburl, ::std::string callType, ::std::strin
 	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::APICall cannot find webrequest pointer"); return; }
 	cvr->log->Info("API call: " + suburl);
 
-	::std::string path = cvr->config->kNetworkHost + "/products/" + cvr->GetCustomerId() + "/" + suburl;
+	::std::string path = cvr->config->kNetworkHostAPI + "/products/" + cvr->GetCustomerId() + "/" + suburl;
+
+	cvr->log->Info(path);
 
 	WebResponse wr = nullptr;// &Callback;
 	if (callType == "exitpollget")
@@ -174,9 +178,8 @@ bool Network::SceneExplorerCall(::std::string suburl, ::std::string content)
 
 	cvr->log->Info("SceneExplorer call: " + suburl);
 	cvr->log->Info("SceneExplorer scenekey: " + scenekey);
-	cvr->log->Info("SceneExplorer body " + content);
 
-	::std::string finalurl = "https://sceneexplorer.com/api/" + suburl + "/" + scenekey;
+	::std::string finalurl = cvr->config->kSceneExplorerAPI + suburl + "/" + scenekey;
 
 	WebResponse wr = nullptr;// &Callback;
 	cvr->sendFunctionPointer(finalurl, content, wr);

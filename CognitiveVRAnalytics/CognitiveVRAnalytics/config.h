@@ -35,6 +35,8 @@ class Config {
 
         //CognitiveVR API host. -- Only enterprise customers need this. Ex: https://data.cognitivevr.io
 		::std::string kNetworkHost = "https://data.cognitivevr.io";
+		::std::string kNetworkHostAPI = "https://api.cognitivevr.io";
+		::std::string kSceneExplorerAPI = "https://sceneexplorer.com/api/";
 
         //SSF app. Ex: isos-personalization
 		::std::string kSsfApp = "isos-personalization";

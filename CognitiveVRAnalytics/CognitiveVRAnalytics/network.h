@@ -37,6 +37,7 @@ class Network
 {
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+		::std::string query = "";
 
     public:
         Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);

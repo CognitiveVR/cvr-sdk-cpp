@@ -11,13 +11,8 @@ ExitPoll::ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 
 void ExitPoll::RequestQuestionSet(::std::string Hook)
 {
+	//cannot request question set without successful init first!
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("ExitPoll::RequestQuestionSet failed: init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("ExitPoll::RequestQuestionSet failed: Session not started!");
-		return;
-	}
 
 	cvr->network->APICall("questionSetHooks/" + Hook + "/questionSet","exitpollget");
 
@@ -93,6 +88,8 @@ void ExitPoll::SendAllAnswers()
 
 void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 {
+	if (!cvr->WasInitSuccessful()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: init not successful"); return; }
+
 	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
 
 	nlohmann::json full = fullResponse.ToJson();

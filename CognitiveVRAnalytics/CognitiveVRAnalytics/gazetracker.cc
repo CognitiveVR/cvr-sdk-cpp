@@ -23,7 +23,7 @@ void GazeTracker::SetHMDType(::std::string hmdtype)
 
 void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId)
 {
-	if (!cvr->WasInitSuccessful()) { return; }
+	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { return; }
 
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -40,8 +40,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 	BatchedGazeSE.emplace_back(data);
 
-	gazeCount++;
-	if (gazeCount >= cvr->config->GazeBatchSize)
+	if (BatchedGazeSE.size() >= cvr->config->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -49,7 +48,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation)
 {
-	if (!cvr->WasInitSuccessful()) { return; }
+	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { return; }
 
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -60,8 +59,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 	BatchedGazeSE.emplace_back(data);
 
-	gazeCount++;
-	if (gazeCount >= cvr->config->GazeBatchSize)
+	if (BatchedGazeSE.size() >= cvr->config->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -69,13 +67,8 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::SendData()
 {
+	if (cvr->IsPendingInit()) { cvr->log->Info("GazeTracker::SendData failed: init pending"); return; }
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("GazeTracker::SendData. init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("GazeTracker::SendData - Session not started!");
-		return;
-	}
 
 	if (BatchedGazeSE.size() == 0)
 	{
@@ -95,7 +88,11 @@ void GazeTracker::SendData()
 	if (cvr->network->SceneExplorerCall("gaze", se.dump()))
 	{
 		BatchedGazeSE.clear();
-		gazeCount = 0;
 	}
+}
+
+void GazeTracker::EndSession()
+{
+	BatchedGazeSE.clear();
 }
 }

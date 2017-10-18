@@ -13,6 +13,7 @@ Sensor::Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 
 void Sensor::RecordSensor(::std::string Name, float value)
 {
+	//if (!cvr->WasInitSuccessful()) { cvr->log->Info("Sensor::RecordSensor failed: init not successful"); return; }
 	//initialize json as array if needed
 	auto search = allsensors.find(Name);
 	if (search == allsensors.end())
@@ -69,13 +70,8 @@ void Sensor::RecordSensor(::std::string Name, float value)
 
 void Sensor::SendData()
 {
+	if (cvr->IsPendingInit()) { cvr->log->Info("Sensor::SendData failed: init pending"); return; }
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Sensor::SendData. init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Sensor::SendData - Session not started!");
-		return;
-	}
 
 	if (allsensors.size() == 0)
 	{
@@ -107,9 +103,12 @@ void Sensor::SendData()
 		sensorCount = 0;
 		allsensors.clear();
 	}
+}
 
-	//send to sceneexplorer
-	//cvr->network->Call("someurl2", "somecontent");
+void Sensor::EndSession()
+{
+	allsensors.clear();
+	sensorCount = 0;
 }
 
 /*std::string Sensors::SensorDataToString()

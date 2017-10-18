@@ -25,7 +25,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 
 	//INIT EVERYTHING	
 	sendFunctionPointer = settings.webRequest;
-	bHasSessionStarted = false;
+	//bHasSessionStarted = false;
 
 	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
 	log->SetLoggingLevel(settings.loggingLevel);
@@ -78,14 +78,14 @@ CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 	instance.reset();
 }
 
-void CognitiveVRAnalyticsCore::SetHasStartedSession(bool started)
+void CognitiveVRAnalyticsCore::SetPendingInit(bool isPending)
 {
-	bHasSessionStarted = started;
+	bPendingInit = isPending;
 }
 
-bool CognitiveVRAnalyticsCore::HasStartedSession()
+bool CognitiveVRAnalyticsCore::IsPendingInit()
 {
-	return bHasSessionStarted;
+	return bPendingInit;
 }
 
 void CognitiveVRAnalyticsCore::SetInitSuccessful(bool success)
@@ -100,7 +100,7 @@ bool CognitiveVRAnalyticsCore::WasInitSuccessful()
 
 bool CognitiveVRAnalyticsCore::StartSession()
 {
-	if (bHasSessionStarted)
+	if (WasInitSuccessful())
 	{
 		return false;
 	}
@@ -180,7 +180,15 @@ void CognitiveVRAnalyticsCore::EndSession()
 	SessionTimestamp = -1;
 	SessionId = "";
 
-	bHasSessionStarted = false;
+	SetInitSuccessful(false);
+	SetPendingInit(true);
+
+	gaze->EndSession();
+	transaction->EndSession();
+	dynamicobject->EndSession();
+	sensor->EndSession();
+	tuning->EndSession();
+
 }
 
 double CognitiveVRAnalyticsCore::GetSessionTimestamp()
@@ -246,7 +254,8 @@ void CognitiveVRAnalyticsCore::SetUserProperties(nlohmann::json properties)
 
 		if (it.value().is_string())
 		{
-			SetUserProperty(it.key(), it.value().dump());
+			std::string tmp = properties[it.key()];
+			SetUserProperty(it.key(), tmp);
 		}
 		else if (it.value().is_number_integer())
 		{
@@ -346,6 +355,7 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	else
 	{
 		log->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
+		CurrentSceneId = "";
 	}
 	if (hasOldScene)
 	{

@@ -132,5 +132,7 @@ public:
 
 	//object ids must be refreshed between scenes. otherwise reused objects will not be written to a manifest for the new scene
 	void RefreshObjectManifest();
+
+	void EndSession();
 };
 }

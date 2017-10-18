@@ -19,13 +19,7 @@ void Transaction::BeginPosition(::std::string category, ::std::vector<float> &Po
 
 void Transaction::BeginPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginPosition failed: init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		// this should still be added to the batch, but not sent
-		cvr->log->Warning("Transaction::Begin failed: Session not started!");
-	}
+	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { cvr->log->Info("Transaction::BeginPosition failed: init not successful"); return; }
 
 	::std::string trans = std::string("TXN");
 
@@ -66,12 +60,7 @@ void Transaction::UpdatePosition(::std::string category, ::std::vector<float> &P
 
 void Transaction::UpdatePosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id, double progress)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::UpdatePosition failed: init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Transaction::UpdatePosition failed: Session not started!");
-	}
+	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { cvr->log->Info("Transaction::UpdatePosition failed: init not successful"); return; }
 
 	double ts = cvr->GetTimestamp();
 
@@ -109,12 +98,7 @@ void Transaction::EndPosition(::std::string category, ::std::vector<float> &Posi
 
 void Transaction::EndPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id, ::std::string result)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::EndPosition failed: init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Transaction::EndPosition failed: Session not started!");
-	}
+	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { cvr->log->Info("Transaction::EndPosition failed: init not successful"); return; }
 
 	double ts = cvr->GetTimestamp();
 
@@ -152,12 +136,7 @@ void Transaction::BeginEndPosition(::std::string category, ::std::vector<float> 
 
 void Transaction::BeginEndPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id, ::std::string result)
 {
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::BeginEndPosition failed: init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Transaction::BeginEndPosition failed: Session not started!");
-	}
+	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { cvr->log->Info("Transaction::BeginEndPosition failed: init not successful"); return; }
 
 	this->EndPosition(category, Position, properties, transaction_id, result);
 }
@@ -171,9 +150,7 @@ void Transaction::AddToBatch(::std::string method, nlohmann::json args)
 
 	BatchedTransactions.emplace_back(batchObject);
 
-	transactionCount++;
-
-	if (transactionCount >= cvr->config->TransactionBatchSize)
+	if (BatchedTransactions.size() >= cvr->config->TransactionBatchSize)
 	{
 		SendData();
 	}
@@ -181,39 +158,39 @@ void Transaction::AddToBatch(::std::string method, nlohmann::json args)
 
 void Transaction::SendData()
 {
+	if (cvr->IsPendingInit()) { cvr->log->Info("Transaction::SendData failed: init pending"); return; }
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Transaction::SendData failed: init not successful"); return; }
 
-	if (!cvr->HasStartedSession())
+	if (BatchedTransactions.size() > 0)
 	{
-		cvr->log->Warning("Transaction::SendData failed: Session not started!");
-		return;
+		//send to dashboard
+		nlohmann::json data = nlohmann::json::array();
+		data.emplace_back(cvr->GetTimestamp());
+		data.emplace_back(BatchedTransactions);
+		cvr->network->DashboardCall("datacollector_batch", data.dump());
+
+		BatchedTransactions.clear();
 	}
 
-	if (BatchedTransactionsSE.size() == 0)
+
+	if (BatchedTransactionsSE.size() > 0)
 	{
-		return;
+		//send to sceneexplorer
+		nlohmann::json se = nlohmann::json();
+		se["userid"] = cvr->UserId;
+		se["timestamp"] = (int)cvr->GetTimestamp();
+		se["sessionid"] = cvr->GetSessionID();
+		se["part"] = jsonPart;
+		jsonPart++;
+		se["data"] = BatchedTransactionsSE;
+		if (cvr->network->SceneExplorerCall("events", se.dump()))
+		{
+			BatchedTransactionsSE.clear();
+		}
 	}
-
-	//send to dashboard
-	nlohmann::json data = nlohmann::json::array();
-	data.emplace_back(cvr->GetTimestamp());
-	data.emplace_back(BatchedTransactions);
-	cvr->network->DashboardCall("datacollector_batch", data.dump());
-
-	BatchedTransactions.clear();
-
-	//send to sceneexplorer
-	nlohmann::json se = nlohmann::json();
-	se["userid"] = cvr->UserId;
-	se["timestamp"] = (int)cvr->GetTimestamp();
-	se["sessionid"] = cvr->GetSessionID();
-	se["part"] = jsonPart;
-	jsonPart++;
-	se["data"] = BatchedTransactionsSE;
-	if (cvr->network->SceneExplorerCall("events", se.dump()))
-	{
-		BatchedTransactionsSE.clear();
-		transactionCount = 0;
-	}
+}
+void Transaction::EndSession()
+{
+	BatchedTransactionsSE.clear();
 }
 }

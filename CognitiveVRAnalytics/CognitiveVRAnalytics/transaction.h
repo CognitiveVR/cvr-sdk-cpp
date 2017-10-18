@@ -39,18 +39,21 @@ class COGNITIVEVRANALYTICS_API Transaction
 
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-		//the array of objects {method:"whatever",args:json} to send to dashboard
-		nlohmann::json BatchedTransactions;
-		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
-		nlohmann::json BatchedTransactionsSE;
+
 
 		
 
 		int jsonPart = 1;
-		int transactionCount = 0;
 
     public:
         Transaction(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+
+		//the array of objects {method:"whatever",args:json} to send to dashboard
+		nlohmann::json BatchedTransactions = nlohmann::json();
+		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
+		nlohmann::json BatchedTransactionsSE = nlohmann::json();
+
+		//int transactionCount = 0;
 
         /** Begin a new transaction.
 
@@ -110,5 +113,6 @@ class COGNITIVEVRANALYTICS_API Transaction
 		void AddToBatch(::std::string method, nlohmann::json args);
 
 		void SendData();
+		void EndSession();
 };
 }

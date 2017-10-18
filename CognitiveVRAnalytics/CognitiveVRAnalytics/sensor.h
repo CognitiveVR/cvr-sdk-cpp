@@ -43,14 +43,15 @@ class COGNITIVEVRANALYTICS_API Sensor
 		//int sensorDataCount = 0;
 		//int SensorThreshold = 16;
 
-		::std::map<::std::string, nlohmann::json> allsensors;// = ::std::map<::std::string, nlohmann::json>();
-		int sensorCount = 0;
+		::std::map<::std::string, nlohmann::json> allsensors = ::std::map<::std::string, nlohmann::json>();
 		int jsonPart = 1;
 
     public:
+		int sensorCount = 0;
+
 		Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 		void RecordSensor(::std::string Name, float value);
 		void SendData();
-        
+		void EndSession();
 };
 }

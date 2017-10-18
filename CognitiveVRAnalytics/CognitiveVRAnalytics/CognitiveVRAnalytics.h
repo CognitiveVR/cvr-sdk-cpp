@@ -102,21 +102,23 @@ private:
 	::std::unique_ptr<Config> config = nullptr;
 	
 
-	bool bHasSessionStarted = false;
-	bool bWasInitSuccessful = true; //set to false if there was an error in response
+	//bool bHasSessionStarted = false; //if the session has been requested to start
+	bool bWasInitSuccessful = false; //application_init returns expected values from dashboard
+	bool bPendingInit = true; //after constructor and before session init has responded. allows batching data before session begins
 	double SessionTimestamp = -1;
 
-	::std::string CurrentSceneId = "";
-	::std::string UserId = "";
-	nlohmann::json UserProperties = nlohmann::json();
-	::std::string DeviceId = "";
-	nlohmann::json DeviceProperties = nlohmann::json();
 	::std::string SessionId = "";
 
 	WebRequest sendFunctionPointer = nullptr;
 	::std::string DevicePropertyToString(EDeviceProperty propertyType);
 
 public:
+
+	::std::string CurrentSceneId = "";
+	::std::string UserId = "";
+	nlohmann::json UserProperties = nlohmann::json();
+	::std::string DeviceId = "";
+	nlohmann::json DeviceProperties = nlohmann::json();
 
 	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
 	::std::unique_ptr<CognitiveLog> log = nullptr;
@@ -155,8 +157,10 @@ public:
 	double GetTimestamp();
 	::std::string GetSessionID();
 	
-	void SetHasStartedSession(bool started);
-	bool HasStartedSession();
+	//void SetHasStartedSession(bool started);
+	//bool HasStartedSession();
+	void SetPendingInit(bool isPending);
+	bool IsPendingInit();
 	void SetInitSuccessful(bool success);
 	bool WasInitSuccessful();
 

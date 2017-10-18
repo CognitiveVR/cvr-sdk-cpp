@@ -38,22 +38,12 @@ void Tuning::ReceiveValues(::std::string rawvalues)
 
 void Tuning::CacheValues(::std::string entity_id, nlohmann::json values, EntityType entity_type, bool getallc)
 {
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Tuning::CacheValues session has not started");
-		return;
-	}
+
 }
 
 bool Tuning::GetValue(::std::string name, bool defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
-		return defaultValue;
-	}
 
 	cvr->log->Info("tuning variable bool");
 	bool result = defaultValue;
@@ -126,12 +116,6 @@ int Tuning::GetValue(::std::string name, int defaultValue, EntityType entity_typ
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
-		return defaultValue;
-	}
-
 	cvr->log->Info("tuning variable int");
 	int result = defaultValue;
 	if (entity_type == EntityType::kEntityTypeUser)
@@ -192,12 +176,6 @@ int Tuning::GetValue(::std::string name, int defaultValue, EntityType entity_typ
 float Tuning::GetValue(::std::string name, float defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
-		return defaultValue;
-	}
 
 	cvr->log->Info("tuning variable float");
 	float result = defaultValue;
@@ -260,12 +238,6 @@ float Tuning::GetValue(::std::string name, float defaultValue, EntityType entity
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
 
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
-		return defaultValue;
-	}
-
 	cvr->log->Info("tuning variable string");
 	::std::string result = defaultValue;
 	if (entity_type == EntityType::kEntityTypeUser)
@@ -296,12 +268,6 @@ float Tuning::GetValue(::std::string name, float defaultValue, EntityType entity
 ::std::string Tuning::GetValue(::std::string name, char* defaultValue, EntityType entity_type)
 {
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Tuning::GetValue failed: init not successful"); return defaultValue; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("Tuning::GetValue failed: Session not started!");
-		return defaultValue;
-	}
 
 	cvr->log->Info("tuning variable char*");
 	::std::string result = defaultValue;
@@ -354,5 +320,11 @@ void Tuning::RecordValueAccess(::std::string name, ::std::string default_value, 
             return "DEVICE";
     }
     return "UNKNOWN";
+}
+
+void Tuning::EndSession()
+{
+	user_value_cache.clear();
+	device_value_cache.clear();
 }
 }

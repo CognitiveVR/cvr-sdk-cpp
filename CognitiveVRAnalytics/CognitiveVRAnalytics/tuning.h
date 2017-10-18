@@ -97,5 +97,7 @@ class COGNITIVEVRANALYTICS_API Tuning
 
 		//in the unity sdk, this is limited to recording every 8 hours. ie once per session
 		void RecordValueAccess(::std::string name, ::std::string default_value, ::std::string user_id = "", ::std::string device_id = "");
+
+		void EndSession();
 };
 }

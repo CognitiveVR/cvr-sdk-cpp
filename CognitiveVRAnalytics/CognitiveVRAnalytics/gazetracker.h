@@ -37,13 +37,15 @@ private:
 	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	long lastIntervalTime = -1;
 	int jsonPart = 1;
-	int gazeCount = 0;
-	nlohmann::json BatchedGazeSE;
+	//int gazeCount = 0;
+	
 	//set from config
 	float PlayerSnapshotInterval = 0.1f;
 	::std::string HMDType = "";
 
 public:
+
+	nlohmann::json BatchedGazeSE = nlohmann::json();
 
 	GazeTracker(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 	void SetInterval(float interval);
@@ -53,5 +55,6 @@ public:
 	void RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation);
 
 	void SendData();
+	void EndSession();
 };
 }

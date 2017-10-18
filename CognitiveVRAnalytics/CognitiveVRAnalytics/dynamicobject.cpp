@@ -195,13 +195,8 @@ void DynamicObject::EndEngagement(int objectId, ::std::string name)
 
 void DynamicObject::SendData()
 {
+	if (cvr->IsPendingInit()) { cvr->log->Info("DynamicObject::SendData failed: init pending"); return; }
 	if (!cvr->WasInitSuccessful()) { cvr->log->Info("DynamicObject::SendData failed: init not successful"); return; }
-
-	if (!cvr->HasStartedSession())
-	{
-		cvr->log->Warning("DynamicObject::SendData failed: Session not started!");
-		return;
-	}
 
 	if (manifestEntries.size() + snapshots.size() == 0)
 	{
@@ -286,5 +281,18 @@ void DynamicObject::RefreshObjectManifest()
 	{
 		manifestEntries.emplace_back(element);
 	}
+}
+
+void DynamicObject::EndSession()
+{
+	fullManifest.clear();
+	manifestEntries.clear();
+
+	objectIds.clear();
+	snapshots.clear();
+
+	engagementCounts.clear();
+	dirtyEngagements.clear();
+	allEngagements.clear();
 }
 }
