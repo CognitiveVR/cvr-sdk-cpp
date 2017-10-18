@@ -244,8 +244,8 @@ void DynamicObject::SendData()
 	//send to sceneexplorer
 	if (cvr->network->SceneExplorerCall("dynamic", sendJson.dump()))
 	{
+		manifestEntries.clear();
 		snapshots.clear();
-		manifest.clear();
 	}
 }
 

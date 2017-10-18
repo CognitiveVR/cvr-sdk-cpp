@@ -57,6 +57,11 @@ void InitCallback(::std::string body)
 			cvr->log->Info("Applicaiton Init callback successful");
 
 			cvr->tuning->ReceiveValues(jsonresponse);
+			nlohmann::json props;
+
+			::std::vector<float> beginPos = { 0,0,0 };
+
+			cvr->transaction->BeginPosition("cvr.session", beginPos, props);
 		}
 		else
 		{
@@ -64,12 +69,6 @@ void InitCallback(::std::string body)
 			cvr->SetInitSuccessful(false);
 			cvr->SetHasStartedSession(false);
 		}
-		
-		nlohmann::json props;
-
-		::std::vector<float> beginPos = { 0,0,0 };
-
-		cvr->transaction->BeginPosition("cvr.session", beginPos, props);
 	}
 }
 
@@ -109,6 +108,7 @@ void ExitPollCallback(::std::string body)
 
 void Network::DashboardCall(::std::string suburl, ::std::string content)
 {
+	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::DashboardCall cannot find webrequest pointer"); return; }
 	cvr->log->Info("Network Dashboard call: " + suburl);
 
 	//std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
@@ -143,6 +143,7 @@ void Network::DashboardCall(::std::string suburl, ::std::string content)
 
 void Network::APICall(::std::string suburl, ::std::string callType, ::std::string content)
 {
+	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::APICall cannot find webrequest pointer"); return; }
 	cvr->log->Info("API call: " + suburl);
 
 	::std::string path = cvr->config->kNetworkHost + "/products/" + cvr->GetCustomerId() + "/" + suburl;
@@ -158,10 +159,11 @@ void Network::APICall(::std::string suburl, ::std::string callType, ::std::strin
 
 bool Network::SceneExplorerCall(::std::string suburl, ::std::string content)
 {
-	::std::string scenekey = cvr->GetSceneKey();
+	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::SceneExplorerCall cannot find webrequest pointer"); return false; }
+	::std::string scenekey = cvr->GetSceneId();
 	if (scenekey.empty())
 	{
-		cvr->log->Warning("SceneExplorer failed: Scene key not set");
+		cvr->log->Warning("SceneExplorer failed: SceneID not set");
 		return false;
 	}
 	if (cvr->sendFunctionPointer == nullptr)

@@ -31,6 +31,11 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	log->SetLoggingLevel(settings.loggingLevel);
 	log->Info("CognitiveVRAnalyticsCore()");
 
+	if (settings.webRequest == nullptr)
+	{
+		log->Error("CognitiveVRAnalyticsCore() webRequest is null!");
+	}
+
 	config = make_unique_cognitive<Config>(Config(instance));
 	network = make_unique_cognitive<Network>(Network(instance));
 
@@ -323,8 +328,9 @@ void CognitiveVRAnalyticsCore::UpdateDeviceState()
 
 void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 {
+	log->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
 	bool hasOldScene = false;
-	if (CurrentSceneKey.size() > 0)
+	if (CurrentSceneId.size() > 0)
 	{
 		//send any remaining data to current scene, if there is a current scene
 		SendData();
@@ -332,11 +338,10 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	}
 	//if no current scene, likely queuing up events/gaze/etc before setting the scene
 
-	log->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
 	auto search = config->sceneIds.find(sceneName);
 	if (search != config->sceneIds.end())
 	{
-		CurrentSceneKey = search->second;
+		CurrentSceneId = search->second;
 	}
 	else
 	{
@@ -348,9 +353,9 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	}
 }
 
-::std::string CognitiveVRAnalyticsCore::GetSceneKey()
+::std::string CognitiveVRAnalyticsCore::GetSceneId()
 {
-	return CurrentSceneKey;
+	return CurrentSceneId;
 }
 
 ::std::string CognitiveVRAnalyticsCore::DevicePropertyToString(EDeviceProperty propertyType)

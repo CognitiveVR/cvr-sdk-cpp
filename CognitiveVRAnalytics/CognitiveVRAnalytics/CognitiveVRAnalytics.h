@@ -106,7 +106,7 @@ private:
 	bool bWasInitSuccessful = true; //set to false if there was an error in response
 	double SessionTimestamp = -1;
 
-	::std::string CurrentSceneKey = "";
+	::std::string CurrentSceneId = "";
 	::std::string UserId = "";
 	nlohmann::json UserProperties = nlohmann::json();
 	::std::string DeviceId = "";
@@ -167,6 +167,6 @@ public:
 	void SendData();
 
 	void SetScene(::std::string sceneName);
-	::std::string GetSceneKey();
+	::std::string GetSceneId();
 };
 }

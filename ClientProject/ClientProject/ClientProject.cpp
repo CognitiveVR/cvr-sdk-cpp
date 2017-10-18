@@ -31,6 +31,11 @@ size_t handle(char* buf, size_t size, size_t nmemb, void* up)
 	return size * nmemb;
 }
 
+void INVALID_DoWebStuff(std::string url)
+{
+
+}
+
 void DoWebStuff(std::string url, std::string content, cognitive::WebResponse response)
 {
 	//std::cout << "<<<<curl url sent\n";
@@ -151,6 +156,41 @@ TEST(Initialization, SessionStart) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
+}
+
+TEST(Initialization, SessionStartNoWeb) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	//settings.webRequest = &DoWebStuff;
+	settings.CustomerId = TESTINGCUSTOMER;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	cog.StartSession();
+	EXPECT_EQ(cog.WasInitSuccessful(), false);
+	EXPECT_EQ(cog.HasStartedSession(), false);
+}
+
+TEST(Initialization, SessionStartInvalidCustomerId) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.CustomerId = "DELETE_NOT_A_CUSTOMERID";
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	cog.StartSession();
+	EXPECT_EQ(cog.WasInitSuccessful(), false);
+	EXPECT_EQ(cog.HasStartedSession(), false);
+}
+
+TEST(Initialization, InstancePreConstructor) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	EXPECT_EQ(cognitive::CognitiveVRAnalyticsCore::Instance(), nullptr);
 }
 
 TEST(Initialization, Initialization) {
@@ -1132,6 +1172,7 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
+	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.CustomerId = TESTINGCUSTOMER;
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
@@ -1152,8 +1193,8 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 
-	cog.SetScene("two");
-	EXPECT_EQ(0, cog.dynamicobject->manifestEntries.size());
+	cog.SetScene("two"); //refreshes object manifest
+	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
 
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
