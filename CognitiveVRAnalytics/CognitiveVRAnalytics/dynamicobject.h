@@ -83,8 +83,6 @@ class COGNITIVEVRANALYTICS_API DynamicObject
 private:
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
-	//creates a unique id for an object. stored in this class, but can be referenced by unique number
-	DynamicObjectId GetUniqueId(std::string meshName);
 	int jsonpart = 1;
 
 	int generatedIdOffset = 1000;

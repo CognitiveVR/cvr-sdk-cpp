@@ -45,12 +45,20 @@ int DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mesh
 	DynamicObjectId registerId = DynamicObjectId(customid, meshname);
 	objectIds.emplace_back(registerId);
 
+	for (auto& element : objectIds)
+	{
+		if (element.Id == customid)
+		{
+			cvr->log->Warning("DynamicObject::RegisterObjectCustomId object id " + std::to_string(customid) + "already registered");
+		}
+	}
+
 	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
 
 	manifestEntries.emplace_back(dome);
 	fullManifest.emplace_back(dome);
 
-	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)
+	if (snapshots.size() + manifestEntries.size() >= cvr->config->DynamicDataLimit)
 	{
 		SendData();
 	}
@@ -60,41 +68,40 @@ int DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mesh
 
 int DynamicObject::RegisterObject(::std::string name, ::std::string meshname)
 {
-	DynamicObjectId registerId = GetUniqueId(meshname);
-	objectIds.emplace_back(registerId);
+	bool foundRecycledId = false;
+	DynamicObjectId newObjectId = DynamicObjectId(0, meshname);
 
-	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
-
-	manifestEntries.emplace_back(dome);
-	fullManifest.emplace_back(dome);
-
-	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)
-	{
-		SendData();
-	}
-
-	return registerId.Id;
-}
-
-DynamicObjectId DynamicObject::GetUniqueId(::std::string meshname)
-{
 	static int nextObjectId = generatedIdOffset;
 	for (auto& element : objectIds)
 	{
-		if (element.Id == nextObjectId) { nextObjectId ++; continue; }
+		if (element.Id == nextObjectId) { nextObjectId++; continue; }
 		if (element.Used) { continue; }
 		if (element.MeshName == meshname)
 		{
 			//found an unused objectid
 			element.Used = true;
-			return element;
+			newObjectId = element;
+			foundRecycledId = true;
+			break;
 		}
 	}
 
-	//create new objectid
-	auto newObjectId = DynamicObjectId(nextObjectId, meshname);
+	if (!foundRecycledId)
+	{
+		newObjectId = DynamicObjectId(nextObjectId, meshname);
+		objectIds.emplace_back(newObjectId);
+		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname);
 
-	return newObjectId;
+		manifestEntries.emplace_back(dome);
+		fullManifest.emplace_back(dome);
+	}
+
+	if (snapshots.size() + manifestEntries.size() >= cvr->config->DynamicDataLimit)
+	{
+		SendData();
+	}
+
+	return newObjectId.Id;
 }
 
 bool isInactive(DynamicObjectEngagementEvent engagement)
@@ -153,7 +160,7 @@ void DynamicObject::AddSnapshot(int objectId, ::std::vector<float> position, ::s
 
 	snapshots.emplace_back(snapshot);
 
-	if (snapshots.size() + manifestEntries.size() >= cvr->config->GazeBatchSize)
+	if (snapshots.size() + manifestEntries.size() >= cvr->config->DynamicDataLimit)
 	{
 		SendData();
 	}
