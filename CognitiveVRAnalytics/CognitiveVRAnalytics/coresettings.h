@@ -1,14 +1,16 @@
-
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
+
+//Temporary container to hold values for constructing Cognitive Analytics
+
 #pragma once
 
 #include "stdafx.h"
 #include <map>
 
-//container class to ensure all settings are correct when CognitiveVRAnalyticsCore is constructed
-namespace cognitive {
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
 enum class ECognitiveHMDType
@@ -23,33 +25,39 @@ enum class ECognitiveHMDType
 typedef void(*WebResponse) (::std::string content);
 typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
 
-class CoreSettings {
-
-	private:
-		nlohmann::json UserProperties = nlohmann::json();
-		nlohmann::json DeviceProperties = nlohmann::json();
-
+class CoreSettings
+{
     public:
 		CoreSettings()
 		{
 
 		}
 
-		LoggingLevel loggingLevel;
+		//pointer to a function that allows this SDK to make web requests and receive web responses
+		WebRequest webRequest = nullptr;
 
-        //Network call timeout, measured in seconds. Ex. 5
+		//which logs to display. default is all
+		LoggingLevel loggingLevel = LoggingLevel::kAll;
+
+        //Network call timeout, in seconds. Ex. 5
 		long kNetworkTimeout = 5;
 
 		//which product to send data to. Ex companyname1234-productname-test
 		::std::string CustomerId = "companyname1234-productname-test";
 
+		//how many sensor data points to batch before sending to SceneExplorer
 		int SensorDataLimit = 64;
+		//how many dynamic objects registered and snapshotted to batch before sending to SceneExplorer
 		int DynamicDataLimit = 64;
+		//how many transactions to batch before sending to dashboard and SceneExplorer
 		int TransactionBatchSize = 64;
+		//how many gaze data points to batch before sending to SceneExplorer
 		int GazeBatchSize = 64;
 
+		//the expected interval for gaze snapshots. used by SceneExplorer's timeline
 		float GazeInterval = 0.1f;
 
+		//the type of HMD the user has. used by SceneExplorer to display the correct player mesh
 		ECognitiveHMDType HMDType = ECognitiveHMDType::kUnknown;
 		::std::string GetHMDType()
 		{
@@ -61,9 +69,9 @@ class CoreSettings {
 			return "unknown";
 		}
 
-		::std::map < ::std::string, ::std::string> sceneIds;// = ::std::map<::std::string, ::std::string>();
+		//all 'scenes' the user might encounter. must contain at least one to use SceneExplorer
+		::std::map < ::std::string, ::std::string> sceneIds;
+		//the default scene to load after Cognitive Analytics constructor
 		::std::string DefaultSceneName = "";
-
-		WebRequest webRequest = nullptr;
 };
 }

@@ -1,20 +1,16 @@
-
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
+
+//Used internally. Save values from CoreSettings when Cognitive Analytics is constructed
+
 #pragma once
 
 #include <string>
 #include <map>
 
-//Configuration defaults.
-//std::string Config::kNetworkHost = "https://data.cognitivevr.io";
-//std::string Config::kSsfApp = "isos-personalization";
-//std::string Config::kSsfVersion = "4";
-//std::string Config::kSsfOutput = "json";
-//long Config::kTuningCacheTtl = 900000;
-//long Config::kNetworkTimeout = 5;
-namespace cognitive {
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
 class Config {
@@ -65,9 +61,7 @@ class Config {
 		float GazeInterval = 0.1f;
 		::std::string HMDType = "";
 
-
-		::std::map < ::std::string, ::std::string> sceneIds;// = ::std::map<::std::string, ::std::string>();
-
+		::std::map < ::std::string, ::std::string> sceneIds;
 
 		#pragma warning(pop)
 };

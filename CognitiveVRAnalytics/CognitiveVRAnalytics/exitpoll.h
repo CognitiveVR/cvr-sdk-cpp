@@ -1,7 +1,8 @@
+/*
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
+*/
 
-// Fill out your copyright notice in the Description page of Project Settings.
-
-//organizes all the question sets, responses and exit poll panel actors
+//Get question sets, add player answers and send answers to dashboard
 
 #pragma once
 
@@ -29,10 +30,11 @@
 #pragma warning Unknown dynamic link import/export semantics.
 #endif
 
-namespace cognitive {
-	//using json = nlohmann::json;
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
+//the type of answer for a question
 enum class EAnswerValueTypeReturn
 {
 	kNumber,
@@ -41,6 +43,7 @@ enum class EAnswerValueTypeReturn
 	kNull
 };
 
+//the type of question
 enum class EQuestionType
 {
 	kHappySad,
@@ -51,6 +54,7 @@ enum class EQuestionType
 	kBoolean
 };
 
+//the value of an answer
 struct FExitPollAnswer
 {
 public:
@@ -104,6 +108,7 @@ public:
 		}
 };
 
+//a collection of answers. this is sent to the web api
 struct FExitPollResponse
 {
 public:
@@ -162,20 +167,36 @@ public:
 
 	ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-	void RequestQuestionSet(::std::string Hook);
+	/** Get a set of questions from the web api
+
+	@param std::string hook
+	*/
+	void RequestQuestionSet(::std::string hook);
+
+	//Receive question set as raw string and json
 	void ReceiveQuestionSet(::std::string questionsetstring, nlohmann::json questionset);
 
 	//can return empty json if request failed
 	nlohmann::json GetQuestionSet();
+	//can return empty string if request failed
 	::std::string GetQuestionSetString();
 
+	//returns true if question set successfully recieved
 	bool HasQuestionSet()
 	{
 		return currentQuestionSet.size() > 0;
 	}
 
+	/** Add an answer to the collection of responses for a question set
+
+		@param FExitPollAnswer position
+	*/
 	void AddAnswer(FExitPollAnswer answer);
 
+	/** Send the collection of answers from a question set to the web api
+
+		@param std::vector<float> position - Optional
+	*/
 	void SendAllAnswers();
 	void SendAllAnswers(::std::vector<float> position);
 

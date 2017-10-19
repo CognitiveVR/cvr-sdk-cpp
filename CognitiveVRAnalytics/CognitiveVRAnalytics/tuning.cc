@@ -1,6 +1,5 @@
-
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
 #include "stdafx.h"
 #include "tuning.h"
@@ -34,11 +33,6 @@ void Tuning::ReceiveValues(nlohmann::json jsonvalues)
 void Tuning::ReceiveValues(::std::string rawvalues)
 {
 	ReceiveValues(nlohmann::json::parse(rawvalues));
-}
-
-void Tuning::CacheValues(::std::string entity_id, nlohmann::json values, EntityType entity_type, bool getallc)
-{
-
 }
 
 bool Tuning::GetValue(::std::string name, bool defaultValue, EntityType entity_type)
@@ -309,17 +303,6 @@ void Tuning::RecordValueAccess(::std::string name, ::std::string default_value, 
 	content.emplace_back(default_value);
 
 	cvr->transaction->AddToBatch("tuner_recordUsed", content);
-}
-
-::std::string Tuning::GetEntityTypeString(EntityType entity_type)
-{
-    switch (entity_type) {
-	case EntityType::kEntityTypeUser:
-            return "USER";
-        case EntityType::kEntityTypeDevice:
-            return "DEVICE";
-    }
-    return "UNKNOWN";
 }
 
 void Tuning::EndSession()

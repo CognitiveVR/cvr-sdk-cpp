@@ -1,13 +1,12 @@
-
-// CognitiveAnalytics.cpp : Defines the exported functions for the DLL application.
-//
+/*
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
+*/
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 namespace cognitive {
 static ::std::shared_ptr<CognitiveVRAnalyticsCore> instance;
 
-//this may return null. constructor should call this manually before referencing instance!
 ::std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
 {
 	return instance;
@@ -23,9 +22,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 {
 	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
 
-	//INIT EVERYTHING	
 	sendFunctionPointer = settings.webRequest;
-	//bHasSessionStarted = false;
 
 	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
 	log->SetLoggingLevel(settings.loggingLevel);
@@ -65,7 +62,6 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
 	log->Info("~CognitiveVRAnalyticsCore");
-	//delete a bunch of stuff
 	config.reset();
 	log.reset();
 	network.reset();
@@ -120,8 +116,6 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	GetSessionTimestamp();
 	GetSessionID();
 
-	//std::string content = "[1504208516.4110603, 1504208516.4110603, \"38f44d5b70939aa215476c29d5735bf2c181019a\", \"46c0e715b45064cf607638bbca3dec69\", null, { \"cvr.app.name\":\"CognitiveVRUnity\",\"cvr.app.version\" : \"1.0\",\"cvr.unity.version\" : \"5.4.1p4\",\"cvr.device.model\" : \"System Product Name (System manufacturer)\",\"cvr.device.type\" : \"Desktop\",\"cvr.device.platform\" : \"WindowsEditor\",\"cvr.device.os\" : \"Windows 10  (10.0.0) 64bit\" }]";
-
 	double ts = GetSessionTimestamp();
 
 	nlohmann::json content = nlohmann::json::array();
@@ -151,8 +145,6 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	gaze->SetHMDType(config->HMDType);
 
 	network->DashboardCall("application_init", content.dump());
-
-	//start session event happens from callback
 
 	return true;
 }
@@ -281,14 +273,11 @@ void CognitiveVRAnalyticsCore::UpdateUserState()
 
 	if (UserProperties.size() > 0)
 	{
-		//UserProperties = properties;
-		//add this to transactions batch
 		args.emplace_back(UserProperties);
 		transaction->AddToBatch("datacollector_updateUserState", args);
 	}
 	else
 	{
-		//UserProperties = nlohmann::json::array();
 		args.emplace_back(nullptr);
 		transaction->AddToBatch("datacollector_updateUserState", args);
 	}
@@ -322,14 +311,11 @@ void CognitiveVRAnalyticsCore::UpdateDeviceState()
 
 	if (DeviceProperties.size() > 0)
 	{
-		//DeviceProperties = properties;
-		//add this to transactions batch
 		args.emplace_back(DeviceProperties);
 		transaction->AddToBatch("datacollector_updateDeviceState", args);
 	}
 	else
 	{
-		//DeviceProperties = nlohmann::json::array();
 		args.emplace_back(nullptr);
 		transaction->AddToBatch("datacollector_updateDeviceState", args);
 	}

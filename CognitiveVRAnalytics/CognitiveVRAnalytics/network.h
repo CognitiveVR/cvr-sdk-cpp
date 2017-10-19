@@ -1,10 +1,11 @@
-
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
+
+//Constructs urls and contents of web requests and parses responses
+
 #pragma once
 
-//#include <stdexcept>
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 
@@ -27,11 +28,9 @@
 #define COGNITIVEVRANALYTICS_EXPORTS
 #pragma warning Unknown dynamic link import/export semantics.
 #endif
-namespace cognitive {
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
-
-//typedef void(*WebResponse) (std::string content);
-//typedef void(*WebRequest) (std::string url, std::string content, WebResponse response);
 
 class Network
 {
@@ -41,17 +40,11 @@ class Network
 
     public:
         Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
-        
-
-        /** Make a call to the CognitiveVR API.
-
-            @param std::string sub_path - The path for the API call.
-            @param Json::Value content - JSON content sent to CognitiveVR.
-			@param NetworkCallback callback - JSON content sent to CognitiveVR.
-        */
 		
+		//send batched transactions to dashboard
 		void DashboardCall(::std::string suburl, ::std::string content);
 
+		//exitpoll calls to get question sets and send answers
 		void APICall(::std::string suburl, ::std::string callType, ::std::string content = "");
 
 		//sub url is dynamic/sensor/gaze/event. for sending stuff to sceneexplorer

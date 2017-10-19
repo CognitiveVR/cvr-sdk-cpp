@@ -1,5 +1,6 @@
-
-// Fill out your copyright notice in the Description page of Project Settings.
+/*
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
+*/
 
 #include "stdafx.h"
 #include "dynamicobject.h"
@@ -50,6 +51,7 @@ int DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mesh
 		if (element.Id == customid)
 		{
 			cvr->log->Warning("DynamicObject::RegisterObjectCustomId object id " + std::to_string(customid) + "already registered");
+			break;
 		}
 	}
 
@@ -116,7 +118,7 @@ void DynamicObject::AddSnapshot(int objectId, ::std::vector<float> position, ::s
 
 void DynamicObject::AddSnapshot(int objectId, ::std::vector<float> position, ::std::vector<float> rotation, nlohmann::json properties)
 {
-	//if dynamic object id is not in manifest, add to manifest. likely object ids were cleared from scene change
+	//if dynamic object id is not in manifest, display warning. likely object ids were cleared from scene change
 	bool foundId = false;
 	for (auto& element : objectIds)
 	{
@@ -171,13 +173,13 @@ void DynamicObject::BeginEngagement(int objectId, ::std::string name)
 	engagementCounts[objectId][name] += 1;
 
 	DynamicObjectEngagementEvent engagement = DynamicObjectEngagementEvent(objectId, name, engagementCounts[objectId][name]);
-	dirtyEngagements[objectId].emplace_back(engagement);
+	activeEngagements[objectId].emplace_back(engagement);
 	allEngagements[objectId].emplace_back(engagement);	
 }
 
 void DynamicObject::EndEngagement(int objectId, ::std::string name)
 {
-	for (auto& e : dirtyEngagements[objectId])
+	for (auto& e : activeEngagements[objectId])
 	{
 		if (e.Name == name)
 		{
@@ -189,8 +191,8 @@ void DynamicObject::EndEngagement(int objectId, ::std::string name)
 
 	BeginEngagement(objectId, name);
 
-	auto rit = dirtyEngagements[objectId].rbegin();
-	for (; rit != dirtyEngagements[objectId].rend(); ++rit)
+	auto rit = activeEngagements[objectId].rbegin();
+	for (; rit != activeEngagements[objectId].rend(); ++rit)
 	{
 		if (rit->Name == name)
 		{
@@ -253,7 +255,7 @@ void DynamicObject::SendData()
 
 void DynamicObject::EndActiveEngagements(int objectid)
 {
-	for (auto& element : dirtyEngagements[objectid])
+	for (auto& element : activeEngagements[objectid])
 	{
 		if (element.isActive)
 		{
@@ -281,7 +283,7 @@ void DynamicObject::RemoveObject(int objectid, std::vector<float> position, std:
 	}
 }
 
-//re add all manifest entries when a scene changes. otherwise there could be snapshots for dynamic objects without any identification in the new scene
+//re-add all manifest entries when a scene changes. otherwise there could be snapshots for dynamic objects without any identification in the new scene
 void DynamicObject::RefreshObjectManifest()
 {
 	for (auto& element : fullManifest)
@@ -299,7 +301,7 @@ void DynamicObject::EndSession()
 	snapshots.clear();
 
 	engagementCounts.clear();
-	dirtyEngagements.clear();
+	activeEngagements.clear();
 	allEngagements.clear();
 }
 }

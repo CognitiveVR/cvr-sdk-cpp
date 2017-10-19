@@ -1,14 +1,17 @@
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
+
+//All comments from Cognitive Analytics. Can be set to different logging level to disable comments by type
+
 #pragma once
 
 #include "stdafx.h"
 #include <iostream>
 #include "CognitiveVRAnalytics.h"
 
-namespace cognitive{
-
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
 class CognitiveLog

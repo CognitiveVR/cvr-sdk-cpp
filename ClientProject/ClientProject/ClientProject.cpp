@@ -17,8 +17,8 @@
 
 std::string temp;
 
-std::string TESTINGCUSTOMER = "altimagegames59340-unitywanderdemo-test";
-long TestDelay = 10;
+std::string TESTINGCUSTOMER = "altimagegames59340-cppsdkautomatedtesting-test";
+long TestDelay = 1;
 
 size_t handle(char* buf, size_t size, size_t nmemb, void* up)
 {
@@ -760,7 +760,6 @@ TEST(Tuning, TuningGetValueNoSession) {
 
 	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, "mellow");
-	std::cout << snow_attitude << std::endl;
 }
 
 TEST(Tuning, TuningGetInvalidValue) {
@@ -775,7 +774,6 @@ TEST(Tuning, TuningGetInvalidValue) {
 	cog.StartSession();
 	auto snow_attitude = cog.tuning->GetValue("snow_raditude", "mellow", cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, "mellow");
-	std::cout << snow_attitude << std::endl;
 	cog.EndSession();
 }
 
@@ -791,7 +789,6 @@ TEST(Tuning, TuningGetInvalidCast) {
 	cog.StartSession();
 	auto snow_attitude = cog.tuning->GetValue("snow_attitude", 500, cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, 500);
-	std::cout << snow_attitude << std::endl;
 	cog.EndSession();
 }
 
@@ -807,7 +804,6 @@ TEST(Tuning, TuningGetInvalidCastBool) {
 	cog.StartSession();
 	auto snow_attitude = cog.tuning->GetValue("snow_attitude", false, cognitive::EntityType::kEntityTypeDevice);
 	EXPECT_EQ(snow_attitude, false);
-	std::cout << snow_attitude << std::endl;
 	cog.EndSession();
 }
 
@@ -1064,8 +1060,8 @@ TEST(ExitPoll, BasicRequest) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("arquestions");
-	EXPECT_EQ(cog.exitpoll->GetQuestionSetString(), "{\"customerId\":\"altimagegames59340-unitywanderdemo-test\",\"id\":\"arquestions:1\",\"name\":\"arquestions\",\"version\":1,\"title\":\"Questionnaire\",\"status\":\"active\",\"questions\":[{\"title\":\"Are you having fun with this experience?\",\"type\":\"HAPPYSAD\"}]}");
+	cog.exitpoll->RequestQuestionSet("testing_questions");
+	EXPECT_EQ(cog.exitpoll->GetQuestionSetString(), "{\"customerId\":\"altimagegames59340-cppsdkautomatedtesting-test\",\"id\":\"testingquestionsetbool:1\",\"name\":\"testingquestionsetbool\",\"version\":1,\"title\":\"Questionnaire\",\"status\":\"active\",\"questions\":[{\"title\":\"Are you having fun with this experience?\",\"type\":\"BOOLEAN\"}]}");
 	cog.EndSession();
 }
 
@@ -1081,7 +1077,7 @@ TEST(ExitPoll, GetThenRequest) {
 
 	cog.StartSession();
 	cog.exitpoll->GetQuestionSet();
-	cog.exitpoll->RequestQuestionSet("arquestions");
+	cog.exitpoll->RequestQuestionSet("testing_questions");
 	cog.EndSession();
 }
 
@@ -1096,7 +1092,7 @@ TEST(ExitPoll, RequestThenGet) {
 
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("arquestions");
+	cog.exitpoll->RequestQuestionSet("testing_questions");
 	cog.exitpoll->GetQuestionSet();
 	cog.EndSession();
 }
@@ -1126,7 +1122,7 @@ TEST(ExitPoll, RequestThenGetAnswersJson) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("arquestions");
+	cog.exitpoll->RequestQuestionSet("testing_questions");
 	cognitive::nlohmann::json questions = cog.exitpoll->GetQuestionSet();
 
 	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
@@ -1146,7 +1142,7 @@ TEST(ExitPoll, RequestThenGetAnswersString) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("arquestions");
+	cog.exitpoll->RequestQuestionSet("testing_questions");
 	std::string questionString = cog.exitpoll->GetQuestionSetString();
 
 	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
@@ -1922,13 +1918,13 @@ TEST(Dynamics, EngagementBeforeRegister) {
 	cog.dynamicobject->BeginEngagement(1, "grab");
 	cog.dynamicobject->AddSnapshot(1, pos, rot);
 	cog.dynamicobject->EndEngagement(1, "grab");
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(), 1);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp",1);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(), 1);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
 }
 
@@ -1957,11 +1953,11 @@ TEST(Dynamics, EngagementNeverRegister) {
 	cog.dynamicobject->BeginEngagement(1, "grab");
 	cog.dynamicobject->AddSnapshot(1, pos, rot);
 	cog.dynamicobject->EndEngagement(1, "grab");
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(), 1);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
 	//cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
 	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(), 1);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
 }
 
@@ -1993,7 +1989,7 @@ TEST(Dynamics, EngagementsScenes) {
 	cog.dynamicobject->BeginEngagement(object1id, "grab");
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->EndEngagement(object1id, "grab");
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(),1);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(),1);
 	EXPECT_EQ(cog.dynamicobject->allEngagements.size(),1);
 
 	cog.SetScene("two"); //refreshes object manifest
@@ -2005,7 +2001,7 @@ TEST(Dynamics, EngagementsScenes) {
 	cog.dynamicobject->BeginEngagement(object2id, "grab");
 	cog.dynamicobject->EndEngagement(object1id, "grab");
 	cog.dynamicobject->EndEngagement(object2id, "grab");
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(), 2);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 2);
 
 	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
@@ -2041,11 +2037,11 @@ TEST(Dynamics, EngagementRemove) {
 	cog.dynamicobject->BeginEngagement(1, "grab");
 	cog.dynamicobject->AddSnapshot(1, pos, rot);
 	cog.dynamicobject->RemoveObject(1, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(), 1);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
 
 	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->dirtyEngagements.size(), 1);
+	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
 }
 

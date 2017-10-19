@@ -1,7 +1,8 @@
-
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
+
+//Record beginning and ending of events
 #pragma once
 
 #include "stdafx.h"
@@ -29,19 +30,14 @@
 #endif
 
 
-namespace cognitive {
-	//using json = nlohmann::json;
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API Transaction
 {
-	//friend class CognitiveVRAnalyticsCore;
-
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-
-
-		
 
 		int jsonPart = 1;
 
@@ -53,66 +49,55 @@ class COGNITIVEVRANALYTICS_API Transaction
 		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
 		nlohmann::json BatchedTransactionsSE = nlohmann::json();
 
-		//int transactionCount = 0;
-
         /** Begin a new transaction.
 
 			@param std::string category
-			@param FVector position - Optional.
-            @param Json::Value properties - Optional.
-			@param std::string transaction_id - Optional.
-                
-            @throws CognitiveVR_exception
+			@param std::vector<float> position - Optional
+            @param nlohmann::json properties - Optional
+			@param std::string transaction_id - Optional
         */
-		//void Begin(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "");
 		void BeginPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "");
 		void BeginPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "");
 
         /** Update an existing transaction.
 
 			@param std::string category
-			@param FVector position - Optional.
-			@param Json::Value properties - Optional.
-            @param std::string transaction_id - Optional.
-            @param double progress - Optional.
-
-            @throws CognitiveVR_exception
+			@param std::vector<float> position - Optional
+			@param nlohmann::json properties - Optional
+			@param std::string transaction_id - Optional
+            @param double progress - Optional
         */
-		//void Update(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", double progress = 0);
 		void UpdatePosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", double progress = 0);
 		void UpdatePosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "", double progress = 0);
 
         /** End an existing transaction.
 
 			@param std::string category
-			@param FVector position - Optional.
-			@param Json::Value properties - Optional.
-            @param std::string transaction_id - Optional.
-            @param std::string result - Optional.
-
-            @throws cognitivevr_exception
+			@param std::vector<float> position - Optional
+			@param nlohmann::json properties - Optional
+			@param std::string transaction_id - Optional
+            @param std::string result - Optional
         */
-		//void End(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
 		void EndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", ::std::string result = "");
 		void EndPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "", ::std::string result = "");
 
         /** Begin and end new transaction.
 
 			@param std::string category
-			@param FVector position - Optional.
-			@param Json::Value properties - Optional.
-            @param std::string transaction_id - Optional.
-            @param std::string result - Optional.
-
-            @throws cognitivevr_exception
+			@param std::vector<float> position - Optional
+			@param nlohmann::json properties - Optional
+			@param std::string transaction_id - Optional
+            @param std::string result - Optional
         */
-		//void BeginEnd(std::string category, std::shared_ptr<json> properties = NULL, std::string transaction_id = "", std::string result = "");
 		void BeginEndPosition(::std::string category, ::std::vector<float> &Position, ::std::string transaction_id = "", ::std::string result = "");
 		void BeginEndPosition(::std::string category, ::std::vector<float> &Position, nlohmann::json properties, ::std::string transaction_id = "", ::std::string result = "");
 
+		//used to batch other calls with transactions to send to dashboard
 		void AddToBatch(::std::string method, nlohmann::json args);
 
 		void SendData();
+		
+		//clear saved transactions
 		void EndSession();
 };
 }

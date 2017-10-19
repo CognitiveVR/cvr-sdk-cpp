@@ -1,5 +1,6 @@
-
-// Fill out your copyright notice in the Description page of Project Settings.
+/*
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
+*/
 
 #include "stdafx.h"
 #include "gazetracker.h"

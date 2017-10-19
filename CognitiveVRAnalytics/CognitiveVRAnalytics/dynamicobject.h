@@ -1,15 +1,16 @@
+/*
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
+*/
 
-// Fill out your copyright notice in the Description page of Project Settings.
+//Register and record objects that created, moved or changed during the experience. Also record being and end engagements
 
 #pragma once
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 
-//central class for registering / snapshotting all dynamic objects
-
-namespace cognitive {
-	//using json = nlohmann::json;
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
 enum class CommonMeshName
@@ -20,7 +21,7 @@ enum class CommonMeshName
 	kViveTracker
 };
 
-//created when registering dynamic objects
+//created when registering dynamic objects. sent to SceneExplorer
 class DynamicObjectManifestEntry
 {
 public:
@@ -37,6 +38,7 @@ public:
 	}
 };
 
+//used in the client to track which ids are used and which can be reused
 class DynamicObjectId
 {
 public:
@@ -51,6 +53,7 @@ public:
 	}
 };
 
+//the state of an object at a time
 struct DynamicObjectSnapshot
 {
 public:
@@ -65,6 +68,7 @@ public:
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, int objectId, nlohmann::json properties);
 };
 
+//an interaction the player has with a dynamic object
 struct DynamicObjectEngagementEvent
 {
 public:
@@ -90,13 +94,21 @@ private:
 public:
 
 	//public for testing, but shouldn't be used outside this class
-	std::vector<DynamicObjectId> objectIds; //cumulative. only used by sdk to assign unique ids
-	std::vector<DynamicObjectSnapshot> snapshots; //cleared on send
-	std::vector<DynamicObjectManifestEntry> fullManifest; //refreshed on scene change
-	std::vector<DynamicObjectManifestEntry> manifestEntries; //cleared on send
 
-	std::map<int, std::vector<DynamicObjectEngagementEvent>> dirtyEngagements; //engagements that are active
-	std::map<int, std::vector<DynamicObjectEngagementEvent>> allEngagements; //all engagements that need to be written to snapshots. inactive engagements are removed
+	//tracks all used ids in client
+	std::vector<DynamicObjectId> objectIds;
+	//oustanding snapshots of dynamic objects. cleared on send
+	std::vector<DynamicObjectSnapshot> snapshots;
+	//all objects that have existed in the scene. resent on scene change
+	std::vector<DynamicObjectManifestEntry> fullManifest;
+	//all objects that have not yet been sent to SceneExplorer. cleared on send
+	std::vector<DynamicObjectManifestEntry> manifestEntries;
+
+	//engagements that are currently active
+	std::map<int, std::vector<DynamicObjectEngagementEvent>> activeEngagements;
+	//all engagements that need to be written to snapshots. active or inactive. inactive engagements are removed after being sent
+	std::map<int, std::vector<DynamicObjectEngagementEvent>> allEngagements;
+	//count of engagements on dynamic objects of type
 	std::map<int, std::map < std::string, int >> engagementCounts;
 
 
@@ -106,29 +118,61 @@ public:
 
 	void SendData();
 
-	//put into dynamic manifest with an id. returns objectid
+	/** put into dynamic manifest with an id. returns objectid
+
+		@param std::string name
+		@param std::string meshname
+		@param int customid
+	*/
 	int RegisterObjectCustomId(std::string name, std::string meshname, int customid);
 
-	//put into dynamic manifest. reuses or creates new objectid. returns objectid
+	//
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible
+
+		@param std::string name
+		@param std::string meshname
+	*/
 	int RegisterObject(std::string name, std::string meshname);
 
-	//append engagement from list if still active
+	/** record the position, rotation and other properties of an object
+
+		@param int objectId
+		@param std::vector<float> position
+		@param std::vector<float> rotation
+		@param nlohmann::json properties - Optional
+	*/
 	void AddSnapshot(int objectId, std::vector<float> position, std::vector<float> rotation);
 	void AddSnapshot(int objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
 
-	//add engagement to list
+	/** add engagement to dynamic object
+
+		@param int objectid
+		@param std::string name
+	*/
 	void BeginEngagement(int objectId, std::string name);
-	//calculate time and remove from list. create snapshot
+	
+	/** end engagement on dynamic object. immediately begins and ends if engagement does not already exist. requires a snapshot of the dynamic object to send engagement data!
+
+		@param int objectid
+		@param std::string name
+	*/
 	void EndEngagement(int objectId, std::string name);
 
-	//deregister. recycles objectid. don't need to do this for objects that don't share ids
-	//also ends all active engagements on this object
+	/**deregister dynamic object and recycles objectid. don't need to do this for objects that were registered without a custom id. also sends a snapshot
+
+		@param int objectid
+		@param std::vector<float> position
+		@param std::vector<float> rotation
+	*/
 	void RemoveObject(int objectid, std::vector<float> position, std::vector<float> rotation);
 
-	//end all engagements on an object. to be used if the object is destroyed
-	void EndActiveEngagements(int objectId);
+	/** end all engagements on an object. to be used if the object is destroyed. requires a snapshot of the dynamic object to send engagement data!
 
-	//object ids must be refreshed between scenes. otherwise reused objects will not be written to a manifest for the new scene
+		@param int objectid
+	*/
+	void EndActiveEngagements(int objectid);
+
+	//object ids are refreshed between scenes. otherwise reused objects will not be written to a manifest for the new scene
 	void RefreshObjectManifest();
 
 	void EndSession();

@@ -1,7 +1,9 @@
-
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
+
+//Record sensors and values of various types over periods of time
+
 #pragma once
 
 #include "stdafx.h"
@@ -27,8 +29,8 @@
 #define COGNITIVEVRANALYTICS_EXPORTS
 #pragma warning Unknown dynamic link import/export semantics.
 #endif
-namespace cognitive {
-	//using json = nlohmann::json;
+namespace cognitive
+{
 class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API Sensor
@@ -36,22 +38,23 @@ class COGNITIVEVRANALYTICS_API Sensor
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
-		//std::map<std::string, std::string> somedatapoints;
-		
-		//std::string SensorDataToString();
-		//int jsonPart = 0;
-		//int sensorDataCount = 0;
-		//int SensorThreshold = 16;
-
-		::std::map<::std::string, nlohmann::json> allsensors;//g++ doesn't like this = ::std::map<::std::string, nlohmann::json>();
+		::std::map<::std::string, nlohmann::json> allsensors;
 		int jsonPart = 1;
 
     public:
 		int sensorCount = 0;
 
 		Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
-		void RecordSensor(::std::string Name, float value);
+
+		/** Record data for a sensor
+
+			@param std::string name
+			@param float value
+		*/
+		void RecordSensor(::std::string name, float value);
 		void SendData();
+
+		//clear all saved sensor data
 		void EndSession();
 };
 }

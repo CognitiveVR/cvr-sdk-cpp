@@ -1,5 +1,8 @@
+/*
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
+*/
 
-// Fill out your copyright notice in the Description page of Project Settings.
+//Record hmd position, direction of gaze, point of gaze and (it applicable) the object that was gazed at
 
 #pragma once
 
@@ -35,12 +38,11 @@ class COGNITIVEVRANALYTICS_API GazeTracker
 {
 private:
 	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-	long lastIntervalTime = -1;
 	int jsonPart = 1;
-	//int gazeCount = 0;
 	
 	//set from config
 	float PlayerSnapshotInterval = 0.1f;
+	//set from config
 	::std::string HMDType = "";
 
 public:
@@ -51,10 +53,18 @@ public:
 	void SetInterval(float interval);
 	void SetHMDType(::std::string hmdtype);
 
-	void RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId = -1);
-	void RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation);
+	/** Record HMD position, rotation, gaze and object hit
+
+		@param std::vector<float> position
+		@param std::vector<float> rotation
+		@param std::vector<float> gazepoint - Optional
+		@param std::vector<float> objectid - Opitonal
+	*/
+	void RecordGaze(::std::vector<float> &position, ::std::vector<float> &rotation, ::std::vector<float> &gazepoint, int objectid = -1);
+	void RecordGaze(::std::vector<float> &position, ::std::vector<float> &rotation);
 
 	void SendData();
+	//clear gaze points
 	void EndSession();
 };
 }

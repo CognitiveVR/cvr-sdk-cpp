@@ -1,3 +1,8 @@
+/*
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
+*/
+
+//Contains functions to construct Cognitive Analytics, set user and device properties, start and end sessions, set scenes, and get timestamps
 
 #pragma once
 
@@ -101,12 +106,12 @@ private:
 	::std::unique_ptr<Network> network = nullptr;
 	::std::unique_ptr<Config> config = nullptr;
 	
+	//application_init returns expected values from dashboard
+	bool bWasInitSuccessful = false;
+	//after constructor and before session init has responded. allows batching data before session begins
+	bool bPendingInit = true;
 
-	//bool bHasSessionStarted = false; //if the session has been requested to start
-	bool bWasInitSuccessful = false; //application_init returns expected values from dashboard
-	bool bPendingInit = true; //after constructor and before session init has responded. allows batching data before session begins
 	double SessionTimestamp = -1;
-
 	::std::string SessionId = "";
 
 	WebRequest sendFunctionPointer = nullptr;
@@ -114,12 +119,15 @@ private:
 
 public:
 
+	//unique id of scene that that receives recorded data
 	::std::string CurrentSceneId = "";
+
 	::std::string UserId = "";
 	nlohmann::json UserProperties = nlohmann::json();
 	::std::string DeviceId = "";
 	nlohmann::json DeviceProperties = nlohmann::json();
 
+	//this may return null. constructor should call this manually before referencing instance!
 	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
 	::std::unique_ptr<CognitiveLog> log = nullptr;
 	::std::unique_ptr<Transaction> transaction = nullptr;
@@ -129,48 +137,78 @@ public:
 	::std::unique_ptr<DynamicObject> dynamicobject = nullptr;
 	::std::unique_ptr<ExitPoll> exitpoll = nullptr;
 
-	//CognitiveVRAnalyticsCore(WebRequest sendFunc);
-	//CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::map<::std::string, ::std::string> sceneids);
-	//CognitiveVRAnalyticsCore(WebRequest sendFunc, ::std::string customerid, int gazecount, int eventcount, int sensorcount, int dynamiccount, ::std::map < ::std::string, ::std::string> sceneids);
 	CognitiveVRAnalyticsCore(CoreSettings settings);
 	CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&);
-	//CognitiveVRAnalyticsCore& operator=(CognitiveVRAnalyticsCore&&) = default;
 	
 	~CognitiveVRAnalyticsCore();
 
+	/** set a unique user id
+		@param std::string user_id
+	*/
 	void SetUserId(::std::string user_id);
+	//* set many user properties
 	void SetUserProperties(nlohmann::json properties);
+	/** set single user property
+		@param std::string propertyType
+		@param int value
+	*/
 	void SetUserProperty(::std::string propertyType, int value);
+	/** set single user property
+		@param std::string propertyType
+		@param float value
+	*/
 	void SetUserProperty(::std::string propertyType, float value);
+	/** set single user property
+		@param std::string propertyType
+		@param std::string value
+	*/
 	void SetUserProperty(::std::string propertyType, ::std::string value);
+	/** confirm user properties. send to dashboard
+	*/
 	void UpdateUserState();
 
+	//* set unique device id
 	void SetDeviceId(::std::string device_id);
+	/** set single device property
+		@param EDeviceProperty propertyType
+		@param int value
+	*/
 	void SetDeviceProperty(EDeviceProperty propertyType, int value);
+	/** set single device property
+		@param EDeviceProperty propertyType
+		@param std::string value
+	*/
 	void SetDeviceProperty(EDeviceProperty propertyType, ::std::string value);
+	//* confirm device properties. send to dashboard
 	void UpdateDeviceState();
 
-
+	//which organization and product this project belongs to. used to send to dashboard
 	::std::string GetCustomerId();
-
+	//used to identify which session this sends to for SceneExplorer
 	double GetSessionTimestamp();
 	double GetTimestamp();
+	//the session timestamp and user. creates a unique session in SceneExplorer
 	::std::string GetSessionID();
 	
-	//void SetHasStartedSession(bool started);
-	//bool HasStartedSession();
 	void SetPendingInit(bool isPending);
 	bool IsPendingInit();
 	void SetInitSuccessful(bool success);
 	bool WasInitSuccessful();
 
-	//returns true if successfully starting session. ie, not already started
+	/** start a session. returns true if successfully starting session. ie, not already started
+	*/
 	bool StartSession();
+
+	/** end the session. sends all final data to dashboard and SceneExplorer
+	*/
 	void EndSession();
 
 	void SendData();
 
-	void SetScene(::std::string sceneName);
+	/** set which scene on SceneExplorer should recieve the recorded data
+		@param std::string scenename
+	*/
+	void SetScene(::std::string scenename);
 	::std::string GetSceneId();
 };
 }

@@ -1,6 +1,5 @@
-
 /*
-** Copyright (c) 2016 CognitiveVR, Inc. All rights reserved.
+Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
 #include "stdafx.h"
 #include "transaction.h"
@@ -191,6 +190,7 @@ void Transaction::SendData()
 }
 void Transaction::EndSession()
 {
+	BatchedTransactions.clear();
 	BatchedTransactionsSE.clear();
 }
 }
