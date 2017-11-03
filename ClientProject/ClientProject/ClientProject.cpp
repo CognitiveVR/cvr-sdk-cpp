@@ -1586,30 +1586,30 @@ TEST(Dynamics, InitRegisterSend) {
 
 	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
 
 	pos = { 0,0,5 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,1,6 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 4);
 
 	pos = { 0,0,7 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,2,8 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 4);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 6);
 
 	pos = { 0,0,9 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,3,10 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 6);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 8);
 
 	cog.SendData();
 	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 6);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 8);
 	cog.EndSession();
 }
 
@@ -1635,7 +1635,7 @@ TEST(Dynamics, InitRegisterSceneSend) {
 
 	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
 
 
 
@@ -1643,19 +1643,19 @@ TEST(Dynamics, InitRegisterSceneSend) {
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,1,6 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 4);
 
 	pos = { 0,0,7 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,2,8 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 4);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 6);
 
 	pos = { 0,0,9 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,3,10 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 6);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 8);
 	
 	cog.SetScene("dynamicscene");
 	cog.SendData();
@@ -1741,7 +1741,7 @@ TEST(Dynamics, CustomIds) {
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 3);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 5);
 
 	cog.SendData();
 	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
@@ -1808,12 +1808,12 @@ TEST(Dynamics, LimitSnapshots) {
 
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
-	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 3);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot); //manifest + snapshots = limit
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 1);
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
+	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
 }
 
 TEST(Dynamics, LimitRegister) {
@@ -1839,12 +1839,12 @@ TEST(Dynamics, LimitRegister) {
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 2, pos, rot);
-	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
-	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 4);
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3, pos, rot); //limit. send
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
+	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4, pos, rot);
+	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5, pos, rot); //limit send
+	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 }
 
 TEST(Dynamics, LimitPreSession) {
@@ -1985,7 +1985,7 @@ TEST(Dynamics, EngagementsScenes) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
+	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.CustomerId = TESTINGCUSTOMER;
 
 	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
@@ -2000,7 +2000,9 @@ TEST(Dynamics, EngagementsScenes) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
 	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
+	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 2);
 
 	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
 
@@ -2008,7 +2010,7 @@ TEST(Dynamics, EngagementsScenes) {
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->EndEngagement(object1id, "grab");
 	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(),1);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(),1);
+	EXPECT_EQ(cog.dynamicobject->allEngagements.size(),2); //engagements[object2] is a null vector, so count = 2
 
 	cog.SetScene("two"); //refreshes object manifest
 	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());

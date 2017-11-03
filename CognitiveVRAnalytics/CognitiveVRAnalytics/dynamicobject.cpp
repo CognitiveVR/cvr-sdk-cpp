@@ -43,17 +43,17 @@ DynamicObject::DynamicObject(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 
 void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string meshname, int customid, ::std::vector<float> position, ::std::vector<float> rotation)
 {
-	DynamicObjectId registerId = DynamicObjectId(customid, meshname);
-	objectIds.emplace_back(registerId);
-
 	for (auto& element : objectIds)
 	{
 		if (element.Id == customid)
 		{
-			cvr->log->Warning("DynamicObject::RegisterObjectCustomId object id " + std::to_string(customid) + "already registered");
+			cvr->log->Warning("DynamicObject::RegisterObjectCustomId object id " + std::to_string(customid) + " already registered");
 			break;
 		}
 	}
+
+	DynamicObjectId registerId = DynamicObjectId(customid, meshname);
+	objectIds.emplace_back(registerId);
 
 	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
 
@@ -164,8 +164,10 @@ void DynamicObject::AddSnapshot(int objectId, ::std::vector<float> position, ::s
 			}
 		}
 
+		cvr->log->Info("all engagements pre " + std::to_string(allEngagements[objectId].size()));
 		//remove inactive engagements https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 		allEngagements[objectId].erase(::std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
+		cvr->log->Info("all engagements post " + std::to_string(allEngagements[objectId].size()));
 	}
 
 	snapshots.emplace_back(snapshot);
@@ -178,6 +180,8 @@ void DynamicObject::AddSnapshot(int objectId, ::std::vector<float> position, ::s
 
 void DynamicObject::BeginEngagement(int objectId, ::std::string name)
 {
+	cvr->log->Info("DynamicObject::BeginEngagement engagement " + name + " on object " + ::std::to_string(objectId));
+
 	engagementCounts[objectId][name] += 1;
 
 	DynamicObjectEngagementEvent engagement = DynamicObjectEngagementEvent(objectId, name, engagementCounts[objectId][name]);
@@ -197,6 +201,7 @@ void DynamicObject::EndEngagement(int objectId, ::std::string name)
 	}
 	//otherwise create and end the engagement
 
+	cvr->log->Info("DynamicObject::EndEngagement engagement " + name + " not found on object"+ ::std::to_string(objectId) +". Begin+End");
 	BeginEngagement(objectId, name);
 
 	auto rit = activeEngagements[objectId].rbegin();
