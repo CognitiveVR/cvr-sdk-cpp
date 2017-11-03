@@ -1300,7 +1300,7 @@ TEST(Gaze, GazeOnDynamic) {
 
 	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 10);
 
-	cog.dynamicobject->RegisterObjectCustomId("object1", "block", 1);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "block", 1, pos, rot);
 
 	for (float i = 0; i < 10; ++i)
 	{
@@ -1578,15 +1578,15 @@ TEST(Dynamics, InitRegisterSend) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 
 	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
-
-	std::vector<float>pos = { 0,0,0 };
-	std::vector<float>rot = { 0,0,0,1 };
 
 	pos = { 0,0,5 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
@@ -1627,15 +1627,17 @@ TEST(Dynamics, InitRegisterSceneSend) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 
 	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
 
-	std::vector<float>pos = { 0,0,0 };
-	std::vector<float>rot = { 0,0,0,1 };
+
 
 	pos = { 0,0,5 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
@@ -1680,11 +1682,15 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
-
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
+
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
+
+	auto props = cognitive::nlohmann::json();
+	props["enabled"] = false;
+	cog.dynamicobject->AddSnapshot(object1id, pos, rot, props);
 
 	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
 
@@ -1721,11 +1727,15 @@ TEST(Dynamics, CustomIds) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObjectCustomId("object1", "lamp",1);
-	int object2id = cog.dynamicobject->RegisterObjectCustomId("object2", "lamp",2);
-
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
+
+	int object1id = 1;
+	int object2id = 2;
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", object1id, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", object2id, pos, rot);
+
+
 
 	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
@@ -1754,9 +1764,16 @@ TEST(Dynamics, CustomIdMultiples) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
-	int object2id = cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 1);
-	int object3id = cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 1);
+	std::vector<float>pos = { 0,0,0 };
+	std::vector<float>rot = { 0,0,0,1 };
+
+	int object1id = 1;
+	int object2id = 2;
+	int object3id = 3;
+
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 1, pos, rot);
 	
 	EXPECT_EQ(cog.dynamicobject->objectIds.size(), 3);
 
@@ -1784,7 +1801,8 @@ TEST(Dynamics, LimitSnapshots) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
+	int object1id = 1;
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", object1id, pos, rot);
 
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 
@@ -1818,14 +1836,14 @@ TEST(Dynamics, LimitRegister) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
-	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 2);
-	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3);
+	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 2, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
-	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4);
+	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 4);
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5);
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
 }
 
@@ -1849,15 +1867,15 @@ TEST(Dynamics, LimitPreSession) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
-	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 2);
-	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3);
-	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4);
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5);
+	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 2, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 5);
 	cog.StartSession();
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 6);
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 6, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
 }
 
@@ -1881,14 +1899,14 @@ TEST(Dynamics, ReuseObjectId) {
 	std::vector<float>rot = { 0,0,0,1 };
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 
 	cog.dynamicobject->RemoveObject(object1id, pos, rot);
-	int object3id = cog.dynamicobject->RegisterObject("object3", "block");
+	int object3id = cog.dynamicobject->RegisterObject("object3", "block", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
-	int object4id = cog.dynamicobject->RegisterObject("object4", "lamp");
+	int object4id = cog.dynamicobject->RegisterObject("object4", "lamp", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
 	cog.SendData();
 }
@@ -1921,7 +1939,7 @@ TEST(Dynamics, EngagementBeforeRegister) {
 	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp",1);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp",1, pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 	cog.SendData();
 	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
@@ -1978,11 +1996,11 @@ TEST(Dynamics, EngagementsScenes) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp");
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp");
-
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
+
+	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 
 	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
 
@@ -2032,7 +2050,7 @@ TEST(Dynamics, EngagementRemove) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
 	
 	cog.dynamicobject->BeginEngagement(1, "grab");
 	cog.dynamicobject->AddSnapshot(1, pos, rot);

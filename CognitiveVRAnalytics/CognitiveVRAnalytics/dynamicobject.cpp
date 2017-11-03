@@ -41,7 +41,7 @@ DynamicObject::DynamicObject(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	cvr = cog;
 }
 
-int DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string meshname, int customid)
+void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string meshname, int customid, ::std::vector<float> position, ::std::vector<float> rotation)
 {
 	DynamicObjectId registerId = DynamicObjectId(customid, meshname);
 	objectIds.emplace_back(registerId);
@@ -60,15 +60,19 @@ int DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mesh
 	manifestEntries.emplace_back(dome);
 	fullManifest.emplace_back(dome);
 
+	cognitive::nlohmann::json props = cognitive::nlohmann::json();
+	props["enabled"] = true;
+	AddSnapshot(customid, position, rotation, props);
+
 	if (snapshots.size() + manifestEntries.size() >= cvr->config->DynamicDataLimit)
 	{
 		SendData();
 	}
 
-	return registerId.Id;
+	return;
 }
 
-int DynamicObject::RegisterObject(::std::string name, ::std::string meshname)
+int DynamicObject::RegisterObject(::std::string name, ::std::string meshname, ::std::vector<float> position, ::std::vector<float> rotation)
 {
 	bool foundRecycledId = false;
 	DynamicObjectId newObjectId = DynamicObjectId(0, meshname);
@@ -97,6 +101,10 @@ int DynamicObject::RegisterObject(::std::string name, ::std::string meshname)
 		manifestEntries.emplace_back(dome);
 		fullManifest.emplace_back(dome);
 	}
+
+	cognitive::nlohmann::json props = cognitive::nlohmann::json();
+	props["enabled"] = true;
+	AddSnapshot(newObjectId.Id, position, rotation, props);
 
 	if (snapshots.size() + manifestEntries.size() >= cvr->config->DynamicDataLimit)
 	{
@@ -270,7 +278,9 @@ void DynamicObject::RemoveObject(int objectid, std::vector<float> position, std:
 	EndActiveEngagements(objectid);
 
 	//one final snapshot to send all the ended engagements
-	AddSnapshot(objectid, position, rotation);
+	cognitive::nlohmann::json props = cognitive::nlohmann::json();
+	props["enabled"] = false;
+	AddSnapshot(objectid, position, rotation,props);
 
 	//set the object as not used
 	for (auto& element : objectIds)

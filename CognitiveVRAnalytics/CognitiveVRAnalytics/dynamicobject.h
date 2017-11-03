@@ -118,21 +118,21 @@ public:
 
 	void SendData();
 
-	/** put into dynamic manifest with an id. returns objectid
+	/** put into dynamic manifest with an id. returns objectid. also adds a snapshot with the property 'enabled'
 
 		@param std::string name
 		@param std::string meshname
 		@param int customid
 	*/
-	int RegisterObjectCustomId(std::string name, std::string meshname, int customid);
+	void RegisterObjectCustomId(std::string name, std::string meshname, int customid, std::vector<float> position, std::vector<float> rotation);
 
 	//
-	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 
 		@param std::string name
 		@param std::string meshname
 	*/
-	int RegisterObject(std::string name, std::string meshname);
+	int RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation);
 
 	/** record the position, rotation and other properties of an object
 
