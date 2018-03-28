@@ -35,8 +35,7 @@ void Sensor::RecordSensor(::std::string Name, float value)
 
 void Sensor::SendData()
 {
-	if (cvr->IsPendingInit()) { cvr->log->Info("Sensor::SendData failed: init pending"); return; }
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("Sensor::SendData. init not successful"); return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("Sensor::SendData failed: no session active"); return; }
 
 	if (allsensors.size() == 0)
 	{
@@ -63,11 +62,9 @@ void Sensor::SendData()
 	}
 	data["data"] = sensors;
 
-	if (cvr->network->SceneExplorerCall("sensor", data.dump()))
-	{
-		sensorCount = 0;
-		allsensors.clear();
-	}
+	cvr->network->NetworkCall("sensor", data.dump());
+	sensorCount = 0;
+	allsensors.clear();
 }
 
 void Sensor::EndSession()

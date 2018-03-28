@@ -26,4 +26,15 @@ namespace cognitive
 		kErrorsOnly = -1,
 		kNone = -2
 	};
+
+	typedef void(*WebResponse) (::std::string content);
+	typedef void(*WebRequest) (::std::string url, ::std::string content, ::std::vector<::std::string> headers, WebResponse response);
+
+	class SceneData
+	{
+	public:
+		std::string SceneName;
+		std::string SceneId;
+		std::string VersionNumber;
+	};
 }

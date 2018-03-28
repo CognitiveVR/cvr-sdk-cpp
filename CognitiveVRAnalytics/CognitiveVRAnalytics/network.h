@@ -36,11 +36,21 @@ class Network
 {
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-		::std::string query = "";
+		::std::vector<::std::string> headers;
 
     public:
         Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+
+		//used for posting gaze/events/dynamics/sensors to dashboard and scene explorer
+		void NetworkCall(::std::string suburl, ::std::string content);
 		
+		//void NetworkCall(::std::string suburl, ::std::string content, WebResponse response);
+
+		//used by exitpolls
+		void NetworkExitpollGet(::std::string hook);
+		//used by exitpolls
+		void NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, ::std::string content);
+		/*
 		//send batched transactions to dashboard
 		void DashboardCall(::std::string suburl, ::std::string content);
 
@@ -49,6 +59,6 @@ class Network
 
 		//sub url is dynamic/sensor/gaze/event. for sending stuff to sceneexplorer
 		//returns true if successfully called. false if scene not set or webrequest not set
-		bool SceneExplorerCall(::std::string suburl, ::std::string content);
+		bool SceneExplorerCall(::std::string suburl, ::std::string content);*/
 };
 }

@@ -36,8 +36,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	config = make_unique_cognitive<Config>(Config(instance));
 	network = make_unique_cognitive<Network>(Network(instance));
 
-	tuning = make_unique_cognitive<Tuning>(Tuning(instance));
-	transaction = make_unique_cognitive<Transaction>(Transaction(instance));
+	customevent = make_unique_cognitive<CustomEvent>(CustomEvent(instance));
 	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
 	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
 	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
@@ -45,16 +44,15 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 
 	//SET VALUES FROM SETTINGS
 	config->HMDType = settings.GetHMDType();
-	config->CustomerId = settings.CustomerId;
+	config->APIKey = settings.APIKey;
 	config->GazeBatchSize = settings.GazeBatchSize;
 	config->TransactionBatchSize = settings.TransactionBatchSize;
 	config->SensorDataLimit = settings.SensorDataLimit;
 	config->DynamicDataLimit = settings.DynamicDataLimit;
 	config->GazeInterval = settings.GazeInterval;
-	config->kNetworkTimeout = settings.kNetworkTimeout;
 
 	//set scenes
-	config->sceneIds = settings.sceneIds;
+	config->SceneData = settings.SceneData; //TODO check that this copies values, not pointer
 	if (settings.DefaultSceneName.size() > 0)
 		SetScene(settings.DefaultSceneName);
 }
@@ -65,8 +63,7 @@ CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 	config.reset();
 	log.reset();
 	network.reset();
-	transaction.reset();
-	tuning.reset();
+	customevent.reset();
 	sensor.reset();
 	gaze.reset();
 	dynamicobject.reset();
@@ -74,88 +71,48 @@ CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 	instance.reset();
 }
 
-void CognitiveVRAnalyticsCore::SetPendingInit(bool isPending)
+bool CognitiveVRAnalyticsCore::IsSessionActive()
 {
-	bPendingInit = isPending;
-}
-
-bool CognitiveVRAnalyticsCore::IsPendingInit()
-{
-	return bPendingInit;
-}
-
-void CognitiveVRAnalyticsCore::SetInitSuccessful(bool success)
-{
-	bWasInitSuccessful = success;
-}
-
-bool CognitiveVRAnalyticsCore::WasInitSuccessful()
-{
-	return bWasInitSuccessful;
+	return isSessionActive;
 }
 
 bool CognitiveVRAnalyticsCore::StartSession()
 {
-	if (WasInitSuccessful())
+	if (IsSessionActive())
 	{
 		return false;
 	}
 
 	log->Info("CognitiveVRAnalytics::StartSession");
 
-	if (UserId.empty())
-	{
-		SetUserId("anonymous");
-	}
-
-	if (DeviceId.empty())
-	{
-		SetDeviceId("unknown");
-	}
+	//TODO maybe set device and user ids here if not previously set?
 
 	GetSessionTimestamp();
 	GetSessionID();
 
 	double ts = GetSessionTimestamp();
 
-	nlohmann::json content = nlohmann::json::array();
-	content.emplace_back(ts);
-	content.emplace_back(ts);
-	content.emplace_back(UserId);
-	content.emplace_back(DeviceId);
-	if (UserProperties.size() == 0)
-	{
-		content.emplace_back(nullptr);
-	}
-	else
-	{
-		content.emplace_back(UserProperties);
-	}
-	
-	if (DeviceProperties.size() == 0)
-	{
-		content.emplace_back(nullptr);
-	}
-	else
-	{
-		content.emplace_back(DeviceProperties);
-	}
-
 	gaze->SetInterval(config->GazeInterval);
 	gaze->SetHMDType(config->HMDType);
 
-	network->DashboardCall("application_init", content.dump());
+	//TODO replace with custom event for session init
+	::std::vector<float> pos = { 0,0,0 };
+	customevent->Send("application_init", pos);
+
+	isSessionActive = true;
 
 	return true;
 }
 
-::std::string CognitiveVRAnalyticsCore::GetCustomerId()
+::std::string CognitiveVRAnalyticsCore::GetAPIKey()
 {
-	return config->CustomerId;
+	return config->APIKey;
 }
 
 void CognitiveVRAnalyticsCore::EndSession()
 {
+	if (!IsSessionActive()) { return; }
+
 	log->Info("CognitiveVRAnalytics::EndSession");
 
 	nlohmann::json props = nlohmann::json();
@@ -165,22 +122,19 @@ void CognitiveVRAnalyticsCore::EndSession()
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
 
-	transaction->EndPosition("cvr.session", endPos, props);
+	customevent->Send("cvr.session", endPos, props);
 
 	SendData();
 
 	SessionTimestamp = -1;
 	SessionId = "";
 
-	SetInitSuccessful(false);
-	SetPendingInit(true);
+	isSessionActive = false;
 
 	gaze->EndSession();
-	transaction->EndSession();
+	customevent->EndSession();
 	dynamicobject->EndSession();
 	sensor->EndSession();
-	tuning->EndSession();
-
 }
 
 double CognitiveVRAnalyticsCore::GetSessionTimestamp()
@@ -214,33 +168,28 @@ double CognitiveVRAnalyticsCore::GetTimestamp()
 
 void CognitiveVRAnalyticsCore::SendData()
 {
-	transaction->SendData();
+	customevent->SendData();
 	gaze->SendData();
 	sensor->SendData();
 	dynamicobject->SendData();
 }
 
-void CognitiveVRAnalyticsCore::SetUserId(::std::string user_id)
-{
-	UserId = user_id;
-}
-
 void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, int value)
 {
-	UserProperties[propertyType] = value;
+	NewUserProperties[propertyType] = value;
 }
 
 void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, ::std::string value)
 {
-	UserProperties[propertyType] = value;
+	NewUserProperties[propertyType] = value;
 }
 
 void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, float value)
 {
-	UserProperties[propertyType] = value;
+	NewUserProperties[propertyType] = value;
 }
 
-void CognitiveVRAnalyticsCore::SetUserProperties(nlohmann::json properties)
+/*void CognitiveVRAnalyticsCore::SetUserProperties(nlohmann::json properties)
 {
 	for (nlohmann::json::iterator it = properties.begin(); it != properties.end(); ++it) {
 
@@ -258,8 +207,15 @@ void CognitiveVRAnalyticsCore::SetUserProperties(nlohmann::json properties)
 			SetUserProperty(it.key(), (float)it.value());
 		}
 	}
-}
+}*/
 
+std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetUserProperties()
+{
+	std::map<std::string, std::string> copiedmap = NewUserProperties;
+	NewUserProperties = std::map<std::string, std::string>();
+	return copiedmap;
+}
+/*
 void CognitiveVRAnalyticsCore::UpdateUserState()
 {
 	double ts = GetTimestamp();
@@ -274,30 +230,37 @@ void CognitiveVRAnalyticsCore::UpdateUserState()
 	if (UserProperties.size() > 0)
 	{
 		args.emplace_back(UserProperties);
-		transaction->AddToBatch("datacollector_updateUserState", args);
+		//TODO user properties to gaze recording
 	}
 	else
 	{
 		args.emplace_back(nullptr);
-		transaction->AddToBatch("datacollector_updateUserState", args);
+		//TODO user properties to gaze recording
 	}
 }
 
 void CognitiveVRAnalyticsCore::SetDeviceId(::std::string device_id)
 {
 	DeviceId = device_id;
-}
+}*/
 
 void CognitiveVRAnalyticsCore::SetDeviceProperty(EDeviceProperty propertyType, int value)
 {
-	DeviceProperties[DevicePropertyToString(propertyType)] = value;
+	NewDeviceProperties[DevicePropertyToString(propertyType)] = value;
 }
 
 void CognitiveVRAnalyticsCore::SetDeviceProperty(EDeviceProperty propertyType, ::std::string value)
 {
-	DeviceProperties[DevicePropertyToString(propertyType)] = value;
+	NewDeviceProperties[DevicePropertyToString(propertyType)] = value;
 }
 
+std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetDeviceProperties()
+{
+	std::map<std::string, std::string> copiedmap = NewDeviceProperties;
+	NewDeviceProperties = std::map<std::string, std::string>();
+	return copiedmap;
+}
+/*
 void CognitiveVRAnalyticsCore::UpdateDeviceState()
 {
 	double ts = GetTimestamp();
@@ -312,40 +275,51 @@ void CognitiveVRAnalyticsCore::UpdateDeviceState()
 	if (DeviceProperties.size() > 0)
 	{
 		args.emplace_back(DeviceProperties);
-		transaction->AddToBatch("datacollector_updateDeviceState", args);
+		//TODO device properties to gaze recording
 	}
 	else
 	{
 		args.emplace_back(nullptr);
-		transaction->AddToBatch("datacollector_updateDeviceState", args);
+		//TODO device properties to gaze recording
 	}
-}
+}*/
 
 void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 {
 	log->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
-	bool hasOldScene = false;
 	if (CurrentSceneId.size() > 0)
 	{
 		//send any remaining data to current scene, if there is a current scene
 		SendData();
-		hasOldScene = true;
+		dynamicobject->RefreshObjectManifest();
 	}
 	//if no current scene, likely queuing up events/gaze/etc before setting the scene
 
-	auto search = config->sceneIds.find(sceneName);
-	if (search != config->sceneIds.end())
+	//config->SceneData.
+
+
+	//std::get(config->SceneData)
+
+	//config->SceneData.
+
+	bool foundScene = false;
+	for (auto const &ent : config->SceneData)
 	{
-		CurrentSceneId = search->second;
+		if (ent.SceneName == sceneName)
+		{
+			CurrentSceneId = ent.SceneId;
+			CurrentSceneVersionNumber = ent.VersionNumber;
+
+			foundScene = true;
+			break;
+		}
 	}
-	else
+
+	if (!foundScene)
 	{
 		log->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
 		CurrentSceneId = "";
-	}
-	if (hasOldScene)
-	{
-		dynamicobject->RefreshObjectManifest();
+		CurrentSceneVersionNumber = "";
 	}
 }
 

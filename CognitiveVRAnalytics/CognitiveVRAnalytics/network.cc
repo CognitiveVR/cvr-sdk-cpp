@@ -8,10 +8,11 @@ namespace cognitive {
 Network::Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
     cvr = cog;
-	query = "";
+	headers.push_back("Content-Type:application/json");
+	headers.push_back("Authorization:"+ cvr->config->APIKey);
 }
 
-//some random callback. use for debugging, otherwise nothing
+//a default callback. use for debugging, otherwise nothing
 void Callback(::std::string body)
 {
 	auto cvr = CognitiveVRAnalyticsCore::Instance();
@@ -23,53 +24,6 @@ void Callback(::std::string body)
 	else
 	{
 		cvr->log->Info("Generic callback");
-	}
-}
-
-//callback for application init. read out tuning variables
-void InitCallback(::std::string body)
-{
-	auto cvr = CognitiveVRAnalyticsCore::Instance();
-
-	cvr->SetPendingInit(false);
-
-	//check that body can be parsed to json
-	if (body.empty())
-	{
-		cvr->log->Info("Application Init response has no body");
-		cvr->SetInitSuccessful(false);
-		//cvr->SetHasStartedSession(false);
-	}
-	else
-	{
-		//try parsing body response to json
-
-		int errorcode = -1;
-
-		auto jsonresponse = nlohmann::json::parse(body);
-
-		errorcode = jsonresponse["error"].get<int>();
-
-		if (errorcode == 0)
-		{
-			//cvr->SetHasStartedSession(true);
-			cvr->SetInitSuccessful(true);
-			cvr->log->Info("Application Init callback successful");
-			//cvr->log->Info(body);
-
-			cvr->tuning->ReceiveValues(jsonresponse);
-			nlohmann::json props;
-
-			::std::vector<float> beginPos = { 0,0,0 };
-
-			cvr->transaction->BeginPosition("cvr.session", beginPos, props);
-		}
-		else
-		{
-			cvr->log->Info("Init Error " + ::std::to_string(errorcode));
-			cvr->SetInitSuccessful(false);
-			//cvr->SetHasStartedSession(false);
-		}
 	}
 }
 
@@ -97,7 +51,7 @@ void ExitPollCallback(::std::string body)
 	{
 		cvr->log->Info("ExitPollCallback callback successful");
 
-		cvr->exitpoll->ReceiveQuestionSet(body,nlohmann::json::parse(body));
+		cvr->exitpoll->ReceiveQuestionSet(body, jsonresponse);
 	}
 	else
 	{
@@ -107,81 +61,33 @@ void ExitPollCallback(::std::string body)
 	}
 }
 
-void Network::DashboardCall(::std::string suburl, ::std::string content)
+void Network::NetworkCall(::std::string suburl, ::std::string content)
 {
-	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::DashboardCall cannot find webrequest pointer"); return; }
-	cvr->log->Info("Network Dashboard call: " + suburl);
-
-	//std::string path = "/" + cvr->config->kSsfApp + "/ws/interface/" + suburl;
-	::std::string path = "/isos-personalization/ws/interface/" + suburl;
-
-	//TEST cache this query string
-	if (query.size() == 0)
-	{
-		query = "?";
-		query.append("ssf_ws_version=");
-		query.append(cvr->config->kSsfVersion);
-		query.append("&ssf_cust_id=");
-		query.append(cvr->GetCustomerId());
-		query.append("&ssf_output=");
-		query.append(cvr->config->kSsfOutput);
-		query.append("&ssf_sdk=cpp");
-		query.append("&ssf_sdk_version=");
-		query.append(cvr->config->SdkVersion);
-	}
-
-	::std::string finalurl = cvr->config->kNetworkHost + path + query;
-
-	WebResponse wr = nullptr;// = &Callback;
-
-	if (suburl == "application_init")
-	{
-		wr = &InitCallback;
-	}
-
-	cvr->sendFunctionPointer(finalurl, content, wr);
-}
-
-void Network::APICall(::std::string suburl, ::std::string callType, ::std::string content)
-{
-	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::APICall cannot find webrequest pointer"); return; }
+	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkCall cannot find webrequest pointer"); return; }
 	cvr->log->Info("API call: " + suburl);
 
-	::std::string path = cvr->config->kNetworkHostAPI + "/products/" + cvr->GetCustomerId() + "/" + suburl;
+	::std::string path = "https://"+cvr->config->kNetworkHost+"/v"+cvr->config->networkVersion+"/"+suburl+"/"+cvr->CurrentSceneId+"?version="+cvr->CurrentSceneVersionNumber;
 
 	cvr->log->Info(path);
 
-	WebResponse wr = nullptr;// &Callback;
-	if (callType == "exitpollget")
-	{
-		wr = &ExitPollCallback;
-	}
-
-	cvr->sendFunctionPointer(path, content, wr);
+	cvr->sendFunctionPointer(path, content, headers, nullptr);
 }
 
-bool Network::SceneExplorerCall(::std::string suburl, ::std::string content)
+void Network::NetworkExitpollGet(::std::string hook)
 {
-	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::SceneExplorerCall cannot find webrequest pointer"); return false; }
-	::std::string scenekey = cvr->GetSceneId();
-	if (scenekey.empty())
-	{
-		cvr->log->Warning("SceneExplorer failed: SceneID not set");
-		return false;
-	}
-	if (cvr->sendFunctionPointer == nullptr)
-	{
-		cvr->log->Warning("SceneExplorer failed: WebRequest not set");
-		return false;
-	}
+	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkExitpollGet cannot find webrequest pointer"); return; }
 
-	cvr->log->Info("SceneExplorer call: " + suburl);
-	cvr->log->Info("SceneExplorer scenekey: " + scenekey);
+	::std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSetHooks" + hook + "/questionSet";
 
-	::std::string finalurl = cvr->config->kSceneExplorerAPI + suburl + "/" + scenekey;
+	cvr->sendFunctionPointer(path, "", headers, &ExitPollCallback);
+}
 
-	WebResponse wr = nullptr;// &Callback;
-	cvr->sendFunctionPointer(finalurl, content, wr);
-	return true;
+void Network::NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, ::std::string content)
+{
+	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkExitpollPost cannot find webrequest pointer"); return; }
+
+	::std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSets" + questionsetname + "/" +questionsetversion + "/responses";
+
+	cvr->sendFunctionPointer(path, content, headers, nullptr);
 }
 }

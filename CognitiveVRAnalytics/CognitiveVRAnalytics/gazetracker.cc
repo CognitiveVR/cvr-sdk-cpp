@@ -24,7 +24,7 @@ void GazeTracker::SetHMDType(::std::string hmdtype)
 
 void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId)
 {
-	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::RecordGaze failed: no session active"); return; }
 
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -39,9 +39,9 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 		data["o"] = objectId;
 	}
 
-	BatchedGazeSE.emplace_back(data);
+	BatchedGaze.emplace_back(data);
 
-	if (BatchedGazeSE.size() >= cvr->config->GazeBatchSize)
+	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -49,7 +49,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation)
 {
-	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::RecordGaze failed: no session active"); return; }
 
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -58,9 +58,9 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 
-	BatchedGazeSE.emplace_back(data);
+	BatchedGaze.emplace_back(data);
 
-	if (BatchedGazeSE.size() >= cvr->config->GazeBatchSize)
+	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -68,10 +68,9 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::SendData()
 {
-	if (cvr->IsPendingInit()) { cvr->log->Info("GazeTracker::SendData failed: init pending"); return; }
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("GazeTracker::SendData. init not successful"); return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::SendData failed: no session active"); return; }
 
-	if (BatchedGazeSE.size() == 0)
+	if (BatchedGaze.size() == 0)
 	{
 		return;
 	}
@@ -85,15 +84,24 @@ void GazeTracker::SendData()
 	jsonPart++;
 	se["hmdtype"] = HMDType;
 	se["interval"] = PlayerSnapshotInterval;
-	se["data"] = BatchedGazeSE;
-	if (cvr->network->SceneExplorerCall("gaze", se.dump()))
+	se["data"] = BatchedGaze;
+
+	auto dproperties = cvr->GetDeviceProperties();
+	if (dproperties.size() > 0)
 	{
-		BatchedGazeSE.clear();
+		se["device"] = dproperties;
 	}
+	auto uproperties = cvr->GetUserProperties();
+	if (uproperties.size() > 0)
+	{
+		se["user"] = uproperties;
+	}
+	cvr->network->NetworkCall("gaze", se.dump());
+	BatchedGaze.clear();
 }
 
 void GazeTracker::EndSession()
 {
-	BatchedGazeSE.clear();
+	BatchedGaze.clear();
 }
 }

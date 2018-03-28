@@ -22,8 +22,8 @@ enum class ECognitiveHMDType
 	kMobile
 };
 
-typedef void(*WebResponse) (::std::string content);
-typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
+//typedef void(*WebResponse) (::std::string content);
+//typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
 
 class CoreSettings
 {
@@ -39,11 +39,8 @@ class CoreSettings
 		//which logs to display. default is all
 		LoggingLevel loggingLevel = LoggingLevel::kAll;
 
-        //Network call timeout, in seconds. Ex. 5
-		long kNetworkTimeout = 5;
-
 		//which product to send data to. Ex companyname1234-productname-test
-		::std::string CustomerId = "companyname1234-productname-test";
+		::std::string APIKey = "asdf1234hjkl5678";
 
 		//how many sensor data points to batch before sending to SceneExplorer
 		int SensorDataLimit = 64;
@@ -70,7 +67,9 @@ class CoreSettings
 		}
 
 		//all 'scenes' the user might encounter. must contain at least one to use SceneExplorer
-		::std::map < ::std::string, ::std::string> sceneIds;
+		std::vector<SceneData> SceneData;
+
+		//::std::map < ::std::string, ::std::string> sceneIds;
 		//the default scene to load after Cognitive Analytics constructor
 		::std::string DefaultSceneName = "";
 };

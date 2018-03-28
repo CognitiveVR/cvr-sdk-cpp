@@ -47,7 +47,7 @@ private:
 
 public:
 
-	nlohmann::json BatchedGazeSE = nlohmann::json();
+	nlohmann::json BatchedGaze = nlohmann::json();
 
 	GazeTracker(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 	void SetInterval(float interval);
