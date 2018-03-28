@@ -109,6 +109,9 @@ private:
 
 	bool isSessionActive = false;
 
+	::std::string UserId = "";
+	::std::string DeviceId = "";
+
 public:
 
 	//unique id of scene that that receives recorded data
@@ -137,15 +140,14 @@ public:
 	//std::map<std::string, std::string> KnownDeviceProperties;
 	std::map<std::string, std::string> NewDeviceProperties;
 
-	::std::string UserId = "";
-	::std::string DeviceId = "";
-
 	//nlohmann::json UserProperties = nlohmann::json();
 	
 	//nlohmann::json DeviceProperties = nlohmann::json();
 	/** set a unique user id
 		@param std::string user_id
 	*/
+
+	void SetUserName(std::string name);
 
 	void SetUserProperty(::std::string propertyType, int value);
 	/** set single user property
@@ -164,6 +166,7 @@ public:
 	//returns new device properties map. clears new properties
 	std::map<std::string,std::string> GetUserProperties();
 
+	void SetDeviceName(std::string name);
 	void SetDeviceProperty(EDeviceProperty propertyType, int value);
 	/** set single device property
 		@param EDeviceProperty propertyType
@@ -186,17 +189,23 @@ public:
 	
 	bool IsSessionActive();
 
+	//OBSOLETE this returns true if session has begun
+	bool WasInitSuccessful();
+
 	/** start a session. returns true if successfully starting session. ie, not already started
 	*/
 	bool StartSession();
 
-	/** end the session. sends all final data to dashboard and SceneExplorer
+	/** end the session. sends all final data to SceneExplorer
 	*/
 	void EndSession();
 
+	//must have started session before sending
+	//send all outstanding data to scene. if scene doesn't exist, clear data - it's not relevant to other scenes anyway
 	void SendData();
 
 	/** set which scene on SceneExplorer should recieve the recorded data
+		if the current scene is not null, this will also send data before changing the active scene
 		@param std::string scenename
 	*/
 	void SetScene(::std::string scenename);

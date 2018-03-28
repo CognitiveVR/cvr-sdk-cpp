@@ -34,14 +34,6 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	}
 
 	config = make_unique_cognitive<Config>(Config(instance));
-	network = make_unique_cognitive<Network>(Network(instance));
-
-	customevent = make_unique_cognitive<CustomEvent>(CustomEvent(instance));
-	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
-	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
-	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
-	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
-
 	//SET VALUES FROM SETTINGS
 	config->HMDType = settings.GetHMDType();
 	config->APIKey = settings.APIKey;
@@ -50,6 +42,14 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	config->SensorDataLimit = settings.SensorDataLimit;
 	config->DynamicDataLimit = settings.DynamicDataLimit;
 	config->GazeInterval = settings.GazeInterval;
+
+	network = make_unique_cognitive<Network>(Network(instance));
+
+	customevent = make_unique_cognitive<CustomEvent>(CustomEvent(instance));
+	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
+	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
+	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
+	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
 
 	//set scenes
 	config->SceneData = settings.SceneData; //TODO check that this copies values, not pointer
@@ -76,6 +76,11 @@ bool CognitiveVRAnalyticsCore::IsSessionActive()
 	return isSessionActive;
 }
 
+bool CognitiveVRAnalyticsCore::WasInitSuccessful()
+{
+	return isSessionActive;
+}
+
 bool CognitiveVRAnalyticsCore::StartSession()
 {
 	if (IsSessionActive())
@@ -95,11 +100,11 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	gaze->SetInterval(config->GazeInterval);
 	gaze->SetHMDType(config->HMDType);
 
+	isSessionActive = true;
+
 	//TODO replace with custom event for session init
 	::std::vector<float> pos = { 0,0,0 };
 	customevent->Send("application_init", pos);
-
-	isSessionActive = true;
 
 	return true;
 }
@@ -168,10 +173,18 @@ double CognitiveVRAnalyticsCore::GetTimestamp()
 
 void CognitiveVRAnalyticsCore::SendData()
 {
+	if (!IsSessionActive()) { log->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
+
 	customevent->SendData();
 	gaze->SendData();
 	sensor->SendData();
 	dynamicobject->SendData();
+}
+
+void CognitiveVRAnalyticsCore::SetUserName(std::string name)
+{
+	UserId = name;
+	NewUserProperties["name"] = name;
 }
 
 void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, int value)
@@ -243,6 +256,12 @@ void CognitiveVRAnalyticsCore::SetDeviceId(::std::string device_id)
 {
 	DeviceId = device_id;
 }*/
+
+void CognitiveVRAnalyticsCore::SetDeviceName(std::string name)
+{
+	DeviceId = name;
+	NewDeviceProperties["name"] = name;
+}
 
 void CognitiveVRAnalyticsCore::SetDeviceProperty(EDeviceProperty propertyType, int value)
 {

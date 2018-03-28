@@ -49,8 +49,6 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation)
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::RecordGaze failed: no session active"); return; }
-
 	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json data = nlohmann::json();
@@ -70,7 +68,10 @@ void GazeTracker::SendData()
 {
 	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::SendData failed: no session active"); return; }
 
-	if (BatchedGaze.size() == 0)
+	auto dproperties = cvr->GetDeviceProperties();
+	auto uproperties = cvr->GetUserProperties();
+
+	if (BatchedGaze.size() == 0 && dproperties.size() == 0 && uproperties.size() == 0)
 	{
 		return;
 	}
@@ -86,12 +87,12 @@ void GazeTracker::SendData()
 	se["interval"] = PlayerSnapshotInterval;
 	se["data"] = BatchedGaze;
 
-	auto dproperties = cvr->GetDeviceProperties();
+	
 	if (dproperties.size() > 0)
 	{
 		se["device"] = dproperties;
 	}
-	auto uproperties = cvr->GetUserProperties();
+	
 	if (uproperties.size() > 0)
 	{
 		se["user"] = uproperties;

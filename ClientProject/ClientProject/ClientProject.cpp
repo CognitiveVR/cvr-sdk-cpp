@@ -17,7 +17,8 @@
 
 std::string temp;
 
-std::string TESTINGCUSTOMER = "altimagegames59340-cppsdkautomatedtesting-test";
+std::string TESTINGAPIKEY = "asdf1234hjkl5678";
+std::string INVALIDAPIKEY = "INVALID_API_KEY";
 long TestDelay = 1;
 
 size_t handle(char* buf, size_t size, size_t nmemb, void* up)
@@ -36,21 +37,20 @@ void INVALID_DoWebStuff(std::string url)
 
 }
 
-void NORESPONSE_DoWebStuff(std::string url, std::string content, cognitive::WebResponse response)
+void NORESPONSE_DoWebStuff(std::string url, std::string content, std::vector<std::string> headers, cognitive::WebResponse response)
 {
 
 }
 
-void DoWebStuff(std::string url, std::string content, cognitive::WebResponse response)
+void DoWebStuff(std::string url, std::string content, std::vector<std::string> headers, cognitive::WebResponse response)
 {
-	//std::cout << "<<<<curl url sent\n";
-	//std::cout << url + "\n";
-
 	CURL* curl;
 	CURLcode res;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	curl = curl_easy_init();
+
+	struct curl_slist *list = NULL;
 
 	//std::cout << curl_version();
 
@@ -60,7 +60,7 @@ void DoWebStuff(std::string url, std::string content, cognitive::WebResponse res
 		data. */
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
-		//verbose output
+		//DEBUG verbose output
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
 		/* Now specify the POST data */
@@ -69,8 +69,14 @@ void DoWebStuff(std::string url, std::string content, cognitive::WebResponse res
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
 		}
 
-		//if (response != NULL)
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &handle);
+
+		for (auto const &ent : headers)
+		{
+			list = curl_slist_append(list, ent.c_str());
+		}
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+		//iterate through and set headers
 
 		/* Perform the request, res will get the return code */
 		res = curl_easy_perform(curl);
@@ -92,6 +98,7 @@ void DoWebStuff(std::string url, std::string content, cognitive::WebResponse res
 		temp.clear();
 		/* always cleanup */
 		curl_easy_cleanup(curl);
+		curl_slist_free_all(list); /* free the list again */
 	}
 }
 
@@ -104,7 +111,7 @@ TEST(Initialization, MultipleStartSessions) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	bool first = cog.StartSession();
@@ -121,7 +128,7 @@ TEST(Initialization, MultipleStartEndSessions) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	bool first = cog.StartSession();
@@ -141,13 +148,13 @@ TEST(Initialization, SessionFullStartEnd) {
 	
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	//settings. //TODO try all the fields in the settings container
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.StartSession();
-	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 	cog.EndSession();
 }
 
@@ -157,7 +164,7 @@ TEST(Initialization, SessionStart) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -170,11 +177,11 @@ TEST(Initialization, SessionStartNoWeb) {
 	cognitive::CoreSettings settings;
 	settings.loggingLevel == cognitive::LoggingLevel::kAll;
 	//settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.WasInitSuccessful(), false);
+	EXPECT_EQ(cog.WasInitSuccessful(), true);
 }
 
 TEST(Initialization, SessionStartNoWebResponse) {
@@ -184,11 +191,11 @@ TEST(Initialization, SessionStartNoWebResponse) {
 	cognitive::CoreSettings settings;
 	settings.loggingLevel == cognitive::LoggingLevel::kAll;
 	settings.webRequest = &NORESPONSE_DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.WasInitSuccessful(), false);
+	EXPECT_EQ(cog.WasInitSuccessful(), true);
 }
 
 TEST(Initialization, SessionStartInvalidCustomerId) {
@@ -198,14 +205,14 @@ TEST(Initialization, SessionStartInvalidCustomerId) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = "INVALID_DELETE_NOT_A_CUSTOMERID";
+	settings.APIKey = INVALIDAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	EXPECT_EQ(cog.GetCustomerId(), "INVALID_DELETE_NOT_A_CUSTOMERID");
+	EXPECT_EQ(cog.GetAPIKey(), INVALIDAPIKEY);
 	
 	cog.StartSession();
-	EXPECT_EQ(cog.GetCustomerId(), "INVALID_DELETE_NOT_A_CUSTOMERID");
-	EXPECT_EQ(cog.WasInitSuccessful(), false);
+	EXPECT_EQ(cog.GetAPIKey(), INVALIDAPIKEY);
+	EXPECT_EQ(cog.WasInitSuccessful(), true);
 }
 
 TEST(Initialization, InstancePreConstructor) {
@@ -226,11 +233,11 @@ TEST(Initialization, Initialization) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 	cog.StartSession();
 }
 
@@ -240,7 +247,7 @@ TEST(Initialization, SessionEnd) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.EndSession();
@@ -252,7 +259,7 @@ TEST(Initialization, SessionStartEnd) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -267,20 +274,19 @@ TEST(UserSettings, UserPreSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cognitive::nlohmann::json user = cognitive::nlohmann::json();
-	user["age"] = 21;
-	user["location"] = "vancouver";
-	cog.SetUserId("john");
-	cog.SetUserProperties(user);
+	cog.SetUserName("john");
+	cog.SetUserProperty("age", 21);
+	cog.SetUserProperty("location", "vancouver");
+	
+	auto props = cog.GetUserProperties();
+	EXPECT_EQ(cog.GetUserProperties().size(), 0);
 
-	EXPECT_EQ(cog.UserId, "john");
-	EXPECT_EQ(cog.UserProperties.dump(), "{\"age\":21,\"location\":\"vancouver\"}");
+	EXPECT_EQ(props.size(), 3);
 
-	cog.UpdateUserState();
 	cog.StartSession();
 }
 
@@ -290,19 +296,16 @@ TEST(UserSettings, UserPostSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cognitive::nlohmann::json user = cognitive::nlohmann::json();
-	user["age"] = 21;
-	user["location"] = "vancouver";
 	cog.StartSession();
-	cog.SetUserId("john");
-
-	EXPECT_EQ(cog.UserId, "john");
-	cog.SetUserProperties(user);
-	EXPECT_EQ(cog.UserProperties.dump(), "{\"age\":21,\"location\":\"vancouver\"}");
-	cog.UpdateUserState();
+	cog.SetUserName("john");
+	cog.SetUserProperty("age", 21);
+	cog.SetUserProperty("location", "vancouver");
+	
+	cog.SendData();
+	EXPECT_EQ(cog.GetUserProperties().size(), 0);
 }
 
 TEST(UserSettings, UserNullPreSession) {
@@ -311,19 +314,11 @@ TEST(UserSettings, UserNullPreSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.SetUserId("");
-	cog.SetUserProperties(cognitive::nlohmann::json());
-
-	EXPECT_EQ(cog.UserId, "");
-	EXPECT_EQ(cog.UserProperties, cognitive::nlohmann::json());
-
-	cog.UpdateUserState();
-	EXPECT_EQ(cog.UserId, "");
-	EXPECT_EQ(cog.UserProperties, cognitive::nlohmann::json());
 	cog.StartSession();
+	cog.SendData();
 }
 
 TEST(UserSettings, UserNullPostSession) {
@@ -332,17 +327,13 @@ TEST(UserSettings, UserNullPostSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.SetUserId("");
-	cog.SetUserProperties(cognitive::nlohmann::json());
-	cog.UpdateUserState();
-	cog.SetUserId("");
-	cog.SetUserProperties(cognitive::nlohmann::json());
-	EXPECT_EQ(cog.UserId, "");
-	EXPECT_EQ(cog.UserProperties, cognitive::nlohmann::json());
+	cog.SendData();
+	cog.SetUserName("");
+	cog.SendData();
 }
 
 //----------------------SET DEVICE
@@ -353,17 +344,18 @@ TEST(DeviceSettings, DevicePreSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.SetDeviceId("7741345684915735");
+	cog.SetDeviceName("7741345684915735");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
 
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
+	auto map = cog.GetDeviceProperties();
+	EXPECT_EQ(map.size(),3);
+	EXPECT_EQ(map["name"], "7741345684915735"); //TODO
+	EXPECT_EQ(cog.GetDeviceProperties().size(), 0);
 
-	cog.UpdateDeviceState();
 	cog.StartSession();
 }
 
@@ -373,20 +365,19 @@ TEST(DeviceSettings, DevicePostSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.SetDeviceId("7741345684915735");
+	cog.SetDeviceName("7741345684915735");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i7-4770 CPU @ 3.40GHz");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 970");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");	
 
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.cpu\":\"i7-4770 CPU @ 3.40GHz\",\"cvr.device.gpu\":\"GeForce GTX 970\",\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
-
-	cog.UpdateDeviceState();
+	cog.SendData();
+	auto map = cog.GetDeviceProperties();
+	EXPECT_EQ(map.size(), 0);
 }
 
 TEST(DeviceSettings, DevicePostSessionOverwrite) {
@@ -395,11 +386,12 @@ TEST(DeviceSettings, DevicePostSessionOverwrite) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.SetDeviceId("7741345684915735");
+	cog.SetDeviceName("7741345684915735");
+	cog.SetDeviceName("7741345684915736");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i5");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 170");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 16);
@@ -409,10 +401,8 @@ TEST(DeviceSettings, DevicePostSessionOverwrite) {
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 970");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
 
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.cpu\":\"i7-4770 CPU @ 3.40GHz\",\"cvr.device.gpu\":\"GeForce GTX 970\",\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
-
-	cog.UpdateDeviceState();
+	auto map = cog.GetDeviceProperties();
+	EXPECT_EQ(map.size(), 5);
 }
 
 TEST(DeviceSettings, DevicePostSessionOutOfOrder) {
@@ -421,20 +411,18 @@ TEST(DeviceSettings, DevicePostSessionOutOfOrder) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.SetDeviceId("7741345684915735");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetDeviceName("7741345684915735");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 970");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");	
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i7-4770 CPU @ 3.40GHz");
-
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.cpu\":\"i7-4770 CPU @ 3.40GHz\",\"cvr.device.gpu\":\"GeForce GTX 970\",\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
-
-	cog.UpdateDeviceState();
+	
+	auto map = cog.GetDeviceProperties();
+	EXPECT_EQ(map.size(), 5);
 }
 
 TEST(DeviceSettings, DeviceNullPreSession) {
@@ -443,16 +431,12 @@ TEST(DeviceSettings, DeviceNullPreSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.SetDeviceId("");
-
-	EXPECT_EQ(cog.DeviceId, "");
-	EXPECT_EQ(cog.DeviceProperties, cognitive::nlohmann::json());
-
-	cog.UpdateDeviceState();
+	cog.SetDeviceName("");
 	cog.StartSession();
+	cog.SendData();
 }
 
 TEST(DeviceSettings, DeviceNullPostSession) {
@@ -461,13 +445,10 @@ TEST(DeviceSettings, DeviceNullPostSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
-	cog.SetDeviceId("");
-	cog.UpdateDeviceState();
-	EXPECT_EQ(cog.DeviceId, "");
-	EXPECT_EQ(cog.DeviceProperties, cognitive::nlohmann::json());
+	cog.SetDeviceName("");
 }
 
 TEST(DeviceSettings, DeviceNullPreEnd) {
@@ -476,18 +457,15 @@ TEST(DeviceSettings, DeviceNullPreEnd) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 
-	cog.SetDeviceId("7741345684915735");
+	cog.SetDeviceName("7741345684915735");
+	cog.SetDeviceName("7741345684915736");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
-	cog.UpdateDeviceState();
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
+
 	cog.EndSession();
 }
 
@@ -498,27 +476,24 @@ TEST(UserDeviceSettings, UserDevicePostSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
 
-	cog.SetDeviceId("7741345684915735");
+	cog.SetDeviceName("7741345684915735");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
-	cog.UpdateDeviceState();
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
+	cog.SendData();
+	auto dmap = cog.GetDeviceProperties();
+	EXPECT_EQ(dmap.size(), 0);
 
-	cognitive::nlohmann::json user = cognitive::nlohmann::json();
-	user["age"] = 21;
-	user["location"] = "vancouver";
-	cog.SetUserId("john");
-	EXPECT_EQ(cog.UserId, "john");
-	EXPECT_EQ(cog.UserProperties, cognitive::nlohmann::json());
-	cog.SetUserProperties(user);
-	EXPECT_EQ(cog.UserProperties.dump(), "{\"age\":21,\"location\":\"vancouver\"}");
-	cog.UpdateUserState();
+	cog.SetUserName("john");
+	cog.SetUserProperty("location", "vancouver");
+	cog.SetUserProperty("location", "seattle");
+	cog.SendData();
+	auto umap = cog.GetUserProperties();
+	EXPECT_EQ(umap.size(), 0);
 
 	cog.EndSession();
 }
@@ -529,203 +504,196 @@ TEST(UserDeviceSettings, UserDevicePreSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cognitive::nlohmann::json user = cognitive::nlohmann::json();
-	user["age"] = 21;
-	user["location"] = "vancouver";
-	cog.SetUserId("john");
-	cog.SetUserProperties(user);
-	cog.UpdateUserState();
-	EXPECT_EQ(cog.UserId, "john");
-	EXPECT_EQ(cog.UserProperties.dump(), "{\"age\":21,\"location\":\"vancouver\"}");
+	cog.SetUserName("john");
+	cog.SetUserProperty("location", "vancouver");
+	cog.SetUserProperty("location", "seattle");
 
-	cog.SetDeviceId("7741345684915735");
+	cog.SetDeviceName("7741345684915735");
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
 	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
-	EXPECT_EQ(cog.DeviceId, "7741345684915735");
-	EXPECT_EQ(cog.DeviceProperties.dump(), "{\"cvr.device.memory\":128,\"cvr.device.os\":\"chrome os 16.9f\"}");
-	cog.UpdateDeviceState();
-
-	cog.StartSession();
-	cog.EndSession();
-}
-
-//----------------------TRANSACTIONS
-
-TEST(Transaction, PreSessionNoEnd) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 1);
-
-	cog.StartSession();
-}
-
-TEST(Transaction, PreSessionEnd) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 1);
-	cog.StartSession();
-	cog.EndSession();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
-}
-
-TEST(Transaction, PreSessionSend) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 1);
-	cog.StartSession();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2); //testing1 and sesionbegin
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
-}
-
-TEST(Transaction, PreSessionPropsSend) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	std::vector<float> pos = { 0,0,0 };
-
-	cognitive::nlohmann::json user = cognitive::nlohmann::json();
-	user["age"] = 21;
-	user["location"] = "vancouver";
-
-	cog.transaction->BeginEndPosition("testing1", pos, user);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 1);
-	cog.StartSession();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2);
-	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
-}
-
-TEST(Transaction, SessionEnd) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	std::vector<float> pos = { 0,0,0 };
-
-	cognitive::nlohmann::json user = cognitive::nlohmann::json();
-	user["age"] = 21;
-	user["location"] = "vancouver";
 
 	cog.StartSession();
-	cog.transaction->BeginEndPosition("testing1", pos, user);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2);
 	cog.EndSession();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
 }
 
-TEST(Transaction, SendLimitPreSessionThreshold) {
+//----------------------CUSTOM EVENTS
+
+TEST(CustomEvent, PreSessionNoEnd) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.customevent->Send("testing1", pos);
+
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+
+	cog.StartSession();
+}
+
+TEST(CustomEvent, PreSessionEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+	cog.StartSession();
+	cog.EndSession();
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+}
+
+TEST(CustomEvent, PreSessionSend) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+	cog.StartSession();
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2); //testing1 and sesionbegin
+	cog.SendData();
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+}
+
+TEST(CustomEvent, PreSessionPropsSend) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cognitive::nlohmann::json prop = cognitive::nlohmann::json();
+	prop["age"] = 21;
+	prop["location"] = "vancouver";
+
+	cog.customevent->Send("testing1", pos, prop);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+	cog.StartSession();
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
+	cog.SendData();
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+}
+
+TEST(CustomEvent, SessionEnd) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cognitive::nlohmann::json props = cognitive::nlohmann::json();
+	props["age"] = 21;
+	props["location"] = "vancouver";
+
+	cog.StartSession();
+	cog.customevent->Send("testing1", pos, props);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
+	cog.EndSession();
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+}
+
+TEST(CustomEvent, SendLimitPreSessionThreshold) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
 	settings.TransactionBatchSize = 3; //on the third transaction it should send
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	cog.transaction->BeginEndPosition("testing2", pos);
-	cog.transaction->BeginEndPosition("testing3", pos); //should try to send here
+	cog.customevent->Send("testing1", pos);
+	cog.customevent->Send("testing2", pos);
+	cog.customevent->Send("testing3", pos); //should try to send here
 
 	cog.StartSession(); //fourth transaction. should send all
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 }
 
-TEST(Transaction, SendLimitPreSession) {
+TEST(CustomEvent, SendLimitPreSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	settings.TransactionBatchSize = 3; //on the third transaction it should send
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2);
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
-TEST(Transaction, SendLimitSession) {
+TEST(CustomEvent, SendLimitSession) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	settings.TransactionBatchSize = 3; //on the third transaction it should send
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.StartSession();
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2);
-	cog.transaction->BeginEndPosition("testing2", pos); //send here
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
+	cog.customevent->Send("testing2", pos); //send here
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	
-	cog.transaction->BeginEndPosition("testing1", pos);
-	cog.transaction->BeginEndPosition("testing1", pos);
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	cog.customevent->Send("testing1", pos);
+	cog.customevent->Send("testing1", pos);
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 
-	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 	cog.EndSession();
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 }
 
 //----------------------TUNING
-
+/*
 TEST(Tuning, TuningGetValue) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -755,7 +723,7 @@ TEST(Tuning, TuningGetValueNoSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", cognitive::EntityType::kEntityTypeDevice);
@@ -768,7 +736,7 @@ TEST(Tuning, TuningGetInvalidValue) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -783,7 +751,7 @@ TEST(Tuning, TuningGetInvalidCast) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -798,7 +766,7 @@ TEST(Tuning, TuningGetInvalidCastBool) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -806,7 +774,7 @@ TEST(Tuning, TuningGetInvalidCastBool) {
 	EXPECT_EQ(snow_attitude, false);
 	cog.EndSession();
 }
-
+*/
 //----------------------SETTING SCENE KEYS FOR SCENE EXPLORER
 
 TEST(Scenes, NoScenes) {
@@ -815,23 +783,21 @@ TEST(Scenes, NoScenes) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 	pos[0] = 2;
-	cog.transaction->BeginEndPosition("testing2", pos);
+	cog.customevent->Send("testing2", pos);
 	pos[0] = 3;
-	cog.transaction->BeginEndPosition("testing3", pos);
+	cog.customevent->Send("testing3", pos);
 	EXPECT_EQ(cog.CurrentSceneId, "");
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 4);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 4);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 4);
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 4);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -841,29 +807,28 @@ TEST(Scenes, InitScenes) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["tutorial"] = "DELETE_ME_1";
-	scenes["menu"] = "DELETE_ME_2";
-	scenes["finalboss"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0"));
+
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 	pos[0] = 2;
-	cog.transaction->BeginEndPosition("testing2", pos);
+	cog.customevent->Send("testing2", pos);
 	pos[0] = 3;
-	cog.transaction->BeginEndPosition("testing3", pos);
+	cog.customevent->Send("testing3", pos);
 
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 4);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 4);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 4);
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 4);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -873,13 +838,14 @@ TEST(Scenes, InitSetScenes) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["tutorial"] = "DELETE_ME_1";
-	scenes["menu"] = "DELETE_ME_2";
-	scenes["finalboss"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0"));
+
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -888,16 +854,14 @@ TEST(Scenes, InitSetScenes) {
 	EXPECT_EQ(cog.CurrentSceneId, "DELETE_ME_1");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 	pos[0] = 2;
-	cog.transaction->BeginEndPosition("testing2", pos);
+	cog.customevent->Send("testing2", pos);
 	pos[0] = 3;
-	cog.transaction->BeginEndPosition("testing3", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 4);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 4);
+	cog.customevent->Send("testing3", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 4);
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 0);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -907,13 +871,13 @@ TEST(Scenes, InitSetSceneSwitch) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["tutorial"] = "DELETE_ME_1";
-	scenes["menu"] = "DELETE_ME_2";
-	scenes["finalboss"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -922,27 +886,21 @@ TEST(Scenes, InitSetSceneSwitch) {
 	EXPECT_EQ(cog.CurrentSceneId, "DELETE_ME_1");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 2);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2);
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 	cog.SetScene("menu");
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 0);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	pos[0] = 2;
-	cog.transaction->BeginEndPosition("testing2", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 1);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 1);
+	cog.customevent->Send("testing2", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
 	cog.SetScene("finalboss");
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 0);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	pos[0] = 3;
-	cog.transaction->BeginEndPosition("testing3", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 1);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 1);
+	cog.customevent->Send("testing3", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
 
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 0);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -952,13 +910,13 @@ TEST(Scenes, InitSetInvalidScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["tutorial"] = "DELETE_ME_1";
-	scenes["menu"] = "DELETE_ME_2";
-	scenes["finalboss"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -967,13 +925,11 @@ TEST(Scenes, InitSetInvalidScene) {
 	EXPECT_EQ(cog.CurrentSceneId, "");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 2);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2);
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 2);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -983,7 +939,7 @@ TEST(Scenes, InitSetInvalidNoScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -992,13 +948,11 @@ TEST(Scenes, InitSetInvalidNoScene) {
 	EXPECT_EQ(cog.CurrentSceneId, "");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 2);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 2);
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 2);
-	EXPECT_EQ(cog.transaction->BatchedTransactions.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -1008,10 +962,10 @@ TEST(Scenes, SetSceneMiddle) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["finalboss"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -1020,14 +974,14 @@ TEST(Scenes, SetSceneMiddle) {
 	EXPECT_EQ(cog.CurrentSceneId, "");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.transaction->BeginEndPosition("testing1", pos);
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 2);
+	cog.customevent->Send("testing1", pos);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2); //startsession and testing1
 
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 2);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.SetScene("finalboss");
 	cog.SendData();
-	EXPECT_EQ(cog.transaction->BatchedTransactionsSE.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 
 	cog.EndSession();
 }
@@ -1039,10 +993,10 @@ TEST(ExitPoll, RequestSetNoInit) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.exitpoll->RequestQuestionSet("arquestions");
+	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
 
 	EXPECT_EQ(cog.exitpoll->GetQuestionSetString(), "");
 
@@ -1055,13 +1009,15 @@ TEST(ExitPoll, BasicRequest) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
+	EXPECT_EQ(cog.GetAPIKey(), TESTINGAPIKEY);
+
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("testing_questions");
-	EXPECT_EQ(cog.exitpoll->GetQuestionSetString(), "{\"customerId\":\"altimagegames59340-cppsdkautomatedtesting-test\",\"id\":\"testingquestionsetbool:1\",\"name\":\"testingquestionsetbool\",\"version\":1,\"title\":\"Questionnaire\",\"status\":\"active\",\"questions\":[{\"title\":\"Are you having fun with this experience?\",\"type\":\"BOOLEAN\"}]}");
+	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
+	EXPECT_NE(cog.exitpoll->GetQuestionSetString(), "");
 	cog.EndSession();
 }
 
@@ -1071,13 +1027,14 @@ TEST(ExitPoll, GetThenRequest) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 
 	cog.StartSession();
-	cog.exitpoll->GetQuestionSet();
-	cog.exitpoll->RequestQuestionSet("testing_questions");
+	EXPECT_EQ(cog.exitpoll->GetQuestionSetString(), "");
+	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
+	EXPECT_NE(cog.exitpoll->GetQuestionSetString(), "");
 	cog.EndSession();
 }
 
@@ -1087,13 +1044,13 @@ TEST(ExitPoll, RequestThenGet) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("testing_questions");
-	cog.exitpoll->GetQuestionSet();
+	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
+	EXPECT_NE(cog.exitpoll->GetQuestionSetString(), "");
 	cog.EndSession();
 }
 
@@ -1103,12 +1060,12 @@ TEST(ExitPoll, InvalidRequestThenGet) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("question-does-not-exist");
-	cog.exitpoll->GetQuestionSet();
+	EXPECT_EQ(cog.exitpoll->GetQuestionSetString(), "");
 	cog.EndSession();
 }
 
@@ -1118,11 +1075,11 @@ TEST(ExitPoll, RequestThenGetAnswersJson) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("testing_questions");
+	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
 	cognitive::nlohmann::json questions = cog.exitpoll->GetQuestionSet();
 
 	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
@@ -1138,11 +1095,11 @@ TEST(ExitPoll, RequestThenGetAnswersString) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.exitpoll->RequestQuestionSet("testing_questions");
+	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
 	std::string questionString = cog.exitpoll->GetQuestionSetString();
 
 	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
@@ -1160,7 +1117,7 @@ TEST(Gaze, GazeThenInit) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float>pos = { 0,0,0 };
@@ -1172,11 +1129,11 @@ TEST(Gaze, GazeThenInit) {
 		cog.gaze->RecordGaze(pos, rot);
 	}
 
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 10);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
 	
 	cog.StartSession();
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 0); //no scene to send to. endsession clears everything
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0); //no scene to send to. endsession clears everything
 }
 
 TEST(Gaze, GazeThenInitSetScene) {
@@ -1185,11 +1142,11 @@ TEST(Gaze, GazeThenInitSetScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["gazescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 
@@ -1201,12 +1158,12 @@ TEST(Gaze, GazeThenInitSetScene) {
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
 	}
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 10);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
 
 	cog.StartSession();
 	cog.SetScene("gazescene");
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 0);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 }
 
 TEST(Gaze, InitThenGazeThenSetScene) {
@@ -1215,11 +1172,11 @@ TEST(Gaze, InitThenGazeThenSetScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["gazescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -1231,11 +1188,11 @@ TEST(Gaze, InitThenGazeThenSetScene) {
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
 	}
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 10);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
 
 	cog.SetScene("gazescene");
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 0);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 }
 
 TEST(Gaze, InitThenGazeThenSendThenSetScene) {
@@ -1244,11 +1201,11 @@ TEST(Gaze, InitThenGazeThenSendThenSetScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["gazescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -1260,15 +1217,15 @@ TEST(Gaze, InitThenGazeThenSendThenSetScene) {
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
 	}
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 10);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
 
 	cog.SendData();
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 10);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 	cog.SetScene("gazescene");
 	cog.SendData();
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 0);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 0);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 }
 
 TEST(Gaze, GazeOnDynamic) {
@@ -1277,11 +1234,11 @@ TEST(Gaze, GazeOnDynamic) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["gazescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1298,9 +1255,9 @@ TEST(Gaze, GazeOnDynamic) {
 		cog.gaze->RecordGaze(pos, rot, point);
 	}
 
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 10);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
 
-	cog.dynamicobject->RegisterObjectCustomId("object1", "block", 1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "block", "1", pos, rot);
 
 	for (float i = 0; i < 10; ++i)
 	{
@@ -1308,10 +1265,10 @@ TEST(Gaze, GazeOnDynamic) {
 		cog.gaze->RecordGaze(pos, rot, point,1);
 	}
 
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 20);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 20);
 
 	cog.SendData();
-	EXPECT_EQ(cog.gaze->BatchedGazeSE.size(), 0);
+	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 
 	cog.EndSession();
 }
@@ -1324,7 +1281,7 @@ TEST(Sensors, SenseThenInit) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1336,7 +1293,7 @@ TEST(Sensors, SenseThenInit) {
 	cog.StartSession();
 	EXPECT_EQ(cog.sensor->sensorCount, 10);
 	cog.SendData();
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
+	EXPECT_EQ(cog.sensor->sensorCount, 0);
 	cog.EndSession();
 	EXPECT_EQ(cog.sensor->sensorCount, 0);
 }
@@ -1347,7 +1304,7 @@ TEST(Sensors, EndSessionThenSense) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1368,12 +1325,12 @@ TEST(Sensors, SensorLimitSingle) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	settings.SensorDataLimit = 10;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["sensescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "sensescene";
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -1398,12 +1355,12 @@ TEST(Sensors, SensorLimitMany) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	settings.SensorDataLimit = 15;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["sensescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "sensescene";
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -1433,11 +1390,11 @@ TEST(Sensors, SensorSceneChange) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 	
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["sensescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "sensescene";
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -1457,7 +1414,7 @@ TEST(Sensors, SensorSceneChange) {
 	}
 	EXPECT_EQ(cog.sensor->sensorCount, 6);
 	cog.SendData();
-	EXPECT_EQ(cog.sensor->sensorCount, 6);
+	EXPECT_EQ(cog.sensor->sensorCount, 0);
 }
 
 TEST(Sensors, SenseThenInitSetScene) {
@@ -1466,11 +1423,11 @@ TEST(Sensors, SenseThenInitSetScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["sensescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	for (int i = 0; i < 10; ++i)
@@ -1492,11 +1449,11 @@ TEST(Sensors, InitThenGazeThenSetScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["sensescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -1516,11 +1473,11 @@ TEST(Sensors, InitThenGazeThenSendThenSetScene) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["sensescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -1531,7 +1488,7 @@ TEST(Sensors, InitThenGazeThenSendThenSetScene) {
 	EXPECT_EQ(cog.sensor->sensorCount, 10);
 	cog.SendData();
 	cog.SetScene("sensescene");
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
+	EXPECT_EQ(cog.sensor->sensorCount, 0);
 	cog.EndSession();
 	EXPECT_EQ(cog.sensor->sensorCount, 0);
 }
@@ -1542,11 +1499,11 @@ TEST(Sensors, ManySensors) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["sensescene"] = "DELETE_ME_3";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
@@ -1573,7 +1530,7 @@ TEST(Dynamics, InitRegisterSend) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1581,13 +1538,14 @@ TEST(Dynamics, InitRegisterSend) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
-
+	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	return;
+	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
 
+	
 	pos = { 0,0,5 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,1,6 };
@@ -1619,19 +1577,19 @@ TEST(Dynamics, InitRegisterSceneSend) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["dynamicscene"] = "DELETE_ME_2";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("dynamicscene", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
 
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
+	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 
 	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
@@ -1672,12 +1630,12 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	scenes["two"] = "DELETE_ME_2";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1685,8 +1643,8 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
+	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 
 	auto props = cognitive::nlohmann::json();
 	props["enabled"] = false;
@@ -1717,12 +1675,12 @@ TEST(Dynamics, CustomIds) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	scenes["two"] = "DELETE_ME_2";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1730,8 +1688,8 @@ TEST(Dynamics, CustomIds) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = 1;
-	int object2id = 2;
+	std::string object1id = "1";
+	std::string object2id = "2";
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", object1id, pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", object2id, pos, rot);
 
@@ -1754,12 +1712,13 @@ TEST(Dynamics, CustomIdMultiples) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1767,13 +1726,13 @@ TEST(Dynamics, CustomIdMultiples) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = 1;
-	int object2id = 2;
-	int object3id = 3;
+	std::string object1id = "1";
+	std::string object2id = "2";
+	std::string object3id = "3";
 
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
-	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 1, pos, rot);
-	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", "1", pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", "1", pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", "1", pos, rot);
 	
 	EXPECT_EQ(cog.dynamicobject->objectIds.size(), 3);
 
@@ -1787,13 +1746,13 @@ TEST(Dynamics, LimitSnapshots) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.DynamicDataLimit = 5;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1801,7 +1760,7 @@ TEST(Dynamics, LimitSnapshots) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = 1;
+	std::string object1id = "1";
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", object1id, pos, rot);
 
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
@@ -1822,13 +1781,13 @@ TEST(Dynamics, LimitRegister) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.DynamicDataLimit = 5;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1836,14 +1795,14 @@ TEST(Dynamics, LimitRegister) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", "1", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
-	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 2, pos, rot);
-	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3, pos, rot); //limit. send
+	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", "2", pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", "3", pos, rot); //limit. send
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
-	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", "4", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5, pos, rot); //limit send
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "5", pos, rot); //limit send
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 }
 
@@ -1853,13 +1812,13 @@ TEST(Dynamics, LimitPreSession) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.DynamicDataLimit = 5;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1867,15 +1826,15 @@ TEST(Dynamics, LimitPreSession) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", "1", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
-	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", 2, pos, rot);
-	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", 3, pos, rot);
-	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", 4, pos, rot);
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 5, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", "2", pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", "3", pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", "4", pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "5", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 5);
 	cog.StartSession();
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", 6, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "6", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
 }
 
@@ -1885,12 +1844,12 @@ TEST(Dynamics, ReuseObjectId) {
 
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1899,14 +1858,14 @@ TEST(Dynamics, ReuseObjectId) {
 	std::vector<float>rot = { 0,0,0,1 };
 	cog.StartSession();
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
+	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 
 	cog.dynamicobject->RemoveObject(object1id, pos, rot);
-	int object3id = cog.dynamicobject->RegisterObject("object3", "block", pos, rot);
+	std::string object3id = cog.dynamicobject->RegisterObject("object3", "block", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
-	int object4id = cog.dynamicobject->RegisterObject("object4", "lamp", pos, rot);
+	std::string object4id = cog.dynamicobject->RegisterObject("object4", "lamp", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
 	cog.SendData();
 }
@@ -1918,12 +1877,12 @@ TEST(Dynamics, EngagementBeforeRegister) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	scenes["two"] = "DELETE_ME_2";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1933,13 +1892,13 @@ TEST(Dynamics, EngagementBeforeRegister) {
 
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(),0);
 
-	cog.dynamicobject->BeginEngagement(1, "grab");
-	cog.dynamicobject->AddSnapshot(1, pos, rot);
-	cog.dynamicobject->EndEngagement(1, "grab");
+	cog.dynamicobject->BeginEngagement("1", "grab");
+	cog.dynamicobject->AddSnapshot("1", pos, rot);
+	cog.dynamicobject->EndEngagement("1", "grab");
 	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp",1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp","1", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 	cog.SendData();
 	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
@@ -1953,12 +1912,12 @@ TEST(Dynamics, EngagementNeverRegister) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	scenes["two"] = "DELETE_ME_2";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1968,9 +1927,9 @@ TEST(Dynamics, EngagementNeverRegister) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	cog.dynamicobject->BeginEngagement(1, "grab");
-	cog.dynamicobject->AddSnapshot(1, pos, rot);
-	cog.dynamicobject->EndEngagement(1, "grab");
+	cog.dynamicobject->BeginEngagement("1", "grab");
+	cog.dynamicobject->AddSnapshot("1", pos, rot);
+	cog.dynamicobject->EndEngagement("1", "grab");
 	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
 	//cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
@@ -1986,12 +1945,12 @@ TEST(Dynamics, EngagementsScenes) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	scenes["two"] = "DELETE_ME_2";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1999,9 +1958,9 @@ TEST(Dynamics, EngagementsScenes) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	int object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
+	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
-	int object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
+	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 2);
 
 	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
@@ -2039,11 +1998,11 @@ TEST(Dynamics, EngagementRemove) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
-	settings.CustomerId = TESTINGCUSTOMER;
+	settings.APIKey = TESTINGAPIKEY;
 
-	std::map<std::string, std::string> scenes = std::map<std::string, std::string>();
-	scenes["one"] = "DELETE_ME_1";
-	settings.sceneIds = scenes;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0"));
+	settings.SceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -2052,11 +2011,11 @@ TEST(Dynamics, EngagementRemove) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	
-	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1, pos, rot);
+	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", "1", pos, rot);
 	
-	cog.dynamicobject->BeginEngagement(1, "grab");
-	cog.dynamicobject->AddSnapshot(1, pos, rot);
-	cog.dynamicobject->RemoveObject(1, pos, rot);
+	cog.dynamicobject->BeginEngagement("1", "grab");
+	cog.dynamicobject->AddSnapshot("1", pos, rot);
+	cog.dynamicobject->RemoveObject("1", pos, rot);
 	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
 

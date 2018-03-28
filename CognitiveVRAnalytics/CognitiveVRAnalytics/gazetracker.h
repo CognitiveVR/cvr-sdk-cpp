@@ -63,6 +63,7 @@ public:
 	void RecordGaze(::std::vector<float> &position, ::std::vector<float> &rotation, ::std::vector<float> &gazepoint, int objectid = -1);
 	void RecordGaze(::std::vector<float> &position, ::std::vector<float> &rotation);
 
+	//post any gaze points and any updated user/device properties
 	void SendData();
 	//clear gaze points
 	void EndSession();

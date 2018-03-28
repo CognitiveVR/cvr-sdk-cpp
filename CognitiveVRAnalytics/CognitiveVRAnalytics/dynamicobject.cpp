@@ -75,8 +75,8 @@ void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mes
 std::string DynamicObject::RegisterObject(::std::string name, ::std::string meshname, ::std::vector<float> position, ::std::vector<float> rotation)
 {
 	bool foundRecycledId = false;
-	DynamicObjectId newObjectId = DynamicObjectId(0, meshname);
-
+	DynamicObjectId newObjectId = DynamicObjectId("0", meshname);
+	
 	static int nextObjectId = generatedIdOffset;
 	for (auto& element : objectIds)
 	{
@@ -91,7 +91,7 @@ std::string DynamicObject::RegisterObject(::std::string name, ::std::string mesh
 			break;
 		}
 	}
-
+	
 	if (!foundRecycledId)
 	{
 		newObjectId = DynamicObjectId(std::to_string(nextObjectId), meshname);

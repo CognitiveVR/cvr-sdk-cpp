@@ -12,7 +12,6 @@ Sensor::Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 
 void Sensor::RecordSensor(::std::string Name, float value)
 {
-	//if (!cvr->WasInitSuccessful()) { cvr->log->Info("Sensor::RecordSensor failed: init not successful"); return; }
 	//initialize json as array if needed
 	auto search = allsensors.find(Name);
 	if (search == allsensors.end())

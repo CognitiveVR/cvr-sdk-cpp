@@ -29,7 +29,7 @@ class Config {
 
 		::std::string SdkVersion = "0.2";
 
-		::std::string kNetworkHost = "https://data.cognitive3d.com";
+		::std::string kNetworkHost = "data.cognitive3d.com";
 
 		//added to the header to authenticate requests
 		::std::string APIKey = "asdf1234jhkl5678";

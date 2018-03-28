@@ -9,7 +9,7 @@ Network::Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
     cvr = cog;
 	headers.push_back("Content-Type:application/json");
-	headers.push_back("Authorization:"+ cvr->config->APIKey);
+	headers.push_back("Authorization:APIKEY:DATA "+ cvr->config->APIKey);
 }
 
 //a default callback. use for debugging, otherwise nothing
@@ -64,11 +64,12 @@ void ExitPollCallback(::std::string body)
 void Network::NetworkCall(::std::string suburl, ::std::string content)
 {
 	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkCall cannot find webrequest pointer"); return; }
-	cvr->log->Info("API call: " + suburl);
+	if (cvr->CurrentSceneId == "") { cvr->log->Warning("Network::NetworkCall does not have valid scenename"); return; }
+	if (cvr->CurrentSceneVersionNumber == "") { cvr->log->Warning("Network::NetworkCall does not have valid scene version number"); return; }
 
 	::std::string path = "https://"+cvr->config->kNetworkHost+"/v"+cvr->config->networkVersion+"/"+suburl+"/"+cvr->CurrentSceneId+"?version="+cvr->CurrentSceneVersionNumber;
 
-	cvr->log->Info(path);
+	cvr->log->Info("API call: " + path);
 
 	cvr->sendFunctionPointer(path, content, headers, nullptr);
 }
@@ -77,7 +78,9 @@ void Network::NetworkExitpollGet(::std::string hook)
 {
 	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkExitpollGet cannot find webrequest pointer"); return; }
 
-	::std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSetHooks" + hook + "/questionSet";
+	::std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSetHooks/" + hook + "/questionSet";
+
+	cvr->log->Info("Network::NetworkExitpollGet: " + path);
 
 	cvr->sendFunctionPointer(path, "", headers, &ExitPollCallback);
 }
@@ -86,7 +89,7 @@ void Network::NetworkExitpollPost(std::string questionsetname, std::string quest
 {
 	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkExitpollPost cannot find webrequest pointer"); return; }
 
-	::std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSets" + questionsetname + "/" +questionsetversion + "/responses";
+	::std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSets/" + questionsetname + "/" +questionsetversion + "/responses";
 
 	cvr->sendFunctionPointer(path, content, headers, nullptr);
 }

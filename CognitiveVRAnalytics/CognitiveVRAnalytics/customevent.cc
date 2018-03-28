@@ -18,7 +18,7 @@ void CustomEvent::Send(::std::string category, ::std::vector<float> &Position)
 
 void CustomEvent::Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties)
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("CustomEvent::Send failed: no session active"); return; }
+	//if (!cvr->IsSessionActive()) { cvr->log->Info("CustomEvent::Send failed: no session active"); return; }
 
 	double ts = cvr->GetTimestamp();
 
@@ -34,6 +34,11 @@ void CustomEvent::Send(::std::string category, ::std::vector<float> &Position, n
 	}
 
 	BatchedCustomEvents.emplace_back(se);
+
+	if (BatchedCustomEvents.size() >= cvr->config->TransactionBatchSize)
+	{
+		SendData();
+	}
 }
 
 void CustomEvent::SendData()
