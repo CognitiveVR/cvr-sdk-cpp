@@ -24,8 +24,6 @@ void GazeTracker::SetHMDType(::std::string hmdtype)
 
 void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId)
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::RecordGaze failed: no session active"); return; }
-
 	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json data = nlohmann::json();

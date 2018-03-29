@@ -38,7 +38,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	config->HMDType = settings.GetHMDType();
 	config->APIKey = settings.APIKey;
 	config->GazeBatchSize = settings.GazeBatchSize;
-	config->TransactionBatchSize = settings.TransactionBatchSize;
+	config->CustomEventBatchSize = settings.CustomEventBatchSize;
 	config->SensorDataLimit = settings.SensorDataLimit;
 	config->DynamicDataLimit = settings.DynamicDataLimit;
 	config->GazeInterval = settings.GazeInterval;
@@ -52,7 +52,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
 
 	//set scenes
-	config->SceneData = settings.SceneData; //TODO check that this copies values, not pointer
+	config->SceneData = settings.SceneData;
 	if (settings.DefaultSceneName.size() > 0)
 		SetScene(settings.DefaultSceneName);
 }
@@ -102,9 +102,8 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	isSessionActive = true;
 
-	//TODO replace with custom event for session init
 	::std::vector<float> pos = { 0,0,0 };
-	customevent->Send("application_init", pos);
+	customevent->Send("Start Session", pos);
 
 	return true;
 }
@@ -127,7 +126,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
 
-	customevent->Send("cvr.session", endPos, props);
+	customevent->Send("End Session", endPos, props);
 
 	SendData();
 
@@ -153,13 +152,10 @@ double CognitiveVRAnalyticsCore::GetSessionTimestamp()
 
 double CognitiveVRAnalyticsCore::GetTimestamp()
 {
-	//http://www.cplusplus.com/forum/general/43203/#msg234281
-	//https://stackoverflow.com/questions/9089842/c-chrono-system-time-in-milliseconds-time-operations
-	
-	//TODO get utc epoch time in milliseconds instead of steady_clock time
-
-	auto now = std::chrono::steady_clock::now();
-	return now.time_since_epoch().count()* 0.0000001;
+	//timezone? daylight savings time?
+	//system clock duration between now and epoch in milliseconds
+	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	return (double)milliseconds*0.001;
 }
 
 ::std::string CognitiveVRAnalyticsCore::GetSessionID()

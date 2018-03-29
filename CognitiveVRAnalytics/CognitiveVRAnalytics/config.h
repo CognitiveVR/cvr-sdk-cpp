@@ -38,7 +38,7 @@ class Config {
 
 		int SensorDataLimit = 64;
 		int DynamicDataLimit = 64;
-		int TransactionBatchSize = 64;
+		int CustomEventBatchSize = 64;
 		int GazeBatchSize = 64;
 
 		//only holds the value between core construction and session begin. use cvr.gaze.PlayerSnapshotInterval

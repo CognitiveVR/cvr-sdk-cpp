@@ -46,8 +46,8 @@ class CoreSettings
 		int SensorDataLimit = 64;
 		//how many dynamic objects registered and snapshotted to batch before sending to SceneExplorer
 		int DynamicDataLimit = 64;
-		//how many transactions to batch before sending to dashboard and SceneExplorer
-		int TransactionBatchSize = 64;
+		//how many custom events to batch before sending to SceneExplorer
+		int CustomEventBatchSize = 64;
 		//how many gaze data points to batch before sending to SceneExplorer
 		int GazeBatchSize = 64;
 

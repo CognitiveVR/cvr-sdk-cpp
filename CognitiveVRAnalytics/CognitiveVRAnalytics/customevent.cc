@@ -35,7 +35,7 @@ void CustomEvent::Send(::std::string category, ::std::vector<float> &Position, n
 
 	BatchedCustomEvents.emplace_back(se);
 
-	if (BatchedCustomEvents.size() >= cvr->config->TransactionBatchSize)
+	if (BatchedCustomEvents.size() >= cvr->config->CustomEventBatchSize)
 	{
 		SendData();
 	}
@@ -45,19 +45,20 @@ void CustomEvent::SendData()
 {
 	if (!cvr->IsSessionActive()) { cvr->log->Info("CustomEvent::SendData failed: no session active"); return; }
 
-	if (BatchedCustomEvents.size() > 0)
+	if (BatchedCustomEvents.size() == 0)
 	{
-		//send to sceneexplorer
-		nlohmann::json se = nlohmann::json();
-		se["userid"] = cvr->UserId;
-		se["timestamp"] = (int)cvr->GetTimestamp();
-		se["sessionid"] = cvr->GetSessionID();
-		se["part"] = jsonPart;
-		jsonPart++;
-		se["data"] = BatchedCustomEvents;
-		cvr->network->NetworkCall("events", se.dump());
-		BatchedCustomEvents.clear();
+		return;
 	}
+
+	nlohmann::json se = nlohmann::json();
+	se["userid"] = cvr->UserId;
+	se["timestamp"] = (int)cvr->GetTimestamp();
+	se["sessionid"] = cvr->GetSessionID();
+	se["part"] = jsonPart;
+	jsonPart++;
+	se["data"] = BatchedCustomEvents;
+	cvr->network->NetworkCall("events", se.dump());
+	BatchedCustomEvents.clear();
 }
 void CustomEvent::EndSession()
 {

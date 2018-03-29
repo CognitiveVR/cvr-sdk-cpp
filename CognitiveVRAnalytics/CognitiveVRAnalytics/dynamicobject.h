@@ -144,7 +144,7 @@ public:
 	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation);
 	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
 
-	/** add engagement to dynamic object
+	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!
 
 		@param int objectid
 		@param std::string name

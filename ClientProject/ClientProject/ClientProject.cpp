@@ -626,7 +626,7 @@ TEST(CustomEvent, SendLimitPreSessionThreshold) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
-	settings.TransactionBatchSize = 3; //on the third transaction it should send
+	settings.CustomEventBatchSize = 3; //on the third transaction it should send
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
@@ -645,7 +645,7 @@ TEST(CustomEvent, SendLimitPreSession) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
-	settings.TransactionBatchSize = 3; //on the third transaction it should send
+	settings.CustomEventBatchSize = 3; //on the third transaction it should send
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
@@ -665,7 +665,7 @@ TEST(CustomEvent, SendLimitSession) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
-	settings.TransactionBatchSize = 3; //on the third transaction it should send
+	settings.CustomEventBatchSize = 3; //on the third transaction it should send
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
