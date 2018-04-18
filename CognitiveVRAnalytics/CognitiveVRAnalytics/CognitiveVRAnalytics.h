@@ -132,23 +132,15 @@ public:
 	
 	~CognitiveVRAnalyticsCore();
 
-
-
-	//std::map<std::string, std::string> KnownUserProperties;
 	std::map<std::string, std::string> NewUserProperties;
-
-	//std::map<std::string, std::string> KnownDeviceProperties;
 	std::map<std::string, std::string> NewDeviceProperties;
-
-	//nlohmann::json UserProperties = nlohmann::json();
-	
-	//nlohmann::json DeviceProperties = nlohmann::json();
-	/** set a unique user id
-		@param std::string user_id
-	*/
 
 	void SetUserName(std::string name);
 
+	/** set single user property
+	@param std::string propertyType
+	@param int value
+	*/
 	void SetUserProperty(::std::string propertyType, int value);
 	/** set single user property
 		@param std::string propertyType
@@ -160,13 +152,16 @@ public:
 		@param std::string value
 	*/
 	void SetUserProperty(::std::string propertyType, ::std::string value);
-	/** confirm user properties. send to dashboard
-	*/
-
+	
 	//returns new device properties map. clears new properties
 	std::map<std::string,std::string> GetUserProperties();
 
+
 	void SetDeviceName(std::string name);
+	/** set single device property
+		@param EDeviceProperty propertyType
+		@param int value
+	*/
 	void SetDeviceProperty(EDeviceProperty propertyType, int value);
 	/** set single device property
 		@param EDeviceProperty propertyType
@@ -179,16 +174,18 @@ public:
 
 
 
-	//which organization and product this project belongs to. used to send to dashboard
+	//the identifying key for the product. used to send to sceneexplorer
 	::std::string GetAPIKey();
-	//used to identify which session this sends to for SceneExplorer
+	//used to identify the session start
 	double GetSessionTimestamp();
+	//returns the current timestamp
 	double GetTimestamp();
-	//the session timestamp and user. creates a unique session in SceneExplorer
+	//the session timestamp and userid. creates a unique session in SceneExplorer
 	::std::string GetSessionID();
 	
 	bool IsSessionActive();
 
+	//TODO this should only return true if IsSessionActive and network can access sceneexplorer
 	//OBSOLETE this returns true if session has begun
 	bool WasInitSuccessful();
 

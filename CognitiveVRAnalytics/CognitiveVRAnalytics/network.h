@@ -50,15 +50,5 @@ class Network
 		void NetworkExitpollGet(::std::string hook);
 		//used by exitpolls
 		void NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, ::std::string content);
-		/*
-		//send batched transactions to dashboard
-		void DashboardCall(::std::string suburl, ::std::string content);
-
-		//exitpoll calls to get question sets and send answers
-		void APICall(::std::string suburl, ::std::string callType, ::std::string content = "");
-
-		//sub url is dynamic/sensor/gaze/event. for sending stuff to sceneexplorer
-		//returns true if successfully called. false if scene not set or webrequest not set
-		bool SceneExplorerCall(::std::string suburl, ::std::string content);*/
 };
 }

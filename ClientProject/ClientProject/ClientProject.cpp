@@ -1262,7 +1262,7 @@ TEST(Gaze, GazeOnDynamic) {
 	for (float i = 0; i < 10; ++i)
 	{
 		pos[1] = i;
-		cog.gaze->RecordGaze(pos, rot, point,1);
+		cog.gaze->RecordGaze(pos, rot, point,"1");
 	}
 
 	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 20);

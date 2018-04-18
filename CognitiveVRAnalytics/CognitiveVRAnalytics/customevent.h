@@ -38,21 +38,18 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 {
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-
 		int jsonPart = 1;
 
     public:
 		CustomEvent(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-		//the array of objects {"name":"whatever","time":100,"point":[0,1,2]} to send to dashboard
 		nlohmann::json BatchedCustomEvents = nlohmann::json();
 
-        /** Begin a new transaction.
+        /** Record a new custom event
 
 			@param std::string category
-			@param std::vector<float> position - Optional
+			@param std::vector<float> position of event
             @param nlohmann::json properties - Optional
-			@param std::string transaction_id - Optional
         */
 		void Send(::std::string category, ::std::vector<float> &Position);
 		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
@@ -60,7 +57,7 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 
 		void SendData();
 		
-		//clear saved transactions
+		//send and clear saved events
 		void EndSession();
 };
 }

@@ -162,7 +162,10 @@ double CognitiveVRAnalyticsCore::GetTimestamp()
 {
 	if (SessionId.empty())
 	{
-		SessionId = ::std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
+		if (UserId.empty())
+			SessionId = ::std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
+		else
+			SessionId = ::std::to_string((int)GetSessionTimestamp()) + "_" + UserId;
 	}
 	return SessionId;
 }
@@ -198,60 +201,12 @@ void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, float
 	NewUserProperties[propertyType] = value;
 }
 
-/*void CognitiveVRAnalyticsCore::SetUserProperties(nlohmann::json properties)
-{
-	for (nlohmann::json::iterator it = properties.begin(); it != properties.end(); ++it) {
-
-		if (it.value().is_string())
-		{
-			std::string tmp = properties[it.key()];
-			SetUserProperty(it.key(), tmp);
-		}
-		else if (it.value().is_number_integer())
-		{
-			SetUserProperty(it.key(), (int)it.value());
-		}
-		else if (it.value().is_number_float())
-		{
-			SetUserProperty(it.key(), (float)it.value());
-		}
-	}
-}*/
-
 std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetUserProperties()
 {
 	std::map<std::string, std::string> copiedmap = NewUserProperties;
 	NewUserProperties = std::map<std::string, std::string>();
 	return copiedmap;
 }
-/*
-void CognitiveVRAnalyticsCore::UpdateUserState()
-{
-	double ts = GetTimestamp();
-
-	nlohmann::json args = nlohmann::json::array();
-
-	args.emplace_back(ts);
-	args.emplace_back(ts);
-	args.emplace_back(UserId);
-	args.emplace_back(DeviceId);
-
-	if (UserProperties.size() > 0)
-	{
-		args.emplace_back(UserProperties);
-		//TODO user properties to gaze recording
-	}
-	else
-	{
-		args.emplace_back(nullptr);
-		//TODO user properties to gaze recording
-	}
-}
-
-void CognitiveVRAnalyticsCore::SetDeviceId(::std::string device_id)
-{
-	DeviceId = device_id;
-}*/
 
 void CognitiveVRAnalyticsCore::SetDeviceName(std::string name)
 {
@@ -275,29 +230,6 @@ std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetDeviceProperties
 	NewDeviceProperties = std::map<std::string, std::string>();
 	return copiedmap;
 }
-/*
-void CognitiveVRAnalyticsCore::UpdateDeviceState()
-{
-	double ts = GetTimestamp();
-
-	nlohmann::json args = nlohmann::json::array();
-
-	args.emplace_back(ts);
-	args.emplace_back(ts);
-	args.emplace_back(UserId);
-	args.emplace_back(DeviceId);
-
-	if (DeviceProperties.size() > 0)
-	{
-		args.emplace_back(DeviceProperties);
-		//TODO device properties to gaze recording
-	}
-	else
-	{
-		args.emplace_back(nullptr);
-		//TODO device properties to gaze recording
-	}
-}*/
 
 void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 {
@@ -309,13 +241,6 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 		dynamicobject->RefreshObjectManifest();
 	}
 	//if no current scene, likely queuing up events/gaze/etc before setting the scene
-
-	//config->SceneData.
-
-
-	//std::get(config->SceneData)
-
-	//config->SceneData.
 
 	bool foundScene = false;
 	for (auto const &ent : config->SceneData)

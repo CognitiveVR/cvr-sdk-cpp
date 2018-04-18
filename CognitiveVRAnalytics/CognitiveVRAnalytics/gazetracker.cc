@@ -22,7 +22,7 @@ void GazeTracker::SetHMDType(::std::string hmdtype)
 	HMDType = hmdtype;
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId)
+void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze)
 {
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -32,10 +32,24 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 
-	if (objectId >= 0)
+	BatchedGaze.emplace_back(data);
+
+	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
 	{
-		data["o"] = objectId;
+		SendData();
 	}
+}
+
+void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, std::string objectId)
+{
+	//TODO conversion for xyz = -xzy or whatever
+
+	nlohmann::json data = nlohmann::json();
+	data["time"] = cvr->GetTimestamp();
+	data["p"] = { Position[0],Position[1],Position[2] };
+	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
+	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
+	data["o"] = objectId;
 
 	BatchedGaze.emplace_back(data);
 
