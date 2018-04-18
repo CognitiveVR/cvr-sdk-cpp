@@ -5,6 +5,9 @@
 #include "CognitiveVRAnalytics.h"
 #include "curl.h"
 
+#include <iostream>
+#include <cstdlib>
+
 //for testing delay
 #include <chrono>
 #include <thread>
