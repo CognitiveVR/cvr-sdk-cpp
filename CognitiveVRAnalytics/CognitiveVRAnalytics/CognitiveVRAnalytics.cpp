@@ -52,7 +52,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
 
 	//set scenes
-	config->SceneData = settings.SceneData;
+	config->AllSceneData = settings.AllSceneData;
 	if (settings.DefaultSceneName.size() > 0)
 		SetScene(settings.DefaultSceneName);
 }
@@ -243,7 +243,7 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	//if no current scene, likely queuing up events/gaze/etc before setting the scene
 
 	bool foundScene = false;
-	for (auto const &ent : config->SceneData)
+	for (auto const &ent : config->AllSceneData)
 	{
 		if (ent.SceneName == sceneName)
 		{

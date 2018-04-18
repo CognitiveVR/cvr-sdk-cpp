@@ -25,11 +25,6 @@ class Config {
 		Config(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 		{
 			cvr = cog;
-			if (const char* env_p = std::getenv("COGNITIVEAPIKEY"))
-			{
-				std::cout << "Custom APIKEY is: " << env_p << '\n';
-				APIKey = env_p;
-			}
 		}
 
 		::std::string SdkVersion = "0.2";
@@ -50,7 +45,7 @@ class Config {
 		float GazeInterval = 0.1f;
 		::std::string HMDType = "";
 
-		std::vector<SceneData> SceneData;
+		std::vector<SceneData> AllSceneData;
 
 		#pragma warning(pop)
 };

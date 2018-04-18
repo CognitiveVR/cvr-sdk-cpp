@@ -82,7 +82,7 @@ class Network;
 class CustomEvent;
 class Sensor;
 class CoreSettings;
-class SceneData;
+//class SceneData;
 
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {

@@ -67,7 +67,7 @@ class CoreSettings
 		}
 
 		//all 'scenes' the user might encounter. must contain at least one to use SceneExplorer
-		std::vector<SceneData> SceneData;
+		std::vector<SceneData> AllSceneData;
 
 		//::std::map < ::std::string, ::std::string> sceneIds;
 		//the default scene to load after Cognitive Analytics constructor
