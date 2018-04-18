@@ -30,9 +30,6 @@
     <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="transaction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="gazetracker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,10 +45,10 @@
     <ClInclude Include="exitpoll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tuning.h">
+    <ClInclude Include="coresettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="coresettings.h">
+    <ClInclude Include="customevent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,9 +60,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cognitive_log.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="transaction.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gazetracker.cc">
@@ -83,7 +77,7 @@
     <ClCompile Include="exitpoll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tuning.cc">
+    <ClCompile Include="customevent.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

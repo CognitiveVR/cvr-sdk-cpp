@@ -25,43 +25,32 @@ class Config {
 		Config(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 		{
 			cvr = cog;
+			if (const char* env_p = std::getenv("COGNITIVEAPIKEY"))
+			{
+				std::cout << "Custom APIKEY is: " << env_p << '\n';
+				APIKey = env_p;
+			}
 		}
 
-		::std::string SdkVersion = "0.1";
+		::std::string SdkVersion = "0.2";
 
-        //CognitiveVR API host. -- Only enterprise customers need this. Ex: https://data.cognitivevr.io
-		::std::string kNetworkHost = "https://data.cognitivevr.io";
-		::std::string kNetworkHostAPI = "https://api.cognitivevr.io";
-		::std::string kSceneExplorerAPI = "https://sceneexplorer.com/api/";
+		::std::string kNetworkHost = "data.cognitive3d.com";
 
-        //SSF app. Ex: isos-personalization
-		::std::string kSsfApp = "isos-personalization";
+		//added to the header to authenticate requests
+		::std::string APIKey = "asdf1234jhkl5678";
 
-        //SSF Version. Ex: 4
-		::std::string kSsfVersion = "4";
-
-        //SSF Output. Ex: json
-		::std::string kSsfOutput = "json";
-
-        //Tuning variable cache time to live, measured in milliseconds. Ex. 900 000 - 15 Minutes
-        long kTuningCacheTtl = 900000;
-
-        //Network call timeout, measured in seconds. Ex. 5
-		long kNetworkTimeout = 5;
-
-		//which product to send data to. Ex companyname1234-productname-test
-		::std::string CustomerId = "altimagegames59340-unitywanderdemo-test";
+		::std::string networkVersion = "0";
 
 		int SensorDataLimit = 64;
 		int DynamicDataLimit = 64;
-		int TransactionBatchSize = 64;
+		int CustomEventBatchSize = 64;
 		int GazeBatchSize = 64;
 
 		//only holds the value between core construction and session begin. use cvr.gaze.PlayerSnapshotInterval
 		float GazeInterval = 0.1f;
 		::std::string HMDType = "";
 
-		::std::map < ::std::string, ::std::string> sceneIds;
+		std::vector<SceneData> SceneData;
 
 		#pragma warning(pop)
 };

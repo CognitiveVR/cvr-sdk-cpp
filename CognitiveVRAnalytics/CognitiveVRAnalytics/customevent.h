@@ -2,12 +2,12 @@
 Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 */
 
-//Constructs urls and contents of web requests and parses responses
-
+//Record beginning and ending of events
 #pragma once
 
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
+
 
 #if defined(_MSC_VER)
 //  Microsoft 
@@ -28,27 +28,36 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #define COGNITIVEVRANALYTICS_EXPORTS
 #pragma warning Unknown dynamic link import/export semantics.
 #endif
+
+
 namespace cognitive
 {
 class CognitiveVRAnalyticsCore;
 
-class Network
+class COGNITIVEVRANALYTICS_API CustomEvent
 {
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-		::std::vector<::std::string> headers;
+		int jsonPart = 1;
 
     public:
-        Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+		CustomEvent(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-		//used for posting gaze/events/dynamics/sensors to dashboard and scene explorer
-		void NetworkCall(::std::string suburl, ::std::string content);
+		nlohmann::json BatchedCustomEvents = nlohmann::json();
+
+        /** Record a new custom event
+
+			@param std::string category
+			@param std::vector<float> position of event
+            @param nlohmann::json properties - Optional
+        */
+		void Send(::std::string category, ::std::vector<float> &Position);
+		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
+
+
+		void SendData();
 		
-		//void NetworkCall(::std::string suburl, ::std::string content, WebResponse response);
-
-		//used by exitpolls
-		void NetworkExitpollGet(::std::string hook);
-		//used by exitpolls
-		void NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, ::std::string content);
+		//send and clear saved events
+		void EndSession();
 };
 }

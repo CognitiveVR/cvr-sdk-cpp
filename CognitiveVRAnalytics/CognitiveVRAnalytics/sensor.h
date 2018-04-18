@@ -40,10 +40,10 @@ class COGNITIVEVRANALYTICS_API Sensor
 
 		::std::map<::std::string, nlohmann::json> allsensors;
 		int jsonPart = 1;
-
     public:
-		int sensorCount = 0;
 
+		//TODO should be private. tests shouldn't directly test this value
+		int sensorCount = 0;
 		Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 		/** Record data for a sensor

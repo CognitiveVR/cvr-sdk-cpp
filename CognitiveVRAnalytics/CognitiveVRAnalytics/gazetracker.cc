@@ -22,10 +22,8 @@ void GazeTracker::SetHMDType(::std::string hmdtype)
 	HMDType = hmdtype;
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, int objectId)
+void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze)
 {
-	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { return; }
-
 	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json data = nlohmann::json();
@@ -34,14 +32,28 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 
-	if (objectId >= 0)
+	BatchedGaze.emplace_back(data);
+
+	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
 	{
-		data["o"] = objectId;
+		SendData();
 	}
+}
 
-	BatchedGazeSE.emplace_back(data);
+void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, std::string objectId)
+{
+	//TODO conversion for xyz = -xzy or whatever
 
-	if (BatchedGazeSE.size() >= cvr->config->GazeBatchSize)
+	nlohmann::json data = nlohmann::json();
+	data["time"] = cvr->GetTimestamp();
+	data["p"] = { Position[0],Position[1],Position[2] };
+	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
+	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
+	data["o"] = objectId;
+
+	BatchedGaze.emplace_back(data);
+
+	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -49,8 +61,6 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation)
 {
-	if (!cvr->WasInitSuccessful() && !cvr->IsPendingInit()) { return; }
-
 	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json data = nlohmann::json();
@@ -58,9 +68,9 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 
-	BatchedGazeSE.emplace_back(data);
+	BatchedGaze.emplace_back(data);
 
-	if (BatchedGazeSE.size() >= cvr->config->GazeBatchSize)
+	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -68,10 +78,12 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::SendData()
 {
-	if (cvr->IsPendingInit()) { cvr->log->Info("GazeTracker::SendData failed: init pending"); return; }
-	if (!cvr->WasInitSuccessful()) { cvr->log->Info("GazeTracker::SendData. init not successful"); return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::SendData failed: no session active"); return; }
 
-	if (BatchedGazeSE.size() == 0)
+	auto dproperties = cvr->GetDeviceProperties();
+	auto uproperties = cvr->GetUserProperties();
+
+	if (BatchedGaze.size() == 0 && dproperties.size() == 0 && uproperties.size() == 0)
 	{
 		return;
 	}
@@ -85,15 +97,24 @@ void GazeTracker::SendData()
 	jsonPart++;
 	se["hmdtype"] = HMDType;
 	se["interval"] = PlayerSnapshotInterval;
-	se["data"] = BatchedGazeSE;
-	if (cvr->network->SceneExplorerCall("gaze", se.dump()))
+	se["data"] = BatchedGaze;
+
+	
+	if (dproperties.size() > 0)
 	{
-		BatchedGazeSE.clear();
+		se["device"] = dproperties;
 	}
+	
+	if (uproperties.size() > 0)
+	{
+		se["user"] = uproperties;
+	}
+	cvr->network->NetworkCall("gaze", se.dump());
+	BatchedGaze.clear();
 }
 
 void GazeTracker::EndSession()
 {
-	BatchedGazeSE.clear();
+	BatchedGaze.clear();
 }
 }

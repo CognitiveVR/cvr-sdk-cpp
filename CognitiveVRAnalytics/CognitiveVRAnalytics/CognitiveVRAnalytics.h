@@ -8,10 +8,9 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 #include "stdafx.h"
 #include "network.h"
-#include "transaction.h"
+#include "customevent.h"
 #include "gazetracker.h"
 #include "sensor.h"
-#include "tuning.h"
 #include "exitpoll.h"
 #include "dynamicobject.h"
 #include "cognitive_log.h"
@@ -75,25 +74,21 @@ enum class EDeviceProperty
 	kVRVendor //(string) oculus
 };
 
-typedef void(*WebResponse) (::std::string content);
-typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
-
 class DynamicObject;
 class ExitPoll;
 class CognitiveLog;
 class GazeTracker;
 class Network;
-class Tuning;
-class Transaction;
+class CustomEvent;
 class Sensor;
 class CoreSettings;
+class SceneData;
 
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
 	friend class CognitiveLog;
 	friend class Network;
-	friend class Transaction;
-	friend class Tuning;
+	friend class CustomEvent;
 	friend class Sensor;
 	friend class Config;
 	friend class DynamicObject;
@@ -105,11 +100,6 @@ private:
 	
 	::std::unique_ptr<Network> network = nullptr;
 	::std::unique_ptr<Config> config = nullptr;
-	
-	//application_init returns expected values from dashboard
-	bool bWasInitSuccessful = false;
-	//after constructor and before session init has responded. allows batching data before session begins
-	bool bPendingInit = true;
 
 	double SessionTimestamp = -1;
 	::std::string SessionId = "";
@@ -117,22 +107,22 @@ private:
 	WebRequest sendFunctionPointer = nullptr;
 	::std::string DevicePropertyToString(EDeviceProperty propertyType);
 
+	bool isSessionActive = false;
+
+	::std::string UserId = "";
+	::std::string DeviceId = "";
+
 public:
 
 	//unique id of scene that that receives recorded data
 	::std::string CurrentSceneId = "";
-
-	::std::string UserId = "";
-	nlohmann::json UserProperties = nlohmann::json();
-	::std::string DeviceId = "";
-	nlohmann::json DeviceProperties = nlohmann::json();
+	::std::string CurrentSceneVersionNumber = "";
 
 	//this may return null. constructor should call this manually before referencing instance!
 	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
 	::std::unique_ptr<CognitiveLog> log = nullptr;
-	::std::unique_ptr<Transaction> transaction = nullptr;
+	::std::unique_ptr<CustomEvent> customevent = nullptr;
 	::std::unique_ptr<Sensor> sensor = nullptr;
-	::std::unique_ptr<Tuning> tuning = nullptr;
 	::std::unique_ptr<GazeTracker> gaze = nullptr;
 	::std::unique_ptr<DynamicObject> dynamicobject = nullptr;
 	::std::unique_ptr<ExitPoll> exitpoll = nullptr;
@@ -142,15 +132,14 @@ public:
 	
 	~CognitiveVRAnalyticsCore();
 
-	/** set a unique user id
-		@param std::string user_id
-	*/
-	void SetUserId(::std::string user_id);
-	//* set many user properties
-	void SetUserProperties(nlohmann::json properties);
+	std::map<std::string, std::string> NewUserProperties;
+	std::map<std::string, std::string> NewDeviceProperties;
+
+	void SetUserName(std::string name);
+
 	/** set single user property
-		@param std::string propertyType
-		@param int value
+	@param std::string propertyType
+	@param int value
 	*/
 	void SetUserProperty(::std::string propertyType, int value);
 	/** set single user property
@@ -163,12 +152,12 @@ public:
 		@param std::string value
 	*/
 	void SetUserProperty(::std::string propertyType, ::std::string value);
-	/** confirm user properties. send to dashboard
-	*/
-	void UpdateUserState();
+	
+	//returns new device properties map. clears new properties
+	std::map<std::string,std::string> GetUserProperties();
 
-	//* set unique device id
-	void SetDeviceId(::std::string device_id);
+
+	void SetDeviceName(std::string name);
 	/** set single device property
 		@param EDeviceProperty propertyType
 		@param int value
@@ -179,33 +168,41 @@ public:
 		@param std::string value
 	*/
 	void SetDeviceProperty(EDeviceProperty propertyType, ::std::string value);
-	//* confirm device properties. send to dashboard
-	void UpdateDeviceState();
 
-	//which organization and product this project belongs to. used to send to dashboard
-	::std::string GetCustomerId();
-	//used to identify which session this sends to for SceneExplorer
+	//returns new device properties map. clears new properties
+	std::map<std::string, std::string> GetDeviceProperties();
+
+
+
+	//the identifying key for the product. used to send to sceneexplorer
+	::std::string GetAPIKey();
+	//used to identify the session start
 	double GetSessionTimestamp();
+	//returns the current timestamp
 	double GetTimestamp();
-	//the session timestamp and user. creates a unique session in SceneExplorer
+	//the session timestamp and userid. creates a unique session in SceneExplorer
 	::std::string GetSessionID();
 	
-	void SetPendingInit(bool isPending);
-	bool IsPendingInit();
-	void SetInitSuccessful(bool success);
+	bool IsSessionActive();
+
+	//TODO this should only return true if IsSessionActive and network can access sceneexplorer
+	//OBSOLETE this returns true if session has begun
 	bool WasInitSuccessful();
 
 	/** start a session. returns true if successfully starting session. ie, not already started
 	*/
 	bool StartSession();
 
-	/** end the session. sends all final data to dashboard and SceneExplorer
+	/** end the session. sends all final data to SceneExplorer
 	*/
 	void EndSession();
 
+	//must have started session before sending
+	//send all outstanding data to scene. if scene doesn't exist, clear data - it's not relevant to other scenes anyway
 	void SendData();
 
 	/** set which scene on SceneExplorer should recieve the recorded data
+		if the current scene is not null, this will also send data before changing the active scene
 		@param std::string scenename
 	*/
 	void SetScene(::std::string scenename);

@@ -47,22 +47,37 @@ private:
 
 public:
 
-	nlohmann::json BatchedGazeSE = nlohmann::json();
+	nlohmann::json BatchedGaze = nlohmann::json();
 
 	GazeTracker(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 	void SetInterval(float interval);
 	void SetHMDType(::std::string hmdtype);
 
+	/** Record HMD position, rotation and gaze
+
+		@param std::vector<float> hmdposition
+		@param std::vector<float> hmdrotation
+		@param std::vector<float> gazepoint - world position of gaze
+	*/
+	void RecordGaze(::std::vector<float> &hmdposition, ::std::vector<float> &hmdrotation, ::std::vector<float> &gazepoint);
+
 	/** Record HMD position, rotation, gaze and object hit
 
-		@param std::vector<float> position
-		@param std::vector<float> rotation
-		@param std::vector<float> gazepoint - Optional
-		@param std::vector<float> objectid - Opitonal
+	@param std::vector<float> hmd position
+	@param std::vector<float> hmd rotation
+	@param std::vector<float> localgazepoint - position local to dynamic object looked at
+	@param std::string objectid - object id of hit dynamic object
 	*/
-	void RecordGaze(::std::vector<float> &position, ::std::vector<float> &rotation, ::std::vector<float> &gazepoint, int objectid = -1);
-	void RecordGaze(::std::vector<float> &position, ::std::vector<float> &rotation);
+	void RecordGaze(::std::vector<float> &hmdposition, ::std::vector<float> &hmdrotation, ::std::vector<float> &localgazepoint, std::string objectid);
 
+	/** Record HMD position and rotation. used when looking at sky or something without a distinct surface
+
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	*/
+	void RecordGaze(::std::vector<float> &hmdposition, ::std::vector<float> &hmdrotation);
+
+	//post any gaze points and any updated user/device properties
 	void SendData();
 	//clear gaze points
 	void EndSession();
