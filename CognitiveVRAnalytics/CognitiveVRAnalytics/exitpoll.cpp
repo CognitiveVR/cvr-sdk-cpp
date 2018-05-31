@@ -102,6 +102,9 @@ void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 	properties["userId"] = cvr->UserId;
 	properties["questionSetId"] = fullResponse.questionSetId;
 	properties["hook"] = fullResponse.hook;
+	properties["sceneId"] = cvr->CurrentSceneId;
+	properties["versionNumber"] = cvr->CurrentSceneVersionNumber;
+	properties["versionId"] = cvr->CurrentSceneVersionId;
 
 	//add answers as properties
 	for (int i = 0; i < fullResponse.answers.size(); ++i)

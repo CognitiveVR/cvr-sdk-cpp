@@ -75,6 +75,7 @@ public:
 	bool isActive = true;
 
 	double startTime = -1;
+	double endTime = -1;
 	std::string Name = "";
 	std::string ObjectId = "";
 	int EngagementNumber = 0;

@@ -36,12 +36,14 @@ namespace cognitive
 		std::string SceneName;
 		std::string SceneId;
 		std::string VersionNumber;
+		int VersionId;
 
-		SceneData(std::string sceneName, std::string sceneId, std::string versionNumber)
+		SceneData(std::string sceneName, std::string sceneId, std::string versionNumber, int versionId)
 		{
 			SceneName = sceneName;
 			SceneId = sceneId;
 			VersionNumber = versionNumber;
+			VersionId = versionId;
 		}
 	};
 }

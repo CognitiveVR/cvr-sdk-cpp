@@ -68,8 +68,6 @@ void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mes
 	{
 		SendData();
 	}
-
-	return;
 }
 
 std::string DynamicObject::RegisterObject(::std::string name, ::std::string meshname, ::std::vector<float> position, ::std::vector<float> rotation)
@@ -157,9 +155,10 @@ void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> posit
 			if (e.isActive)
 			{
 				nlohmann::json engagementEvent = nlohmann::json();
-				engagementEvent["engagementparent"] = objectId;
+				engagementEvent["engagementparent"] = e.ObjectId;
 				engagementEvent["engagement_count"] = e.EngagementNumber;
-				engagementEvent["engagement_time"] = cvr->GetTimestamp() - e.startTime;
+				engagementEvent["engagement_time"] = (e.endTime > 0 ? e.endTime - e.startTime : cvr->GetTimestamp() - e.startTime);
+				engagementEvent["engagementtype"] = e.Name;
 				snapshot.Engagements.emplace_back(engagementEvent);
 			}
 		}
@@ -167,6 +166,7 @@ void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> posit
 		cvr->log->Info("all engagements pre " + std::to_string(allEngagements[objectId].size()));
 		//remove inactive engagements https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 		allEngagements[objectId].erase(::std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
+		activeEngagements[objectId].erase(::std::remove_if(activeEngagements[objectId].begin(), activeEngagements[objectId].end(), isInactive), activeEngagements[objectId].end());
 		cvr->log->Info("all engagements post " + std::to_string(allEngagements[objectId].size()));
 	}
 
@@ -196,9 +196,11 @@ void DynamicObject::EndEngagement(std::string objectId, ::std::string name)
 		if (e.Name == name)
 		{
 			e.isActive = false;
+			e.endTime = cvr->GetTimestamp();
 			return;
 		}
 	}
+
 	//otherwise create and end the engagement
 
 	cvr->log->Info("DynamicObject::EndEngagement engagement " + name + " not found on object"+ objectId +". Begin+End");
@@ -210,6 +212,7 @@ void DynamicObject::EndEngagement(std::string objectId, ::std::string name)
 		if (rit->Name == name)
 		{
 			rit->isActive = false;
+			rit->endTime = cvr->GetTimestamp();
 			return;
 		}
 	}

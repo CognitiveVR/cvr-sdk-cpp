@@ -34,7 +34,13 @@ void Sensor::RecordSensor(::std::string Name, float value)
 
 void Sensor::SendData()
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("Sensor::SendData failed: no session active"); return; }
+	if (!cvr->IsSessionActive())
+	{
+		cvr->log->Info("Sensor::SendData failed: no session active");
+		sensorCount = 0;
+		allsensors.clear();
+		return;
+	}
 
 	if (allsensors.size() == 0)
 	{
@@ -61,7 +67,7 @@ void Sensor::SendData()
 	}
 	data["data"] = sensors;
 
-	cvr->network->NetworkCall("sensor", data.dump());
+	cvr->network->NetworkCall("sensors", data.dump());
 	sensorCount = 0;
 	allsensors.clear();
 }

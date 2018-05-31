@@ -41,7 +41,12 @@ void CustomEvent::Send(::std::string category, ::std::vector<float> &Position, n
 
 void CustomEvent::SendData()
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("CustomEvent::SendData failed: no session active"); return; }
+	if (!cvr->IsSessionActive())
+	{
+		cvr->log->Info("CustomEvent::SendData failed: no session active");
+		BatchedCustomEvents.clear();
+		return;
+	}
 
 	if (BatchedCustomEvents.size() == 0)
 	{

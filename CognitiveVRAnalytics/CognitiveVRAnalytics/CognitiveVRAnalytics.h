@@ -117,6 +117,7 @@ public:
 	//unique id of scene that that receives recorded data
 	::std::string CurrentSceneId = "";
 	::std::string CurrentSceneVersionNumber = "";
+	int CurrentSceneVersionId = 0;
 
 	//this may return null. constructor should call this manually before referencing instance!
 	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();

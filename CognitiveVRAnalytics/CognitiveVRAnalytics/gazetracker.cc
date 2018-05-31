@@ -78,7 +78,12 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 
 void GazeTracker::SendData()
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("GazeTracker::SendData failed: no session active"); return; }
+	if (!cvr->IsSessionActive())
+	{
+		cvr->log->Info("GazeTracker::SendData failed: no session active");
+		BatchedGaze.clear();
+		return;
+	}
 
 	auto dproperties = cvr->GetDeviceProperties();
 	auto uproperties = cvr->GetUserProperties();
