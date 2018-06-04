@@ -111,6 +111,7 @@ private:
 
 	::std::string UserId = "";
 	::std::string DeviceId = "";
+	std::string LobbyId;
 
 public:
 
@@ -118,6 +119,8 @@ public:
 	::std::string CurrentSceneId = "";
 	::std::string CurrentSceneVersionNumber = "";
 	int CurrentSceneVersionId = 0;
+	void SetLobbyId(std::string lobbyId);
+	std::string GetLobbyId();
 
 	//this may return null. constructor should call this manually before referencing instance!
 	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
@@ -133,47 +136,18 @@ public:
 	
 	~CognitiveVRAnalyticsCore();
 
-	std::map<std::string, std::string> NewUserProperties;
-	std::map<std::string, std::string> NewDeviceProperties;
+	std::map<std::string, std::string> NewSessionProperties;
+	std::map<std::string, std::string> AllSessionProperties;
+	//std::map<std::string, std::string> NewUserProperties;
+	//std::map<std::string, std::string> NewDeviceProperties;
 
 	void SetUserName(std::string name);
-
-	/** set single user property
-	@param std::string propertyType
-	@param int value
-	*/
-	void SetUserProperty(::std::string propertyType, int value);
-	/** set single user property
-		@param std::string propertyType
-		@param float value
-	*/
-	void SetUserProperty(::std::string propertyType, float value);
-	/** set single user property
-		@param std::string propertyType
-		@param std::string value
-	*/
-	void SetUserProperty(::std::string propertyType, ::std::string value);
-	
-	//returns new device properties map. clears new properties
-	std::map<std::string,std::string> GetUserProperties();
-
-
 	void SetDeviceName(std::string name);
-	/** set single device property
-		@param EDeviceProperty propertyType
-		@param int value
-	*/
-	void SetDeviceProperty(EDeviceProperty propertyType, int value);
-	/** set single device property
-		@param EDeviceProperty propertyType
-		@param std::string value
-	*/
-	void SetDeviceProperty(EDeviceProperty propertyType, ::std::string value);
-
-	//returns new device properties map. clears new properties
-	std::map<std::string, std::string> GetDeviceProperties();
-
-
+	void SetSessionProperty(::std::string propertyType, ::std::string value);
+	void SetSessionProperty(::std::string propertyType, float value);
+	void SetSessionProperty(::std::string propertyType, int value);
+	std::map<std::string, std::string> GetNewSessionProperties();
+	
 
 	//the identifying key for the product. used to send to sceneexplorer
 	::std::string GetAPIKey();
@@ -183,6 +157,8 @@ public:
 	double GetTimestamp();
 	//the session timestamp and userid. creates a unique session in SceneExplorer
 	::std::string GetSessionID();
+
+	void SetSessionName(std::string sessionName);
 	
 	bool IsSessionActive();
 

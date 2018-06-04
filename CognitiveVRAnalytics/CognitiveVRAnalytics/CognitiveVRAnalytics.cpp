@@ -81,6 +81,15 @@ bool CognitiveVRAnalyticsCore::WasInitSuccessful()
 	return isSessionActive;
 }
 
+void CognitiveVRAnalyticsCore::SetLobbyId(std::string lobbyId)
+{
+	LobbyId = lobbyId;
+}
+std::string CognitiveVRAnalyticsCore::GetLobbyId()
+{
+	return LobbyId;
+}
+
 bool CognitiveVRAnalyticsCore::StartSession()
 {
 	if (IsSessionActive())
@@ -183,52 +192,45 @@ void CognitiveVRAnalyticsCore::SendData()
 void CognitiveVRAnalyticsCore::SetUserName(std::string name)
 {
 	UserId = name;
-	NewUserProperties["name"] = name;
+	AllSessionProperties["userid"] = name;
+	NewSessionProperties["userid"] = name;
 }
 
-void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, int value)
+void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, int value)
 {
-	NewUserProperties[propertyType] = value;
+	AllSessionProperties[propertyType] = value;
+	NewSessionProperties[propertyType] = value;
 }
 
-void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, ::std::string value)
+void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, ::std::string value)
 {
-	NewUserProperties[propertyType] = value;
+	AllSessionProperties[propertyType] = value;
+	NewSessionProperties[propertyType] = value;
 }
 
-void CognitiveVRAnalyticsCore::SetUserProperty(::std::string propertyType, float value)
+void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, float value)
 {
-	NewUserProperties[propertyType] = value;
+	AllSessionProperties[propertyType] = value;
+	NewSessionProperties[propertyType] = value;
 }
 
-std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetUserProperties()
+std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetNewSessionProperties()
 {
-	std::map<std::string, std::string> copiedmap = NewUserProperties;
-	NewUserProperties = std::map<std::string, std::string>();
+	std::map<std::string, std::string> copiedmap = NewSessionProperties;
+	NewSessionProperties = std::map<std::string, std::string>();
 	return copiedmap;
 }
 
 void CognitiveVRAnalyticsCore::SetDeviceName(std::string name)
 {
 	DeviceId = name;
-	NewDeviceProperties["name"] = name;
+	AllSessionProperties["deviceid"] = name;
+	NewSessionProperties["deviceid"] = name;
 }
-
-void CognitiveVRAnalyticsCore::SetDeviceProperty(EDeviceProperty propertyType, int value)
+void CognitiveVRAnalyticsCore::SetSessionName(std::string sessionName)
 {
-	NewDeviceProperties[DevicePropertyToString(propertyType)] = value;
-}
-
-void CognitiveVRAnalyticsCore::SetDeviceProperty(EDeviceProperty propertyType, ::std::string value)
-{
-	NewDeviceProperties[DevicePropertyToString(propertyType)] = value;
-}
-
-std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetDeviceProperties()
-{
-	std::map<std::string, std::string> copiedmap = NewDeviceProperties;
-	NewDeviceProperties = std::map<std::string, std::string>();
-	return copiedmap;
+	AllSessionProperties["cvr.sessionname"] = sessionName;
+	NewSessionProperties["cvr.sessionname"] = sessionName;
 }
 
 void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)

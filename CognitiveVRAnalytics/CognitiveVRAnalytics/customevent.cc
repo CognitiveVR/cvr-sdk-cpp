@@ -55,6 +55,8 @@ void CustomEvent::SendData()
 
 	nlohmann::json se = nlohmann::json();
 	se["userid"] = cvr->UserId;
+	if (!cvr->GetLobbyId().empty())
+		se["lobbyId"] = cvr->GetLobbyId();
 	se["timestamp"] = (int)cvr->GetTimestamp();
 	se["sessionid"] = cvr->GetSessionID();
 	se["part"] = jsonPart;

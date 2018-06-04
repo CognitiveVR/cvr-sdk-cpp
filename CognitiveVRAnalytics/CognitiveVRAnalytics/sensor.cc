@@ -51,6 +51,8 @@ void Sensor::SendData()
 	nlohmann::json data = nlohmann::json();
 
 	data["name"] = cvr->UserId;
+	if (!cvr->GetLobbyId().empty())
+		data["lobbyId"] = cvr->GetLobbyId();
 	data["sessionid"] = cvr->GetSessionID();
 	data["timestamp"] = (int)cvr->GetTimestamp();
 	data["part"] = jsonPart;

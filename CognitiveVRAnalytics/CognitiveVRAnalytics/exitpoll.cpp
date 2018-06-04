@@ -100,6 +100,8 @@ void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 	//send this as a transaction too
 	nlohmann::json properties = nlohmann::json();
 	properties["userId"] = cvr->UserId;
+	if (!cvr->GetLobbyId().empty())
+		properties["lobbyId"] = cvr->GetLobbyId();
 	properties["questionSetId"] = fullResponse.questionSetId;
 	properties["hook"] = fullResponse.hook;
 	properties["sceneId"] = cvr->CurrentSceneId;

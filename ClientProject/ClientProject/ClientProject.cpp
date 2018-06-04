@@ -55,8 +55,6 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 
 	struct curl_slist *list = NULL;
 
-	//std::cout << curl_version();
-
 	if (curl) {
 		/* First set the URL that is about to receive our POST. This URL can
 		just as well be a https:// URL if that is what should receive the
@@ -115,8 +113,9 @@ TEST(Initialization, MultipleStartSessions) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
+	
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
+	
 	bool first = cog.StartSession();
 	EXPECT_EQ(first, true);
 	bool second = cog.StartSession();
@@ -143,6 +142,44 @@ TEST(Initialization, MultipleStartEndSessions) {
 	bool third = cog.StartSession();
 	EXPECT_EQ(third, true);
 	cog.EndSession();
+}
+
+TEST(Initialization, SetLobbyId) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	settings.DefaultSceneName = "tutorial";
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetLobbyId("my lobby id");
+
+	cog.StartSession();
+	cog.SendData();
+}
+
+TEST(Initialization, SetSessionName) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	settings.DefaultSceneName = "tutorial";
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetSessionName("my friendly session name");
+	
+	cog.StartSession();
+	cog.SendData();
 }
 
 TEST(Initialization, SessionFullStartEnd) {
@@ -282,11 +319,11 @@ TEST(UserSettings, UserPreSession) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.SetUserName("john");
-	cog.SetUserProperty("age", 21);
-	cog.SetUserProperty("location", "vancouver");
+	cog.SetSessionProperty("age", 21);
+	cog.SetSessionProperty("location", "vancouver");
 	
-	auto props = cog.GetUserProperties();
-	EXPECT_EQ(cog.GetUserProperties().size(), 0);
+	auto props = cog.GetNewSessionProperties();
+	EXPECT_EQ(cog.GetNewSessionProperties().size(), 0);
 
 	EXPECT_EQ(props.size(), 3);
 
@@ -304,11 +341,11 @@ TEST(UserSettings, UserPostSession) {
 
 	cog.StartSession();
 	cog.SetUserName("john");
-	cog.SetUserProperty("age", 21);
-	cog.SetUserProperty("location", "vancouver");
+	cog.SetSessionProperty("age", 21);
+	cog.SetSessionProperty("location", "vancouver");
 	
 	cog.SendData();
-	EXPECT_EQ(cog.GetUserProperties().size(), 0);
+	EXPECT_EQ(cog.GetNewSessionProperties().size(), 0);
 }
 
 TEST(UserSettings, UserNullPreSession) {
@@ -351,13 +388,13 @@ TEST(DeviceSettings, DevicePreSession) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.SetDeviceName("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
+	cog.SetSessionProperty("devicememory", 128);
+	cog.SetSessionProperty("deviceos", "chrome os 16.9f");
 
-	auto map = cog.GetDeviceProperties();
+	auto map = cog.GetNewSessionProperties();
 	EXPECT_EQ(map.size(),3);
 	EXPECT_EQ(map["name"], "7741345684915735"); //TODO
-	EXPECT_EQ(cog.GetDeviceProperties().size(), 0);
+	EXPECT_EQ(cog.GetNewSessionProperties().size(), 0);
 
 	cog.StartSession();
 }
@@ -373,13 +410,13 @@ TEST(DeviceSettings, DevicePostSession) {
 
 	cog.StartSession();
 	cog.SetDeviceName("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i7-4770 CPU @ 3.40GHz");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 970");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");	
+	cog.SetSessionProperty("cpu", "i7-4770 CPU @ 3.40GHz");
+	cog.SetSessionProperty("gpu", "GeForce GTX 970");
+	cog.SetSessionProperty("memory", 128);
+	cog.SetSessionProperty("os", "chrome os 16.9f");
 
 	cog.SendData();
-	auto map = cog.GetDeviceProperties();
+	auto map = cog.GetNewSessionProperties();
 	EXPECT_EQ(map.size(), 0);
 }
 
@@ -395,16 +432,16 @@ TEST(DeviceSettings, DevicePostSessionOverwrite) {
 	cog.StartSession();
 	cog.SetDeviceName("7741345684915735");
 	cog.SetDeviceName("7741345684915736");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i5");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 170");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 16);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
+	cog.SetSessionProperty("cpu", "i5");
+	cog.SetSessionProperty("gpu", "GeForce GTX 170");
+	cog.SetSessionProperty("memory", 16);
+	cog.SetSessionProperty("os", "chrome os 16.9f");
 
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i7-4770 CPU @ 3.40GHz");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 970");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetSessionProperty("cpu", "i7-4770 CPU @ 3.40GHz");
+	cog.SetSessionProperty("gpu", "GeForce GTX 970");
+	cog.SetSessionProperty("memory", 128);
 
-	auto map = cog.GetDeviceProperties();
+	auto map = cog.GetNewSessionProperties();
 	EXPECT_EQ(map.size(), 5);
 }
 
@@ -418,13 +455,13 @@ TEST(DeviceSettings, DevicePostSessionOutOfOrder) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
+	cog.SetSessionProperty("memory", 128);
 	cog.SetDeviceName("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceGPU, "GeForce GTX 970");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");	
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceCPU, "i7-4770 CPU @ 3.40GHz");
+	cog.SetSessionProperty("gpu", "GeForce GTX 970");
+	cog.SetSessionProperty("os", "chrome os 16.9f");
+	cog.SetSessionProperty("cpu", "i7-4770 CPU @ 3.40GHz");
 	
-	auto map = cog.GetDeviceProperties();
+	auto map = cog.GetNewSessionProperties();
 	EXPECT_EQ(map.size(), 5);
 }
 
@@ -466,8 +503,8 @@ TEST(DeviceSettings, DeviceNullPreEnd) {
 
 	cog.SetDeviceName("7741345684915735");
 	cog.SetDeviceName("7741345684915736");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
+	cog.SetSessionProperty("memory", 128);
+	cog.SetSessionProperty("os", "chrome os 16.9f");
 
 	cog.EndSession();
 }
@@ -485,17 +522,17 @@ TEST(UserDeviceSettings, UserDevicePostSession) {
 	cog.StartSession();
 
 	cog.SetDeviceName("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
+	cog.SetSessionProperty("memory", 128);
+	cog.SetSessionProperty("os", "chrome os 16.9f");
 	cog.SendData();
-	auto dmap = cog.GetDeviceProperties();
+	auto dmap = cog.GetNewSessionProperties();
 	EXPECT_EQ(dmap.size(), 0);
 
 	cog.SetUserName("john");
-	cog.SetUserProperty("location", "vancouver");
-	cog.SetUserProperty("location", "seattle");
+	cog.SetSessionProperty("location", "vancouver");
+	cog.SetSessionProperty("location", "seattle");
 	cog.SendData();
-	auto umap = cog.GetUserProperties();
+	auto umap = cog.GetNewSessionProperties();
 	EXPECT_EQ(umap.size(), 0);
 
 	cog.EndSession();
@@ -511,12 +548,12 @@ TEST(UserDeviceSettings, UserDevicePreSession) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.SetUserName("john");
-	cog.SetUserProperty("location", "vancouver");
-	cog.SetUserProperty("location", "seattle");
+	cog.SetSessionProperty("location", "vancouver");
+	cog.SetSessionProperty("location", "seattle");
 
 	cog.SetDeviceName("7741345684915735");
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceMemory, 128);
-	cog.SetDeviceProperty(cognitive::EDeviceProperty::kDeviceOS, "chrome os 16.9f");
+	cog.SetSessionProperty("memory", 128);
+	cog.SetSessionProperty("os", "chrome os 16.9f");
 	cog.SendData();
 
 	cog.StartSession();

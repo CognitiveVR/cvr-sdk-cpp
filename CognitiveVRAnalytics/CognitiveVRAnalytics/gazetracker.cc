@@ -85,10 +85,9 @@ void GazeTracker::SendData()
 		return;
 	}
 
-	auto dproperties = cvr->GetDeviceProperties();
-	auto uproperties = cvr->GetUserProperties();
+	auto properties = cvr->GetNewSessionProperties();
 
-	if (BatchedGaze.size() == 0 && dproperties.size() == 0 && uproperties.size() == 0)
+	if (BatchedGaze.size() == 0 && properties.size() == 0)
 	{
 		return;
 	}
@@ -96,6 +95,8 @@ void GazeTracker::SendData()
 	//send to sceneexplorer
 	nlohmann::json se = nlohmann::json();
 	se["userid"] = cvr->UserId;
+	if (!cvr->GetLobbyId().empty())
+		se["lobbyId"] = cvr->GetLobbyId();
 	se["timestamp"] = (int)cvr->GetTimestamp();
 	se["sessionid"] = cvr->GetSessionID();
 	se["part"] = jsonPart;
@@ -105,15 +106,11 @@ void GazeTracker::SendData()
 	se["data"] = BatchedGaze;
 
 	
-	if (dproperties.size() > 0)
+	if (properties.size() > 0)
 	{
-		se["device"] = dproperties;
+		se["properties"] = properties;
 	}
-	
-	if (uproperties.size() > 0)
-	{
-		se["user"] = uproperties;
-	}
+
 	cvr->network->NetworkCall("gaze", se.dump());
 	BatchedGaze.clear();
 }
