@@ -870,9 +870,9 @@ TEST(Scenes, InitScenes) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0",0));
-	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0",0));
-	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0",0));
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1",0));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "1",0));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1",0));
 
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -901,9 +901,9 @@ TEST(Scenes, InitSetScenes) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1", 0));
 
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -934,9 +934,9 @@ TEST(Scenes, InitSetSceneSwitch) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -973,9 +973,9 @@ TEST(Scenes, InitSetInvalidScene) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("menu", "DELETE_ME_2", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1024,7 +1024,7 @@ TEST(Scenes, SetSceneMiddle) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1228,7 +1228,7 @@ TEST(Gaze, GazeThenInitSetScene) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1258,7 +1258,7 @@ TEST(Gaze, InitThenGazeThenSetScene) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1287,7 +1287,7 @@ TEST(Gaze, InitThenGazeThenSendThenSetScene) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1320,7 +1320,7 @@ TEST(Gaze, GazeOnDynamic) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("gazescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -1432,7 +1432,7 @@ TEST(Sensors, SensorLimitSingle) {
 	settings.SensorDataLimit = 10;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "sensescene";
 
@@ -1462,7 +1462,7 @@ TEST(Sensors, SensorLimitMany) {
 	settings.SensorDataLimit = 15;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "sensescene";
 
@@ -1496,7 +1496,7 @@ TEST(Sensors, SensorSceneChange) {
 	settings.APIKey = TESTINGAPIKEY;
 	
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "sensescene";
 
@@ -1529,7 +1529,7 @@ TEST(Sensors, SenseThenInitSetScene) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1555,7 +1555,7 @@ TEST(Sensors, InitThenGazeThenSetScene) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1579,7 +1579,7 @@ TEST(Sensors, InitThenGazeThenSendThenSetScene) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1605,7 +1605,7 @@ TEST(Sensors, ManySensors) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("sensescene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -1683,7 +1683,7 @@ TEST(Dynamics, InitRegisterSceneSend) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("dynamicscene", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("dynamicscene", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.StartSession();
@@ -1736,8 +1736,8 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -1781,8 +1781,8 @@ TEST(Dynamics, CustomIds) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -1816,8 +1816,8 @@ TEST(Dynamics, CustomIdMultiples) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
@@ -1850,7 +1850,7 @@ TEST(Dynamics, LimitSnapshots) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
@@ -1885,7 +1885,7 @@ TEST(Dynamics, LimitRegister) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
@@ -1916,7 +1916,7 @@ TEST(Dynamics, LimitPreSession) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0",0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1",0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
@@ -1948,7 +1948,7 @@ TEST(Dynamics, ReuseObjectId) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	//settings.loggingLevel = cognitive::LoggingLevel::kAll;
@@ -1983,8 +1983,8 @@ TEST(Dynamics, EngagementBeforeRegister) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -2018,8 +2018,8 @@ TEST(Dynamics, EngagementNeverRegister) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -2051,8 +2051,8 @@ TEST(Dynamics, EngagementsScenes) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
-	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("two", "DELETE_ME_2", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -2104,7 +2104,7 @@ TEST(Dynamics, EngagementRemove) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "0", 0));
+	scenedatas.emplace_back(cognitive::SceneData("one", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "one";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
