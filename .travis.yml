@@ -13,6 +13,18 @@ addons:
       - g++-7
       - cmake
 
+notifications:
+    slack:
+        rooms:
+            - cognitivevr:HHACAo19lTRQXZWblbfGaL36
+        on_success: change
+        on_failure: change
+    email:
+        recipients:
+            - engineering@cognitive3d.com
+    on_success: always
+    on_failure: always
+
 script:
   # Export CC and CXX to tell cmake which compiler to use
   - export CC=gcc-7
