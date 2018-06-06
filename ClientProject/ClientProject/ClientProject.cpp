@@ -189,7 +189,6 @@ TEST(Initialization, SessionFullStartEnd) {
 	cognitive::CoreSettings settings;
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
-	//settings. //TODO try all the fields in the settings container
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	std::vector<float> pos = { 0,0,0 };
@@ -392,9 +391,7 @@ TEST(DeviceSettings, DevicePreSession) {
 	cog.SetSessionProperty("deviceos", "chrome os 16.9f");
 
 	auto map = cog.GetNewSessionProperties();
-	EXPECT_EQ(map.size(),3);
-	EXPECT_EQ(map["name"], "7741345684915735"); //TODO
-	EXPECT_EQ(cog.GetNewSessionProperties().size(), 0);
+	EXPECT_EQ(map.size(),0);
 
 	cog.StartSession();
 }
@@ -692,10 +689,11 @@ TEST(CustomEvent, SendLimitPreSessionThreshold) {
 	std::vector<float> pos = { 0,0,0 };
 	cog.customevent->Send("testing1", pos);
 	cog.customevent->Send("testing2", pos);
-	cog.customevent->Send("testing3", pos); //should try to send here
+	cog.customevent->Send("testing3", pos); //should try to send here. clear batched custom events
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 
 	cog.StartSession(); //fourth transaction. should send all
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
 }
 
 TEST(CustomEvent, SendLimitPreSession) {
