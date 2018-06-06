@@ -1,8 +1,11 @@
 The Cognitive3D SDK for C++
 =========
+
 Welcome!  This SDK allows you to integrate your custom engine or applications with Cognitive3D, which provides analytics and insights about your VR/AR/MR experience.  In addition, Cognitive3D empowers you to take actions that will improve users' engagement with your experience.
 
 **Requires C++ 11 or newer**
+
+[![Build Status](https://travis-ci.org/CognitiveVR/cvr-sdk-cpp.svg?branch=master)](https://travis-ci.org/CognitiveVR/cvr-sdk-cpp)
 
 ## Additional Headers
 
