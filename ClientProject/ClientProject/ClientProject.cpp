@@ -391,8 +391,8 @@ TEST(DeviceSettings, DevicePreSession) {
 	cog.SetSessionProperty("deviceos", "chrome os 16.9f");
 
 	auto map = cog.GetNewSessionProperties();
-	EXPECT_EQ(map.size(),0);
-
+	EXPECT_EQ(map.size(),3);
+	EXPECT_EQ(cog.GetNewSessionProperties().size(), 0);
 	cog.StartSession();
 }
 
