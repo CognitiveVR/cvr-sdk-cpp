@@ -76,22 +76,20 @@ void ExitPoll::ClearQuestionSet()
 	fullResponse.user.clear();
 }
 
-void ExitPoll::AddAnswer(FExitPollAnswer answer)
+void ExitPoll::AddAnswer(ExitPollAnswer answer)
 {
 	fullResponse.answers.push_back(answer);
 }
 
-void ExitPoll::SendAllAnswers()
+nlohmann::json ExitPoll::SendAllAnswers()
 {
 	std::vector<float> pos = { 0,0,0 };
-	SendAllAnswers(pos);
+	return SendAllAnswers(pos);
 }
 
-void ExitPoll::SendAllAnswers(::std::vector<float> pos)
+nlohmann::json ExitPoll::SendAllAnswers(::std::vector<float> pos)
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: no session active"); return; }
-
-	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
+	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: no session active"); return nlohmann::json(); }
 
 	nlohmann::json full = fullResponse.ToJson();
 
@@ -125,5 +123,7 @@ void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 	cvr->customevent->Send("cvr.exitpoll", pos, properties);
 
 	ClearQuestionSet();
+
+	return full;
 }
 }

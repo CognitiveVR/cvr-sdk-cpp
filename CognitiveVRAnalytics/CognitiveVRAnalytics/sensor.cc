@@ -32,19 +32,19 @@ void Sensor::RecordSensor(::std::string Name, float value)
 	}
 }
 
-void Sensor::SendData()
+nlohmann::json Sensor::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
 		cvr->log->Info("Sensor::SendData failed: no session active");
 		sensorCount = 0;
 		allsensors.clear();
-		return;
+		return nlohmann::json();
 	}
 
 	if (allsensors.size() == 0)
 	{
-		return;
+		return nlohmann::json();
 	}
 
 	//put together all json
@@ -72,6 +72,8 @@ void Sensor::SendData()
 	cvr->network->NetworkCall("sensors", data.dump());
 	sensorCount = 0;
 	allsensors.clear();
+
+	return data;
 }
 
 void Sensor::EndSession()

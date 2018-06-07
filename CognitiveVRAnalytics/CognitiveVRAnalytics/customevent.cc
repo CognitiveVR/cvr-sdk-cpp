@@ -39,18 +39,18 @@ void CustomEvent::Send(::std::string category, ::std::vector<float> &Position, n
 	}
 }
 
-void CustomEvent::SendData()
+nlohmann::json CustomEvent::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
 		cvr->log->Info("CustomEvent::SendData failed: no session active");
 		BatchedCustomEvents.clear();
-		return;
+		return nlohmann::json();
 	}
 
 	if (BatchedCustomEvents.size() == 0)
 	{
-		return;
+		return nlohmann::json();
 	}
 
 	nlohmann::json se = nlohmann::json();
@@ -64,6 +64,7 @@ void CustomEvent::SendData()
 	se["data"] = BatchedCustomEvents;
 	cvr->network->NetworkCall("events", se.dump());
 	BatchedCustomEvents.clear();
+	return se;
 }
 void CustomEvent::EndSession()
 {

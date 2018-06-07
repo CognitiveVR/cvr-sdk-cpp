@@ -215,12 +215,11 @@ TEST(Initialization, SessionStartNoWeb) {
 
 	cognitive::CoreSettings settings;
 	settings.loggingLevel == cognitive::LoggingLevel::kAll;
-	//settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.WasInitSuccessful(), true);
+	EXPECT_EQ(cog.IsSessionActive(), true);
 }
 
 TEST(Initialization, SessionStartNoWebResponse) {
@@ -234,7 +233,7 @@ TEST(Initialization, SessionStartNoWebResponse) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.WasInitSuccessful(), true);
+	EXPECT_EQ(cog.IsSessionActive(), true);
 }
 
 TEST(Initialization, SessionStartInvalidCustomerId) {
@@ -251,7 +250,7 @@ TEST(Initialization, SessionStartInvalidCustomerId) {
 	
 	cog.StartSession();
 	EXPECT_EQ(cog.GetAPIKey(), INVALIDAPIKEY);
-	EXPECT_EQ(cog.WasInitSuccessful(), true);
+	EXPECT_EQ(cog.IsSessionActive(), true);
 }
 
 TEST(Initialization, InstancePreConstructor) {
@@ -290,6 +289,7 @@ TEST(Initialization, SessionEnd) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.EndSession();
+	EXPECT_EQ(cog.IsSessionActive(), false);
 }
 
 TEST(Initialization, SessionStartEnd) {
@@ -301,8 +301,11 @@ TEST(Initialization, SessionStartEnd) {
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
+	EXPECT_EQ(cog.IsSessionActive(), false);
 	cog.StartSession();
+	EXPECT_EQ(cog.IsSessionActive(), true);
 	cog.EndSession();
+	EXPECT_EQ(cog.IsSessionActive(), false);
 }
 
 //----------------------SET USER
@@ -571,9 +574,15 @@ TEST(CustomEvent, PreSessionNoEnd) {
 	std::vector<float> pos = { 0,0,0 };
 	cog.customevent->Send("testing1", pos);
 
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 
 	cog.StartSession();
+
+	cog.customevent->Send("testing1", pos);
+
+	c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
 }
 
 TEST(CustomEvent, PreSessionBatchClear) {
@@ -589,9 +598,10 @@ TEST(CustomEvent, PreSessionBatchClear) {
 	std::vector<float> pos = { 0,0,0 };
 	cog.customevent->Send("testing1", pos);
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 
 	cog.StartSession();
 }
@@ -607,10 +617,10 @@ TEST(CustomEvent, PreSessionEnd) {
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
 	cog.StartSession();
 	cog.EndSession();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 }
 
 TEST(CustomEvent, PreSessionSend) {
@@ -624,11 +634,9 @@ TEST(CustomEvent, PreSessionSend) {
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
 	cog.StartSession();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2); //testing1 and sesionbegin
-	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
 }
 
 TEST(CustomEvent, PreSessionPropsSend) {
@@ -647,11 +655,10 @@ TEST(CustomEvent, PreSessionPropsSend) {
 	prop["location"] = "vancouver";
 
 	cog.customevent->Send("testing1", pos, prop);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
+	EXPECT_EQ(c["data"][0]["properties"]["location"], "vancouver");
 	cog.StartSession();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
-	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 }
 
 TEST(CustomEvent, SessionEnd) {
@@ -671,9 +678,9 @@ TEST(CustomEvent, SessionEnd) {
 
 	cog.StartSession();
 	cog.customevent->Send("testing1", pos, props);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 	cog.EndSession();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 }
 
 TEST(CustomEvent, SendLimitPreSessionThreshold) {
@@ -690,10 +697,10 @@ TEST(CustomEvent, SendLimitPreSessionThreshold) {
 	cog.customevent->Send("testing1", pos);
 	cog.customevent->Send("testing2", pos);
 	cog.customevent->Send("testing3", pos); //should try to send here. clear batched custom events
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 
 	cog.StartSession(); //fourth transaction. should send all
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 }
 
 TEST(CustomEvent, SendLimitPreSession) {
@@ -710,9 +717,9 @@ TEST(CustomEvent, SendLimitPreSession) {
 	cog.customevent->Send("testing1", pos);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 	cog.EndSession();
 }
 
@@ -729,111 +736,20 @@ TEST(CustomEvent, SendLimitSession) {
 	std::vector<float> pos = { 0,0,0 };
 	cog.StartSession();
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 	cog.customevent->Send("testing2", pos); //send here
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
-	
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);	
 	cog.customevent->Send("testing1", pos);
 	cog.customevent->Send("testing1", pos);
+	c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 
 	cog.customevent->Send("testing1", pos);
 	cog.EndSession();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 }
-
-//----------------------TUNING
-/*
-TEST(Tuning, TuningGetValue) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.APIKey = TESTINGAPIKEY;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	cog.StartSession();
-
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_EQ(snow_attitude, "ferocious");
-	std::cout << snow_attitude << std::endl;
-
-	auto blockPosition = cog.tuning->GetValue("vinegar_volume", 0, cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_EQ(blockPosition, 50);
-	std::cout << blockPosition << std::endl;
-
-	auto ExitPollActivated = cog.tuning->GetValue("ExitPollActivated", false, cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_EQ(ExitPollActivated, true);
-	std::cout << ExitPollActivated << std::endl;
-
-	auto pi = cog.tuning->GetValue("pi", (float)3.0, cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_FLOAT_EQ(pi, 3.1415927);
-	std::cout << pi << std::endl;
-
-	cog.EndSession();
-}
-
-TEST(Tuning, TuningGetValueNoSession) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.APIKey = TESTINGAPIKEY;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", "mellow", cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_EQ(snow_attitude, "mellow");
-}
-
-TEST(Tuning, TuningGetInvalidValue) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.APIKey = TESTINGAPIKEY;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	cog.StartSession();
-	auto snow_attitude = cog.tuning->GetValue("snow_raditude", "mellow", cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_EQ(snow_attitude, "mellow");
-	cog.EndSession();
-}
-
-TEST(Tuning, TuningGetInvalidCast) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.APIKey = TESTINGAPIKEY;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	cog.StartSession();
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", 500, cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_EQ(snow_attitude, 500);
-	cog.EndSession();
-}
-
-TEST(Tuning, TuningGetInvalidCastBool) {
-	if (TestDelay > 0)
-		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
-
-	cognitive::CoreSettings settings;
-	settings.webRequest = &DoWebStuff;
-	settings.APIKey = TESTINGAPIKEY;
-	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-
-	cog.StartSession();
-	auto snow_attitude = cog.tuning->GetValue("snow_attitude", false, cognitive::EntityType::kEntityTypeDevice);
-	EXPECT_EQ(snow_attitude, false);
-	cog.EndSession();
-}
-*/
-//----------------------SETTING SCENE KEYS FOR SCENE EXPLORER
 
 TEST(Scenes, NoScenes) {
 	if (TestDelay > 0)
@@ -852,10 +768,11 @@ TEST(Scenes, NoScenes) {
 	cog.customevent->Send("testing2", pos);
 	pos[0] = 3;
 	cog.customevent->Send("testing3", pos);
-	EXPECT_EQ(cog.CurrentSceneId, "");
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 4);
+	EXPECT_EQ(cog.GetSceneId(), "");
+
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 4);
 	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -884,9 +801,9 @@ TEST(Scenes, InitScenes) {
 	pos[0] = 3;
 	cog.customevent->Send("testing3", pos);
 
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 4);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 4);
 	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -907,9 +824,9 @@ TEST(Scenes, InitSetScenes) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.CurrentSceneId, "");
+	EXPECT_EQ(cog.GetSceneId(), "");
 	cog.SetScene("tutorial");
-	EXPECT_EQ(cog.CurrentSceneId, "DELETE_ME_1");
+	EXPECT_EQ(cog.GetSceneId(), "DELETE_ME_1");
 
 	std::vector<float> pos = { 1,0,0 };
 	cog.customevent->Send("testing1", pos);
@@ -917,9 +834,9 @@ TEST(Scenes, InitSetScenes) {
 	cog.customevent->Send("testing2", pos);
 	pos[0] = 3;
 	cog.customevent->Send("testing3", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 4);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 4);
 	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -939,26 +856,20 @@ TEST(Scenes, InitSetSceneSwitch) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.CurrentSceneId,"");
 	cog.SetScene("tutorial");
-	EXPECT_EQ(cog.CurrentSceneId, "DELETE_ME_1");
 
 	std::vector<float> pos = { 1,0,0 };
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
 	cog.SetScene("menu");
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
-	pos[0] = 2;
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c.size(), 0);
 	cog.customevent->Send("testing2", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
+	c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
 	cog.SetScene("finalboss");
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
-	pos[0] = 3;
 	cog.customevent->Send("testing3", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 1);
-
-	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
 	cog.EndSession();
 }
 
@@ -978,16 +889,16 @@ TEST(Scenes, InitSetInvalidScene) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.CurrentSceneId, "");
+	EXPECT_EQ(cog.GetSceneId(), "");
 	cog.SetScene("non-existent");
-	EXPECT_EQ(cog.CurrentSceneId, "");
+	EXPECT_EQ(cog.GetSceneId(), "");
 
 	std::vector<float> pos = { 1,0,0 };
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
 
 	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -1001,16 +912,16 @@ TEST(Scenes, InitSetInvalidNoScene) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.CurrentSceneId, "");
+	EXPECT_EQ(cog.GetSceneId(), "");
 	cog.SetScene("non-existent");
-	EXPECT_EQ(cog.CurrentSceneId, "");
+	EXPECT_EQ(cog.GetSceneId(), "");
 
 	std::vector<float> pos = { 1,0,0 };
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
 
 	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
 	cog.EndSession();
 }
 
@@ -1027,20 +938,18 @@ TEST(Scenes, SetSceneMiddle) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
 	cog.StartSession();
-	EXPECT_EQ(cog.CurrentSceneId, "");
 	cog.SetScene("non-existent");
-	EXPECT_EQ(cog.CurrentSceneId, "");
-
 	std::vector<float> pos = { 1,0,0 };
 	cog.customevent->Send("testing1", pos);
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 2); //startsession and testing1
-
-	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
 	cog.SetScene("finalboss");
-	cog.SendData();
-	EXPECT_EQ(cog.customevent->BatchedCustomEvents.size(), 0);
+	cog.customevent->Send("testing1", pos);
+	cog.customevent->Send("testing1", pos);
 
+	c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+	cog.SendData();
 	cog.EndSession();
 }
 //----------------------EXITPOLL
@@ -1139,10 +1048,11 @@ TEST(ExitPoll, RequestThenGetAnswersJson) {
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
 	cognitive::nlohmann::json questions = cog.exitpoll->GetQuestionSet();
+	EXPECT_EQ(questions.size(), 7);
 
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kScale, 1));
+	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
+	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
+	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kScale, 1));
 	cog.exitpoll->SendAllAnswers();
 	cog.EndSession();
 }
@@ -1159,11 +1069,13 @@ TEST(ExitPoll, RequestThenGetAnswersString) {
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
 	std::string questionString = cog.exitpoll->GetQuestionSetString();
+	EXPECT_NE(questionString, "");
 
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
-	cog.exitpoll->AddAnswer(cognitive::FExitPollAnswer(cognitive::EQuestionType::kScale, 1));
-	cog.exitpoll->SendAllAnswers();
+	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
+	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
+	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kScale, 1));
+	auto a = cog.exitpoll->SendAllAnswers();
+	EXPECT_EQ(a["answers"].size(), 5);
 	cog.EndSession();
 }
 
@@ -1187,11 +1099,12 @@ TEST(Gaze, GazeThenInit) {
 		cog.gaze->RecordGaze(pos, rot);
 	}
 
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
+	auto g = cog.gaze->SendData();
+	EXPECT_EQ(g.size(), 0);
 	
 	cog.StartSession();
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0); //no scene to send to. endsession clears everything
+	//EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0); //no scene to send to. endsession clears everything
 }
 
 TEST(Gaze, PreSessionGazeBatchClear) {
@@ -1210,11 +1123,12 @@ TEST(Gaze, PreSessionGazeBatchClear) {
 	
 	cog.gaze->RecordGaze(pos, rot);
 	cog.gaze->RecordGaze(pos, rot);
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 2);
+	auto g = cog.gaze->SendData();
+	EXPECT_EQ(g.size(), 0);
 	cog.gaze->RecordGaze(pos, rot);
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
-
 	cog.StartSession();
+	g = cog.gaze->SendData();
+	EXPECT_EQ(g["data"].size(), 1);
 }
 
 TEST(Gaze, GazeThenInitSetScene) {
@@ -1239,12 +1153,11 @@ TEST(Gaze, GazeThenInitSetScene) {
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
 	}
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
-
 	cog.StartSession();
 	cog.SetScene("gazescene");
+	auto g = cog.gaze->SendData();
+	EXPECT_EQ(g["data"].size(), 10);
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 }
 
 TEST(Gaze, InitThenGazeThenSetScene) {
@@ -1269,11 +1182,11 @@ TEST(Gaze, InitThenGazeThenSetScene) {
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
 	}
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
 
 	cog.SetScene("gazescene");
+	auto g = cog.gaze->SendData();
+	EXPECT_EQ(g["data"].size(), 10);
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 }
 
 TEST(Gaze, InitThenGazeThenSendThenSetScene) {
@@ -1298,15 +1211,15 @@ TEST(Gaze, InitThenGazeThenSendThenSetScene) {
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot);
 	}
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
 
 	cog.SendData();
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
+	auto g = cog.gaze->SendData();
+	EXPECT_EQ(g["data"].size(), 0);
 	cog.SetScene("gazescene");
-	cog.SendData();
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
+	cog.gaze->RecordGaze(pos, rot);
+	g = cog.gaze->SendData();
+	EXPECT_EQ(g["data"].size(), 1);
 	cog.EndSession();
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 }
 
 TEST(Gaze, GazeOnDynamic) {
@@ -1335,21 +1248,21 @@ TEST(Gaze, GazeOnDynamic) {
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot, point);
 	}
-
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 10);
+	auto g = cog.gaze->SendData();
+	EXPECT_EQ(g["data"].size(), 10);
 
 	cog.dynamicobject->RegisterObjectCustomId("object1", "block", "1", pos, rot);
 
-	for (float i = 0; i < 10; ++i)
+	for (float i = 0; i < 20; ++i)
 	{
 		pos[1] = i;
 		cog.gaze->RecordGaze(pos, rot, point,"1");
 	}
 
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 20);
+	g = cog.gaze->SendData();
+	EXPECT_EQ(g["data"].size(), 20);
 
 	cog.SendData();
-	EXPECT_EQ(cog.gaze->BatchedGaze.size(), 0);
 
 	cog.EndSession();
 }
@@ -1372,11 +1285,11 @@ TEST(Sensors, SenseThenInit) {
 	}
 
 	cog.StartSession();
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"].size(), 1);
+	EXPECT_EQ(s["data"][0]["data"].size(), 10);
 	cog.SendData();
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
 	cog.EndSession();
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
 }
 
 TEST(Sensors, PreSessionSenseBatchClear) {
@@ -1392,11 +1305,15 @@ TEST(Sensors, PreSessionSenseBatchClear) {
 
 	cog.sensor->RecordSensor("test-sensor", 1);
 	cog.sensor->RecordSensor("test-sensor", 2);
-	EXPECT_EQ(cog.sensor->sensorCount, 2);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s.size(), 0);
 	cog.sensor->RecordSensor("test-sensor", 3);
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
 
 	cog.StartSession();
+	cog.sensor->RecordSensor("test-sensor", 1);
+	cog.sensor->RecordSensor("test-sensor", 2);
+	s = cog.sensor->SendData();
+	EXPECT_EQ(s.size(), 0);
 }
 
 TEST(Sensors, EndSessionThenSense) {
@@ -1416,8 +1333,8 @@ TEST(Sensors, EndSessionThenSense) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s.size(), 0);
 }
 
 TEST(Sensors, SensorLimitSingle) {
@@ -1442,12 +1359,13 @@ TEST(Sensors, SensorLimitSingle) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 5);
+	
 	for (int i = 0; i < 6; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 1);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"][0]["data"].size(), 1);
 }
 
 TEST(Sensors, SensorLimitMany) {
@@ -1472,17 +1390,20 @@ TEST(Sensors, SensorLimitMany) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 5);
 	for (int i = 0; i < 5; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor1", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"][0]["data"].size(), 5);
+	EXPECT_EQ(s["data"].size(), 2);
 	for (int i = 0; i < 5; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor2", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
+	s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"][0]["data"].size(), 5);
+	EXPECT_EQ(s["data"].size(), 1);
 }
 
 TEST(Sensors, SensorSceneChange) {
@@ -1506,16 +1427,18 @@ TEST(Sensors, SensorSceneChange) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 5);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"].size(), 5);
 	cog.SetScene("non-existent-scene");
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
+	s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"].size(), 0);
 	for (int i = 0; i < 6; ++i)
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 6);
-	cog.SendData();
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
+	EXPECT_EQ(s["data"].size(), 6);
+	s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"].size(), 0);
 }
 
 TEST(Sensors, SenseThenInitSetScene) {
@@ -1535,16 +1458,16 @@ TEST(Sensors, SenseThenInitSetScene) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"].size(), 10);
 	cog.StartSession();
 	cog.SetScene("sensescene");
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
-	cog.SendData();
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
+	EXPECT_EQ(s["data"].size(), 10);
+	s = cog.sensor->SendData();
 	cog.EndSession();
 }
 
-TEST(Sensors, InitThenGazeThenSetScene) {
+TEST(Sensors, InitThenSenseThenSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -1562,13 +1485,14 @@ TEST(Sensors, InitThenGazeThenSetScene) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
 	cog.SetScene("sensescene");
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"][0]["data"].size(), 10);
+	EXPECT_EQ(s["data"].size(), 1);
 	cog.EndSession();
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
 }
 
-TEST(Sensors, InitThenGazeThenSendThenSetScene) {
+TEST(Sensors, InitThenSenseThenSendThenSetScene) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
@@ -1586,12 +1510,11 @@ TEST(Sensors, InitThenGazeThenSendThenSetScene) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(cog.sensor->sensorCount, 10);
 	cog.SendData();
 	cog.SetScene("sensescene");
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s.size(), 0);
 	cog.EndSession();
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
 }
 
 TEST(Sensors, ManySensors) {
@@ -1617,10 +1540,13 @@ TEST(Sensors, ManySensors) {
 		cog.sensor->RecordSensor("test-sensor2", i);
 	}
 
-	EXPECT_EQ(cog.sensor->sensorCount, 20);
+	auto s = cog.sensor->SendData();
+	EXPECT_EQ(s["data"][0]["data"].size(), 10);
+	EXPECT_EQ(s["data"][1]["data"].size(), 10);
+	EXPECT_EQ(s["data"].size(), 2);
+
 	cog.SetScene("sensescene");
 	cog.EndSession();
-	EXPECT_EQ(cog.sensor->sensorCount, 0);
 }
 
 //----------------------DYNAMICS
@@ -1640,36 +1566,10 @@ TEST(Dynamics, InitRegisterSend) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
-	return;
-	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
-
-	
-	pos = { 0,0,5 };
-	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
-	pos = { 0,1,6 };
-	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 4);
-
-	pos = { 0,0,7 };
-	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
-	pos = { 0,2,8 };
-	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 6);
-
-	pos = { 0,0,9 };
-	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
-	pos = { 0,3,10 };
-	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 8);
-
-	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 8);
-	cog.EndSession();
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d.size(), 6);
+	EXPECT_EQ(d["data"].size(), 1);
+	EXPECT_EQ(d["manifest"].size(), 1);
 }
 
 TEST(Dynamics, InitRegisterSceneSend) {
@@ -1692,36 +1592,29 @@ TEST(Dynamics, InitRegisterSceneSend) {
 	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
 	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
 
-	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
-
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 2);
+	EXPECT_EQ(d["manifest"].size(), 2);
 
 
 	pos = { 0,0,5 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,1,6 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 4);
 
 	pos = { 0,0,7 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,2,8 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 6);
 
 	pos = { 0,0,9 };
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	pos = { 0,3,10 };
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 8);
 	
-	cog.SetScene("dynamicscene");
-	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
-	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 2);
-	cog.EndSession();
+	d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 6);
+	EXPECT_EQ(d["manifest"].size(), 0);
 }
 
 TEST(Dynamics, ResetObjectIdsSceneChange) {
@@ -1751,22 +1644,15 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 	props["enabled"] = false;
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot, props);
 
-	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
-
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 
 	cog.SetScene("two"); //refreshes object manifest
-	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
 
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-
-	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
-	cog.SendData();
-	EXPECT_EQ(0, cog.dynamicobject->manifestEntries.size());
-
-	cog.SendData();
-	cog.EndSession();
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 4);
+	EXPECT_EQ(d["manifest"].size(), 2);
 }
 
 TEST(Dynamics, CustomIds) {
@@ -1794,16 +1680,13 @@ TEST(Dynamics, CustomIds) {
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", object1id, pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", object2id, pos, rot);
 
-
-
-	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 5);
 
-	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 5);
+	EXPECT_EQ(d["manifest"].size(), 2);
 	cog.EndSession();
 }
 
@@ -1835,10 +1718,9 @@ TEST(Dynamics, CustomIdMultiples) {
 	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", "1", pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", "1", pos, rot);
 	
-	EXPECT_EQ(cog.dynamicobject->objectIds.size(), 3);
-
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
-	EXPECT_EQ(cog.dynamicobject->fullManifest.size(), 3);
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 3);
+	EXPECT_EQ(d["manifest"].size(), 3);
 }
 
 TEST(Dynamics, LimitSnapshots) {
@@ -1863,17 +1745,14 @@ TEST(Dynamics, LimitSnapshots) {
 
 	std::string object1id = "1";
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", object1id, pos, rot);
-
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
-
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 3);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot); //manifest + snapshots = limit
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 0);
+
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
-	EXPECT_EQ(cog.dynamicobject->snapshots.size(), 2);
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 2);
 }
 
 TEST(Dynamics, LimitRegister) {
@@ -1897,14 +1776,12 @@ TEST(Dynamics, LimitRegister) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", "1", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", "2", pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", "3", pos, rot); //limit. send
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
 	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", "4", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "5", pos, rot); //limit send
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d.size(), 0);
 }
 
 TEST(Dynamics, LimitPreSession) {
@@ -1928,15 +1805,18 @@ TEST(Dynamics, LimitPreSession) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", "1", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
 	cog.dynamicobject->RegisterObjectCustomId("object2", "lamp", "2", pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object3", "lamp", "3", pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", "4", pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "5", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 5);
+	
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d.size(), 0);
+
 	cog.StartSession();
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "6", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "6", pos, rot); //auto snapshot triggers send, manifest entry stays
+	d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d.size(), 1);
 }
 
 TEST(Dynamics, ReuseObjectId) {
@@ -1961,13 +1841,15 @@ TEST(Dynamics, ReuseObjectId) {
 
 	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
 	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 2);
 
 	cog.dynamicobject->RemoveObject(object1id, pos, rot);
 	std::string object3id = cog.dynamicobject->RegisterObject("object3", "block", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
 	std::string object4id = cog.dynamicobject->RegisterObject("object4", "lamp", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 3);
+	
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 4);
+	EXPECT_EQ(d["manifest"].size(), 3);
+
 	cog.SendData();
 }
 
@@ -1991,19 +1873,20 @@ TEST(Dynamics, EngagementBeforeRegister) {
 	std::vector<float>pos = { 0,0,0 };
 	std::vector<float>rot = { 0,0,0,1 };
 
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(),0);
-
 	cog.dynamicobject->BeginEngagement("1", "grab");
 	cog.dynamicobject->AddSnapshot("1", pos, rot);
 	cog.dynamicobject->EndEngagement("1", "grab");
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
 
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 0);
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 1);
+	EXPECT_EQ(d["manifest"].size(), 1);
+
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp","1", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->manifestEntries.size(), 1);
+	d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 1);
+	EXPECT_EQ(d["manifest"].size(), 0);
+
 	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
 }
 
 TEST(Dynamics, EngagementNeverRegister) {
@@ -2031,12 +1914,10 @@ TEST(Dynamics, EngagementNeverRegister) {
 	cog.dynamicobject->BeginEngagement("1", "grab");
 	cog.dynamicobject->AddSnapshot("1", pos, rot);
 	cog.dynamicobject->EndEngagement("1", "grab");
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
-
-	//cog.dynamicobject->RegisterObjectCustomId("object1", "lamp", 1);
-	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
+	
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(),1);
+	EXPECT_EQ(d["manifest"].size(), 1);
 }
 
 TEST(Dynamics, EngagementsScenes) {
@@ -2060,20 +1941,16 @@ TEST(Dynamics, EngagementsScenes) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	std::string object1id = cog.dynamicobject->RegisterObject("object1", "lamp", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
 	std::string object2id = cog.dynamicobject->RegisterObject("object2", "lamp", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 2);
-
-	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
-
 	cog.dynamicobject->BeginEngagement(object1id, "grab");
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->EndEngagement(object1id, "grab");
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(),1);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(),2); //engagements[object2] is a null vector, so count = 2
 
-	cog.SetScene("two"); //refreshes object manifest
-	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 3);
+	EXPECT_EQ(d["manifest"].size(), 2);
+
+	cog.SetScene("two");
 
 	cog.dynamicobject->BeginEngagement(object1id, "grab");
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
@@ -2081,12 +1958,10 @@ TEST(Dynamics, EngagementsScenes) {
 	cog.dynamicobject->BeginEngagement(object2id, "grab");
 	cog.dynamicobject->EndEngagement(object1id, "grab");
 	cog.dynamicobject->EndEngagement(object2id, "grab");
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 2);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 2);
-
-	EXPECT_EQ(2, cog.dynamicobject->manifestEntries.size());
-	cog.SendData();
-	EXPECT_EQ(0, cog.dynamicobject->manifestEntries.size());
+	
+	d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 4);
+	EXPECT_EQ(d["manifest"].size(), 2);
 
 	cog.SendData();
 	cog.EndSession();
@@ -2117,12 +1992,12 @@ TEST(Dynamics, EngagementRemove) {
 	cog.dynamicobject->BeginEngagement("1", "grab");
 	cog.dynamicobject->AddSnapshot("1", pos, rot);
 	cog.dynamicobject->RemoveObject("1", pos, rot);
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
-
+	
+	auto d = cog.dynamicobject->SendData();
+	EXPECT_EQ(d["data"].size(), 2);
+	EXPECT_EQ(d["manifest"].size(), 1);
 
 	cog.SendData();
-	EXPECT_EQ(cog.dynamicobject->activeEngagements.size(), 1);
-	EXPECT_EQ(cog.dynamicobject->allEngagements.size(), 1);
 }
 
 

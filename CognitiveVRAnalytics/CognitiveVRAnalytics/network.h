@@ -43,8 +43,6 @@ class Network
 
 		//used for posting gaze/events/dynamics/sensors to dashboard and scene explorer
 		void NetworkCall(::std::string suburl, ::std::string content);
-		
-		//void NetworkCall(::std::string suburl, ::std::string content, WebResponse response);
 
 		//used by exitpolls
 		void NetworkExitpollGet(::std::string hook);

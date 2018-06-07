@@ -32,32 +32,32 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 namespace cognitive
 {
-class CognitiveVRAnalyticsCore;
-
 class COGNITIVEVRANALYTICS_API CustomEvent
 {
+	friend class CognitiveVRAnalyticsCore;
+
     private:
 		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 		int jsonPart = 1;
 
-    public:
 		CustomEvent(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 		nlohmann::json BatchedCustomEvents = nlohmann::json();
+		//send and clear saved events
+		void EndSession();
 
-        /** Record a new custom event
+    public:
 
-			@param std::string category
-			@param std::vector<float> position of event
-            @param nlohmann::json properties - Optional
-        */
+
+		/** Record a new custom event
+
+		@param std::string category
+		@param std::vector<float> position of event
+		@param nlohmann::json properties - Optional
+		*/
 		void Send(::std::string category, ::std::vector<float> &Position);
 		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
 
-
-		void SendData();
-		
-		//send and clear saved events
-		void EndSession();
+		nlohmann::json SendData();
 };
 }

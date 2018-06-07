@@ -32,10 +32,10 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 namespace cognitive
 {
-class CognitiveVRAnalyticsCore;
-
 class COGNITIVEVRANALYTICS_API GazeTracker
 {
+	friend class CognitiveVRAnalyticsCore;
+
 private:
 	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	int jsonPart = 1;
@@ -45,7 +45,6 @@ private:
 	//set from config
 	::std::string HMDType = "";
 
-public:
 
 	nlohmann::json BatchedGaze = nlohmann::json();
 
@@ -53,6 +52,12 @@ public:
 	void SetInterval(float interval);
 	void SetHMDType(::std::string hmdtype);
 
+
+	
+	//clear gaze points
+	void EndSession();
+
+public:
 	/** Record HMD position, rotation and gaze
 
 		@param std::vector<float> hmdposition
@@ -78,8 +83,6 @@ public:
 	void RecordGaze(::std::vector<float> &hmdposition, ::std::vector<float> &hmdrotation);
 
 	//post any gaze points and any updated user/device properties
-	void SendData();
-	//clear gaze points
-	void EndSession();
+	nlohmann::json SendData();
 };
 }

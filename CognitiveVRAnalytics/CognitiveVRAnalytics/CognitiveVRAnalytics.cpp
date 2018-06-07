@@ -76,11 +76,6 @@ bool CognitiveVRAnalyticsCore::IsSessionActive()
 	return isSessionActive;
 }
 
-bool CognitiveVRAnalyticsCore::WasInitSuccessful()
-{
-	return isSessionActive;
-}
-
 void CognitiveVRAnalyticsCore::SetLobbyId(std::string lobbyId)
 {
 	LobbyId = lobbyId;

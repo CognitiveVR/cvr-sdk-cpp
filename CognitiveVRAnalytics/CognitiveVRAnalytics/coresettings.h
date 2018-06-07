@@ -22,9 +22,6 @@ enum class ECognitiveHMDType
 	kMobile
 };
 
-//typedef void(*WebResponse) (::std::string content);
-//typedef void(*WebRequest) (::std::string url, ::std::string content, WebResponse response);
-
 class CoreSettings
 {
     public:

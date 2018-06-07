@@ -55,68 +55,63 @@ enum class EQuestionType
 };
 
 //the value of an answer
-struct FExitPollAnswer
+struct ExitPollAnswer
 {
-public:
-		//this is only used internally. use one of the constructors and an enum
-		::std::string type = "";
-		EAnswerValueTypeReturn AnswerValueType = EAnswerValueTypeReturn::kNull;
-		int numberValue = -1;
-		bool boolValue = false; //converted to 0 or 1
-		::std::string stringValue = "";; //for base64 voice
+	friend class ExitPoll;
+	friend struct ExitPollResponse;
 
-		FExitPollAnswer(EQuestionType questionType, int number)
+private:
+	//this is only used internally. use one of the constructors and an enum
+	::std::string type = "";
+	EAnswerValueTypeReturn AnswerValueType = EAnswerValueTypeReturn::kNull;
+	int numberValue = -1;
+	bool boolValue = false; //converted to 0 or 1
+	::std::string stringValue = "";; //for base64 voice
+
+	::std::string GetQuestionTypeString(EQuestionType questionType)
+	{
+		if (questionType == EQuestionType::kBoolean)
+			return "BOOLEAN";
+		if (questionType == EQuestionType::kHappySad)
+			return "HAPPYSAD";
+		if (questionType == EQuestionType::kThumbs)
+			return "THUMBS";
+		if (questionType == EQuestionType::kScale)
+			return "SCALE";
+		if (questionType == EQuestionType::kMultiple)
+			return "MULTIPLE";
+		if (questionType == EQuestionType::kVoice)
+			return "VOICE";
+
+		return "BOOLEAN";
+	}
+
+public:
+		ExitPollAnswer(EQuestionType questionType, int number)
 		{
 			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::kNumber;
 			numberValue = number;
 		}
-		FExitPollAnswer(EQuestionType questionType)
-		{
-			type = GetQuestionTypeString(questionType);
-			AnswerValueType = EAnswerValueTypeReturn::kNull;
-		}
-		FExitPollAnswer(EQuestionType questionType, bool boolean)
-		{
-			type = GetQuestionTypeString(questionType);
-			AnswerValueType = EAnswerValueTypeReturn::kBool;
-			boolValue = boolean;
-		}
-		FExitPollAnswer(EQuestionType questionType, ::std::string string)
+		ExitPollAnswer(EQuestionType questionType, ::std::string string)
 		{
 			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::kString;
 			stringValue = string;
 		}
-
-		::std::string GetQuestionTypeString(EQuestionType questionType)
-		{
-			if (questionType == EQuestionType::kBoolean)
-				return "BOOLEAN";
-			if (questionType == EQuestionType::kHappySad)
-				return "HAPPYSAD";
-			if (questionType == EQuestionType::kThumbs)
-				return "THUMBS";
-			if (questionType == EQuestionType::kScale)
-				return "SCALE";
-			if (questionType == EQuestionType::kMultiple)
-				return "MULTIPLE";
-			if (questionType == EQuestionType::kVoice)
-				return "VOICE";
-			
-			return "BOOLEAN";
-		}
 };
 
 //a collection of answers. this is sent to the web api
-struct FExitPollResponse
+struct ExitPollResponse
 {
-public:
+	friend class ExitPoll;
+
+private:
 		::std::string user = "";
 		::std::string questionSetId = "";
 		::std::string sessionId = "";
 		::std::string hook = "";
-		::std::vector<FExitPollAnswer> answers = ::std::vector<FExitPollAnswer>();
+		::std::vector<ExitPollAnswer> answers = ::std::vector<ExitPollAnswer>();
 
 		::std::string questionSetName = "";
 		::std::string questionSetVersion = "";
@@ -155,16 +150,17 @@ public:
 
 class COGNITIVEVRANALYTICS_API ExitPoll
 {
+	friend class Network;
+
 private:
 	::std::string lastHook = "";
 	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	nlohmann::json currentQuestionSet = nlohmann::json();
 	::std::string currentQuestionSetString = "";
 
-	FExitPollResponse fullResponse = FExitPollResponse();
+	ExitPollResponse fullResponse = ExitPollResponse();
 
 public:
-
 	ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 	/** Get a set of questions from the web api
@@ -191,14 +187,14 @@ public:
 
 		@param FExitPollAnswer position
 	*/
-	void AddAnswer(FExitPollAnswer answer);
+	void AddAnswer(ExitPollAnswer answer);
 
 	/** Send the collection of answers from a question set to the web api
 
 		@param std::vector<float> position - Optional
 	*/
-	void SendAllAnswers();
-	void SendAllAnswers(::std::vector<float> position);
+	nlohmann::json SendAllAnswers();
+	nlohmann::json SendAllAnswers(::std::vector<float> position);
 
 	//called after SendQuestionResponse. clears the currentQuestionSetData and response
 	void ClearQuestionSet();

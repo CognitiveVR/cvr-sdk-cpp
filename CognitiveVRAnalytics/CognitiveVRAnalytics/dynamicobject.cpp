@@ -218,13 +218,13 @@ void DynamicObject::EndEngagement(std::string objectId, ::std::string name)
 	}
 }
 
-void DynamicObject::SendData()
+nlohmann::json DynamicObject::SendData()
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("DynamicObject::SendData failed: no session active"); return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("DynamicObject::SendData failed: no session active"); return nlohmann::json(); }
 
 	if (manifestEntries.size() + snapshots.size() == 0)
 	{
-		return;
+		return nlohmann::json();
 	}
 
 	nlohmann::json sendJson = nlohmann::json();
@@ -266,6 +266,7 @@ void DynamicObject::SendData()
 	cvr->network->NetworkCall("dynamic", sendJson.dump());
 	manifestEntries.clear();
 	snapshots.clear();
+	return sendJson;
 }
 
 void DynamicObject::EndActiveEngagements(std::string objectid)
