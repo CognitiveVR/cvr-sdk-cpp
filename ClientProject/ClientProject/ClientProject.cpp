@@ -656,9 +656,11 @@ TEST(CustomEvent, PreSessionPropsSend) {
 
 	cog.customevent->Send("testing1", pos, prop);
 	auto c = cog.customevent->SendData();
-	EXPECT_EQ(c["data"].size(), 1);
-	EXPECT_EQ(c["data"][0]["properties"]["location"], "vancouver");
+	EXPECT_EQ(c.size(), 0);
 	cog.StartSession();
+	cog.customevent->Send("testing1", pos, prop);
+	c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"][1]["properties"]["location"], "vancouver"); //session start is data[0]
 }
 
 TEST(CustomEvent, SessionEnd) {
@@ -700,7 +702,7 @@ TEST(CustomEvent, SendLimitPreSessionThreshold) {
 
 	cog.StartSession(); //fourth transaction. should send all
 	auto c = cog.customevent->SendData();
-	EXPECT_EQ(c.size(), 0);
+	EXPECT_EQ(c["data"].size(), 1);
 }
 
 TEST(CustomEvent, SendLimitPreSession) {
@@ -1075,7 +1077,7 @@ TEST(ExitPoll, RequestThenGetAnswersString) {
 	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
 	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kScale, 1));
 	auto a = cog.exitpoll->SendAllAnswers();
-	EXPECT_EQ(a["answers"].size(), 5);
+	EXPECT_EQ(a["answers"].size(), 3);
 	cog.EndSession();
 }
 
@@ -1428,7 +1430,7 @@ TEST(Sensors, SensorSceneChange) {
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
 	auto s = cog.sensor->SendData();
-	EXPECT_EQ(s["data"].size(), 5);
+	EXPECT_EQ(s["data"][0]["data"].size(), 5);
 	cog.SetScene("non-existent-scene");
 	s = cog.sensor->SendData();
 	EXPECT_EQ(s["data"].size(), 0);
@@ -1436,9 +1438,10 @@ TEST(Sensors, SensorSceneChange) {
 	{
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
-	EXPECT_EQ(s["data"].size(), 6);
 	s = cog.sensor->SendData();
-	EXPECT_EQ(s["data"].size(), 0);
+	EXPECT_EQ(s["data"][0]["data"].size(), 6);
+	s = cog.sensor->SendData();
+	EXPECT_EQ(s.size(), 0);
 }
 
 TEST(Sensors, SenseThenInitSetScene) {
@@ -1459,11 +1462,11 @@ TEST(Sensors, SenseThenInitSetScene) {
 		cog.sensor->RecordSensor("test-sensor", i);
 	}
 	auto s = cog.sensor->SendData();
-	EXPECT_EQ(s["data"].size(), 10);
+	EXPECT_EQ(s.size(), 0);
 	cog.StartSession();
 	cog.SetScene("sensescene");
-	EXPECT_EQ(s["data"].size(), 10);
 	s = cog.sensor->SendData();
+	EXPECT_EQ(s.size(), 0);
 	cog.EndSession();
 }
 
@@ -1651,7 +1654,7 @@ TEST(Dynamics, ResetObjectIdsSceneChange) {
 	cog.dynamicobject->AddSnapshot(object1id, pos, rot);
 	cog.dynamicobject->AddSnapshot(object2id, pos, rot);
 	auto d = cog.dynamicobject->SendData();
-	EXPECT_EQ(d["data"].size(), 4);
+	EXPECT_EQ(d["data"].size(), 2);
 	EXPECT_EQ(d["manifest"].size(), 2);
 }
 
@@ -1720,7 +1723,7 @@ TEST(Dynamics, CustomIdMultiples) {
 	
 	auto d = cog.dynamicobject->SendData();
 	EXPECT_EQ(d["data"].size(), 3);
-	EXPECT_EQ(d["manifest"].size(), 3);
+	EXPECT_EQ(d["manifest"].size(), 1);
 }
 
 TEST(Dynamics, LimitSnapshots) {
@@ -1781,7 +1784,8 @@ TEST(Dynamics, LimitRegister) {
 	cog.dynamicobject->RegisterObjectCustomId("object4", "lamp", "4", pos, rot);
 	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "5", pos, rot); //limit send
 	auto d = cog.dynamicobject->SendData();
-	EXPECT_EQ(d.size(), 0);
+	EXPECT_EQ(d["data"].size(), 2);
+	EXPECT_EQ(d["manifest"].size(), 2);
 }
 
 TEST(Dynamics, LimitPreSession) {
@@ -1814,9 +1818,9 @@ TEST(Dynamics, LimitPreSession) {
 	EXPECT_EQ(d.size(), 0);
 
 	cog.StartSession();
-	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "6", pos, rot); //auto snapshot triggers send, manifest entry stays
+	cog.dynamicobject->RegisterObjectCustomId("object5", "lamp", "6", pos, rot); //auto snapshot and manifest triggers send
 	d = cog.dynamicobject->SendData();
-	EXPECT_EQ(d.size(), 1);
+	EXPECT_EQ(d.size(), 0);
 }
 
 TEST(Dynamics, ReuseObjectId) {
@@ -1847,7 +1851,7 @@ TEST(Dynamics, ReuseObjectId) {
 	std::string object4id = cog.dynamicobject->RegisterObject("object4", "lamp", pos, rot);
 	
 	auto d = cog.dynamicobject->SendData();
-	EXPECT_EQ(d["data"].size(), 4);
+	EXPECT_EQ(d["data"].size(), 5);
 	EXPECT_EQ(d["manifest"].size(), 3);
 
 	cog.SendData();
@@ -1874,17 +1878,17 @@ TEST(Dynamics, EngagementBeforeRegister) {
 	std::vector<float>rot = { 0,0,0,1 };
 
 	cog.dynamicobject->BeginEngagement("1", "grab");
-	cog.dynamicobject->AddSnapshot("1", pos, rot);
+	cog.dynamicobject->AddSnapshot("1", pos, rot); //snapshot will not add an entry to manifest automatically
 	cog.dynamicobject->EndEngagement("1", "grab");
 
 	auto d = cog.dynamicobject->SendData();
 	EXPECT_EQ(d["data"].size(), 1);
-	EXPECT_EQ(d["manifest"].size(), 1);
+	EXPECT_EQ(d["manifest"].size(), 0);
 
 	cog.dynamicobject->RegisterObjectCustomId("object1", "lamp","1", pos, rot);
 	d = cog.dynamicobject->SendData();
 	EXPECT_EQ(d["data"].size(), 1);
-	EXPECT_EQ(d["manifest"].size(), 0);
+	EXPECT_EQ(d["manifest"].size(), 1);
 
 	cog.SendData();
 }
@@ -1917,7 +1921,7 @@ TEST(Dynamics, EngagementNeverRegister) {
 	
 	auto d = cog.dynamicobject->SendData();
 	EXPECT_EQ(d["data"].size(),1);
-	EXPECT_EQ(d["manifest"].size(), 1);
+	EXPECT_EQ(d["manifest"].size(), 0);
 }
 
 TEST(Dynamics, EngagementsScenes) {
@@ -1960,7 +1964,7 @@ TEST(Dynamics, EngagementsScenes) {
 	cog.dynamicobject->EndEngagement(object2id, "grab");
 	
 	d = cog.dynamicobject->SendData();
-	EXPECT_EQ(d["data"].size(), 4);
+	EXPECT_EQ(d["data"].size(), 2);
 	EXPECT_EQ(d["manifest"].size(), 2);
 
 	cog.SendData();
@@ -1994,7 +1998,7 @@ TEST(Dynamics, EngagementRemove) {
 	cog.dynamicobject->RemoveObject("1", pos, rot);
 	
 	auto d = cog.dynamicobject->SendData();
-	EXPECT_EQ(d["data"].size(), 2);
+	EXPECT_EQ(d["data"].size(), 3);
 	EXPECT_EQ(d["manifest"].size(), 1);
 
 	cog.SendData();
@@ -2005,7 +2009,7 @@ int main(int argc, char **argv)
 {
 	if (const char* env_p = std::getenv("COGNITIVEAPIKEY"))
 	{
-		std::cout << "Custom APIKEY is: " << env_p << '\n';
+		//std::cout << "Custom APIKEY is: " << env_p << '\n';
 		TESTINGAPIKEY = env_p;
 	}
 
