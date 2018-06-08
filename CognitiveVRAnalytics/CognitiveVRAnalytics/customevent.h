@@ -61,9 +61,9 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 
 		nlohmann::json SendData();
 
-		[[deprecated("Use RecordEvent instead")]]
+		//deprecated! Use RecordEvent instead
 		void Send(::std::string category, ::std::vector<float> &Position);
-		[[deprecated("Use RecordEvent instead")]]
+		//deprecated! Use RecordEvent instead
 		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
 };
 }
