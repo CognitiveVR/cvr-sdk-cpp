@@ -76,11 +76,6 @@ bool CognitiveVRAnalyticsCore::IsSessionActive()
 	return isSessionActive;
 }
 
-bool CognitiveVRAnalyticsCore::WasInitSuccessful()
-{
-	return isSessionActive;
-}
-
 void CognitiveVRAnalyticsCore::SetLobbyId(std::string lobbyId)
 {
 	LobbyId = lobbyId;
@@ -112,7 +107,7 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	isSessionActive = true;
 
 	::std::vector<float> pos = { 0,0,0 };
-	customevent->Send("Start Session", pos);
+	customevent->RecordEvent("Start Session", pos);
 
 	return true;
 }
@@ -135,7 +130,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
 
-	customevent->Send("End Session", endPos, props);
+	customevent->RecordEvent("End Session", endPos, props);
 
 	SendData();
 
@@ -181,7 +176,7 @@ double CognitiveVRAnalyticsCore::GetTimestamp()
 
 void CognitiveVRAnalyticsCore::SendData()
 {
-	if (!IsSessionActive()) { log->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
+	//if (!IsSessionActive()) { log->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
 
 	customevent->SendData();
 	gaze->SendData();
@@ -202,7 +197,7 @@ void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, in
 	NewSessionProperties[propertyType] = value;
 }
 
-void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, ::std::string value)
+void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, std::string value)
 {
 	AllSessionProperties[propertyType] = value;
 	NewSessionProperties[propertyType] = value;
@@ -214,10 +209,10 @@ void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, fl
 	NewSessionProperties[propertyType] = value;
 }
 
-std::map<std::string, std::string> CognitiveVRAnalyticsCore::GetNewSessionProperties()
+nlohmann::json CognitiveVRAnalyticsCore::GetNewSessionProperties()
 {
-	std::map<std::string, std::string> copiedmap = NewSessionProperties;
-	NewSessionProperties = std::map<std::string, std::string>();
+	nlohmann::json copiedmap = NewSessionProperties;
+	NewSessionProperties = nlohmann::json();
 	return copiedmap;
 }
 
@@ -240,7 +235,7 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	{
 		//send any remaining data to current scene, if there is a current scene
 		SendData();
-		dynamicobject->RefreshObjectManifest();
+		//dynamicobject->RefreshObjectManifest();
 	}
 	//if no current scene, likely queuing up events/gaze/etc before setting the scene
 
@@ -264,6 +259,11 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 		CurrentSceneId = "";
 		CurrentSceneVersionNumber = "";
 		CurrentSceneVersionId = 0;
+	}
+	else
+	{
+		NewSessionProperties = AllSessionProperties;
+		dynamicobject->RefreshObjectManifest();
 	}
 }
 

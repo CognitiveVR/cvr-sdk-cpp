@@ -24,7 +24,8 @@ enum class CommonMeshName
 //created when registering dynamic objects. sent to SceneExplorer
 class DynamicObjectManifestEntry
 {
-public:
+	friend class DynamicObject;
+private:
 	std::string Id = "";
 	std::string Name = "";
 	std::string MeshName = "";
@@ -41,7 +42,8 @@ public:
 //used in the client to track which ids are used and which can be reused
 class DynamicObjectId
 {
-public:
+	friend class DynamicObject;
+private:
 	std::string Id = "";
 	bool Used = true;
 	std::string MeshName = "";
@@ -56,7 +58,8 @@ public:
 //the state of an object at a time
 struct DynamicObjectSnapshot
 {
-public:
+	friend class DynamicObject;
+private:
 	std::vector<float> Position;
 	std::vector<float> Rotation;
 	double Time = -1;
@@ -69,11 +72,12 @@ public:
 };
 
 //an interaction the player has with a dynamic object
-struct DynamicObjectEngagementEvent
+class DynamicObjectEngagementEvent
 {
+	friend class DynamicObject;
 public:
 	bool isActive = true;
-
+private:
 	double startTime = -1;
 	double endTime = -1;
 	std::string Name = "";
@@ -85,14 +89,13 @@ public:
 
 class COGNITIVEVRANALYTICS_API DynamicObject
 {
+	friend class CognitiveVRAnalyticsCore;
 private:
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
 	int jsonpart = 1;
 
 	int generatedIdOffset = 1000;
-
-public:
 
 	//public for testing, but shouldn't be used outside this class
 
@@ -106,66 +109,14 @@ public:
 	std::vector<DynamicObjectManifestEntry> manifestEntries;
 
 	//engagements that are currently active
-	std::map<std::string, std::vector<DynamicObjectEngagementEvent>> activeEngagements;
+	std::map<std::string, std::vector<DynamicObjectEngagementEvent*>> activeEngagements;
 	//all engagements that need to be written to snapshots. active or inactive. inactive engagements are removed after being sent
-	std::map<std::string, std::vector<DynamicObjectEngagementEvent>> allEngagements;
+	std::map<std::string, std::vector<DynamicObjectEngagementEvent*>> allEngagements;
 	//count of engagements on dynamic objects of type
 	std::map<std::string, std::map < std::string, int >> engagementCounts;
 
 
-
-
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
-
-	void SendData();
-
-	/** put into dynamic manifest with an id. returns objectid. also adds a snapshot with the property 'enabled'
-
-		@param std::string name
-		@param std::string meshname
-		@param int customid
-	*/
-	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation);
-
-	//
-	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
-
-		@param std::string name
-		@param std::string meshname
-	*/
-	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation);
-
-	/** record the position, rotation and other properties of an object
-
-		@param int objectId
-		@param std::vector<float> position
-		@param std::vector<float> rotation
-		@param nlohmann::json properties - Optional
-	*/
-	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation);
-	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
-
-	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!
-
-		@param int objectid
-		@param std::string name
-	*/
-	void BeginEngagement(std::string objectId, std::string name);
-	
-	/** end engagement on dynamic object. immediately begins and ends if engagement does not already exist. requires a snapshot of the dynamic object to send engagement data!
-
-		@param int objectid
-		@param std::string name
-	*/
-	void EndEngagement(std::string objectId, std::string name);
-
-	/**deregister dynamic object and recycles objectid. don't need to do this for objects that were registered without a custom id. also sends a snapshot
-
-		@param int objectid
-		@param std::vector<float> position
-		@param std::vector<float> rotation
-	*/
-	void RemoveObject(std::string objectid, std::vector<float> position, std::vector<float> rotation);
 
 	/** end all engagements on an object. to be used if the object is destroyed. requires a snapshot of the dynamic object to send engagement data!
 
@@ -177,5 +128,61 @@ public:
 	void RefreshObjectManifest();
 
 	void EndSession();
+
+public:
+	/** put into dynamic manifest with an id. returns objectid. also adds a snapshot with the property 'enabled'
+
+	@param std::string name
+	@param std::string meshname
+	@param int customid
+	*/
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation);
+
+	//
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+
+	@param std::string name
+	@param std::string meshname
+	*/
+	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation);
+
+	/** record the position, rotation and other properties of an object
+
+	@param int objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param nlohmann::json properties - Optional
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation);
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
+
+	[[deprecated("Use RecordDynamic instead")]]
+	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation);
+	[[deprecated("Use RecordDynamic instead")]]
+	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
+
+	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!
+
+	@param int objectid
+	@param std::string name
+	*/
+	void BeginEngagement(std::string objectId, std::string name);
+
+	/** end engagement on dynamic object. immediately begins and ends if engagement does not already exist. requires a snapshot of the dynamic object to send engagement data!
+
+	@param int objectid
+	@param std::string name
+	*/
+	void EndEngagement(std::string objectId, std::string name);
+
+	/**deregister dynamic object and recycles objectid. don't need to do this for objects that were registered without a custom id. also sends a snapshot
+
+	@param int objectid
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	*/
+	void RemoveObject(std::string objectid, std::vector<float> position, std::vector<float> rotation);
+
+	nlohmann::json SendData();
 };
 }
