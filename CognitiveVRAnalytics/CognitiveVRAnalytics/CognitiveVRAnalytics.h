@@ -118,8 +118,10 @@ private:
 	::std::string CurrentSceneVersionNumber = "";
 	int CurrentSceneVersionId = 0;
 
-	std::map<std::string, std::string> NewSessionProperties;
-	std::map<std::string, std::string> AllSessionProperties;
+	nlohmann::json NewSessionProperties = nlohmann::json();
+	nlohmann::json AllSessionProperties = nlohmann::json();
+	//std::map<std::string, std::string> NewSessionProperties;
+	//std::map<std::string, std::string> AllSessionProperties;
 	//std::map<std::string, std::string> NewUserProperties;
 	//std::map<std::string, std::string> NewDeviceProperties;
 
@@ -171,7 +173,8 @@ public:
 	void SetSessionProperty(::std::string propertyType, ::std::string value);
 	void SetSessionProperty(::std::string propertyType, float value);
 	void SetSessionProperty(::std::string propertyType, int value);
-	std::map<std::string, std::string> GetNewSessionProperties();
+	//returns any properties not sent to this scene
+	nlohmann::json GetNewSessionProperties();
 
 	/** set which scene on SceneExplorer should recieve the recorded data
 		if the current scene is not null, this will also send data before changing the active scene

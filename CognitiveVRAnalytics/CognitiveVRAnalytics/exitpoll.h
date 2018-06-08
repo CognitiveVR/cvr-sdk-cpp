@@ -115,37 +115,6 @@ private:
 
 		::std::string questionSetName = "";
 		::std::string questionSetVersion = "";
-
-		//could use nlohmann::to_json and from_json
-		nlohmann::json ToJson()
-		{
-			nlohmann::json j = nlohmann::json{ { "userId", user },{ "questionSetId", questionSetId },{ "sessionId", sessionId },{ "hook", hook } };
-			nlohmann::json janswers = nlohmann::json::array();
-			for (auto& an : answers)
-			{
-				nlohmann::json tempAnswer = nlohmann::json();
-				if (an.AnswerValueType == EAnswerValueTypeReturn::kBool)
-				{
-					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.boolValue ? 1 : 0 } };
-				}
-				else if (an.AnswerValueType == EAnswerValueTypeReturn::kNumber)
-				{
-					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.numberValue } };
-				}
-				else if (an.AnswerValueType == EAnswerValueTypeReturn::kNull)
-				{
-					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", -32768 } };
-				}
-				else if (an.AnswerValueType == EAnswerValueTypeReturn::kString)
-				{
-					tempAnswer = nlohmann::json{ { "name", an.type },{ "value", an.stringValue } };
-				}
-
-				janswers.push_back(tempAnswer);
-			}
-			j["answers"] = janswers;
-			return j;
-		};
 };
 
 class COGNITIVEVRANALYTICS_API ExitPoll

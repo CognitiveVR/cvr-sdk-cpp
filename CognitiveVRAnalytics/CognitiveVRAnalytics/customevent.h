@@ -55,9 +55,15 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 		@param std::vector<float> position of event
 		@param nlohmann::json properties - Optional
 		*/
-		void Send(::std::string category, ::std::vector<float> &Position);
-		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
+
+		void RecordEvent(std::string category, std::vector<float> &Position);
+		void RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties);
 
 		nlohmann::json SendData();
+
+		[[deprecated("Use RecordEvent instead")]]
+		void Send(::std::string category, ::std::vector<float> &Position);
+		[[deprecated("Use RecordEvent instead")]]
+		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
 };
 }

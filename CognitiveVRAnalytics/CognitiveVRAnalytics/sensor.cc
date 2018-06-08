@@ -56,6 +56,7 @@ nlohmann::json Sensor::SendData()
 	data["sessionid"] = cvr->GetSessionID();
 	data["timestamp"] = (int)cvr->GetTimestamp();
 	data["part"] = jsonPart;
+	data["formatversion"] = "1.0";
 	jsonPart++;
 
 	nlohmann::json sensors = nlohmann::json::array();

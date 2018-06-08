@@ -72,7 +72,7 @@ private:
 };
 
 //an interaction the player has with a dynamic object
-struct DynamicObjectEngagementEvent
+class DynamicObjectEngagementEvent
 {
 	friend class DynamicObject;
 public:
@@ -109,9 +109,9 @@ private:
 	std::vector<DynamicObjectManifestEntry> manifestEntries;
 
 	//engagements that are currently active
-	std::map<std::string, std::vector<DynamicObjectEngagementEvent>> activeEngagements;
+	std::map<std::string, std::vector<DynamicObjectEngagementEvent*>> activeEngagements;
 	//all engagements that need to be written to snapshots. active or inactive. inactive engagements are removed after being sent
-	std::map<std::string, std::vector<DynamicObjectEngagementEvent>> allEngagements;
+	std::map<std::string, std::vector<DynamicObjectEngagementEvent*>> allEngagements;
 	//count of engagements on dynamic objects of type
 	std::map<std::string, std::map < std::string, int >> engagementCounts;
 
@@ -153,7 +153,12 @@ public:
 	@param std::vector<float> rotation
 	@param nlohmann::json properties - Optional
 	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation);
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
+
+	[[deprecated("Use RecordDynamic instead")]]
 	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation);
+	[[deprecated("Use RecordDynamic instead")]]
 	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
 
 	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!

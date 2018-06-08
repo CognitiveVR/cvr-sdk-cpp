@@ -4,19 +4,29 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #include "stdafx.h"
 #include "customevent.h"
 namespace cognitive {
-CustomEvent::CustomEvent(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+CustomEvent::CustomEvent(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 
 	BatchedCustomEvents = nlohmann::json::array();
 }
 
-void CustomEvent::Send(::std::string category, ::std::vector<float> &Position)
+void CustomEvent::Send(std::string category, std::vector<float> &Position)
 {
-	Send(category, Position, nlohmann::json());
+	RecordEvent(category, Position, nlohmann::json());
 }
 
-void CustomEvent::Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties)
+void CustomEvent::Send(std::string category, std::vector<float> &Position, nlohmann::json properties)
+{
+	RecordEvent(category, Position, properties);
+}
+
+void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position)
+{
+	RecordEvent(category, Position, nlohmann::json());
+}
+
+void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties)
 {
 	double ts = cvr->GetTimestamp();
 
@@ -60,6 +70,7 @@ nlohmann::json CustomEvent::SendData()
 	se["timestamp"] = (int)cvr->GetTimestamp();
 	se["sessionid"] = cvr->GetSessionID();
 	se["part"] = jsonPart;
+	se["formatversion"] = "1.0";
 	jsonPart++;
 	se["data"] = BatchedCustomEvents;
 	cvr->network->NetworkCall("events", se.dump());

@@ -104,7 +104,7 @@ nlohmann::json GazeTracker::SendData()
 	se["hmdtype"] = HMDType;
 	se["interval"] = PlayerSnapshotInterval;
 	se["data"] = BatchedGaze;
-
+	se["formatversion"] = "1.0";
 	
 	if (properties.size() > 0)
 	{
