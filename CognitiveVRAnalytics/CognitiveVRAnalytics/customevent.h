@@ -32,6 +32,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 namespace cognitive
 {
+	class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API CustomEvent
 {
 	friend class CognitiveVRAnalyticsCore;
