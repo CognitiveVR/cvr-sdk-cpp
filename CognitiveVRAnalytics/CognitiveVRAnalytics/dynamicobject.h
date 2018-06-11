@@ -81,10 +81,10 @@ private:
 	double startTime = -1;
 	double endTime = -1;
 	std::string Name = "";
-	std::string ObjectId = "";
+	std::string ParentObjectId = "";
 	int EngagementNumber = 0;
 
-	DynamicObjectEngagementEvent(std::string id, std::string engagementName, int engagementNumber);
+	DynamicObjectEngagementEvent(std::string parentId, std::string engagementName, int engagementNumber);
 };
 
 class COGNITIVEVRANALYTICS_API DynamicObject
@@ -162,18 +162,30 @@ public:
 	void AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
 
 	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!
-
-	@param int objectid
-	@param std::string name
+	@param std::string objectid of the object being engaged with
+	@param std::string name of the engagement ex "grab"
 	*/
 	void BeginEngagement(std::string objectId, std::string name);
 
-	/** end engagement on dynamic object. immediately begins and ends if engagement does not already exist. requires a snapshot of the dynamic object to send engagement data!
+	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!
+	@param std::string objectid of the object being engaged with
+	@param std::string name of the engagement ex "grab"
+	@param std::string parentId unique identifier for the engagement
+	*/
+	void BeginEngagement(std::string objectId, std::string name, std::string parentId);
 
-	@param int objectid
-	@param std::string name
+	/** end engagement on dynamic object. immediately begins and ends if engagement does not already exist. requires a snapshot of the dynamic object to send engagement data!
+	@param std::string objectid of the object the engagement is being ended with
+	@param std::string name of the engagement ex "grab"
 	*/
 	void EndEngagement(std::string objectId, std::string name);
+
+	/** end engagement on dynamic object. immediately begins and ends if engagement does not already exist. requires a snapshot of the dynamic object to send engagement data!
+	@param std::string objectid of the object the engagement is being ended with
+	@param std::string name of the engagement ex "grab"
+	@param std::string parentId unique identifier for the engagement
+	*/
+	void EndEngagement(std::string objectId, std::string name, std::string parentId);
 
 	/**deregister dynamic object and recycles objectid. don't need to do this for objects that were registered without a custom id. also sends a snapshot
 

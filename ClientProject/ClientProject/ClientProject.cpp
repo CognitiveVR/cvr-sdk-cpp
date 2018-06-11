@@ -2421,6 +2421,45 @@ TEST(Engagements, DuringSession) {
 	EXPECT_EQ(c["data"][5]["engagements"].size(), 2);
 }
 
+TEST(Engagements, DuringSessionParentId) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.StartSession();
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.dynamicobject->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+	cog.dynamicobject->BeginEngagement("0", "grab","left");
+	cog.dynamicobject->BeginEngagement("0", "grab", "right");
+	cog.dynamicobject->RecordDynamic("0", pos, rot);
+	auto c = cog.dynamicobject->SendData();
+	EXPECT_EQ(c["data"][1]["engagements"][0]["engagementparent"], "left");
+	EXPECT_EQ(c["data"][1]["engagements"][1]["engagementparent"], "right");
+
+	cog.dynamicobject->EndEngagement("0", "grab", "left");
+	cog.dynamicobject->RecordDynamic("0", pos, rot);
+	cog.dynamicobject->RecordDynamic("0", pos, rot);
+	c = cog.dynamicobject->SendData();
+	EXPECT_EQ(c["data"][0]["engagements"].size(), 2);
+	EXPECT_EQ(c["data"][0]["engagements"][0]["engagementparent"], "left");
+	EXPECT_EQ(c["data"][0]["engagements"][1]["engagementparent"], "right");
+	EXPECT_EQ(c["data"][1]["engagements"].size(), 1);
+	EXPECT_EQ(c["data"][1]["engagements"][0]["engagementparent"], "right");
+
+	cog.dynamicobject->EndEngagement("0", "grab", "left");
+	cog.dynamicobject->RecordDynamic("0", pos, rot);
+	c = cog.dynamicobject->SendData();
+	std::cout << c.dump() << "\n";
+	EXPECT_EQ(c["data"][0]["engagements"].size(), 2);
+	EXPECT_EQ(c["data"][0]["engagements"][0]["engagementparent"], "right");
+	EXPECT_EQ(c["data"][0]["engagements"][1]["engagementparent"], "left");
+}
+
 TEST(Engagements, DuringSessionOverwrite) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));

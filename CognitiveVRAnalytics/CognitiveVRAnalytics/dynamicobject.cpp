@@ -28,9 +28,9 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::st
 	}
 }
 
-DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(std::string id, ::std::string engagementName, int engagementNumber)
+DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(std::string parentId, ::std::string engagementName, int engagementNumber)
 {
-	ObjectId = id;
+	ParentObjectId = parentId;
 	Name = engagementName;
 	startTime = CognitiveVRAnalyticsCore::Instance()->GetTimestamp();
 	EngagementNumber = engagementNumber;
@@ -158,7 +158,7 @@ void DynamicObject::RecordDynamic(std::string objectId, ::std::vector<float> pos
 			//if (e.isActive)
 			//{
 				nlohmann::json engagementEvent = nlohmann::json();
-				engagementEvent["engagementparent"] = e->ObjectId;
+				engagementEvent["engagementparent"] = e->ParentObjectId;
 				engagementEvent["engagement_count"] = e->EngagementNumber;
 				engagementEvent["engagement_time"] = (e->endTime > 0 ? e->endTime - e->startTime : cvr->GetTimestamp() - e->startTime);
 				engagementEvent["engagementtype"] = e->Name;
@@ -185,20 +185,30 @@ void DynamicObject::RecordDynamic(std::string objectId, ::std::vector<float> pos
 
 void DynamicObject::BeginEngagement(std::string objectId, ::std::string name)
 {
+	BeginEngagement(objectId, name, "0");
+}
+
+void DynamicObject::BeginEngagement(std::string objectId, std::string name, std::string parentId)
+{
 	cvr->log->Info("DynamicObject::BeginEngagement engagement " + name + " on object " + objectId);
 
 	engagementCounts[objectId][name] += 1;
 
-	DynamicObjectEngagementEvent* engagement = new DynamicObjectEngagementEvent(objectId, name, engagementCounts[objectId][name]);
+	DynamicObjectEngagementEvent* engagement = new DynamicObjectEngagementEvent(parentId, name, engagementCounts[objectId][name]);
 	activeEngagements[objectId].emplace_back(engagement);
 	allEngagements[objectId].emplace_back(engagement);
 }
 
-void DynamicObject::EndEngagement(std::string objectId, ::std::string name)
+void DynamicObject::EndEngagement(std::string objectId, std::string name)
+{
+	EndEngagement(objectId, name, "0");
+}
+
+void DynamicObject::EndEngagement(std::string objectId, std::string name, std::string parentId)
 {
 	for (auto& e : allEngagements[objectId])
 	{
-		if (e->Name == name)
+		if (e->Name == name && e->ParentObjectId == parentId)
 		{
 			e->isActive = false;
 			e->endTime = cvr->GetTimestamp();
@@ -209,12 +219,12 @@ void DynamicObject::EndEngagement(std::string objectId, ::std::string name)
 	//otherwise create and end the engagement
 
 	cvr->log->Info("DynamicObject::EndEngagement engagement " + name + " not found on object"+ objectId +". Begin+End");
-	BeginEngagement(objectId, name);
+	BeginEngagement(objectId, name, parentId);
 
 	auto rit = allEngagements[objectId].rbegin();
 	for (; rit != allEngagements[objectId].rend(); ++rit)
 	{
-		if ((*rit)->Name == name)
+		if ((*rit)->Name == name && (*rit)->ParentObjectId == parentId)
 		{
 			(*rit)->isActive = false;
 			(*rit)->endTime = cvr->GetTimestamp();
