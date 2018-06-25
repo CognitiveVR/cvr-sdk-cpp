@@ -35,6 +35,10 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 
 	config = make_unique_cognitive<Config>(Config(instance));
 	//SET VALUES FROM SETTINGS
+	if (!settings.CustomGateway.empty())
+	{
+		config->kNetworkHost = settings.CustomGateway;
+	}
 	config->HMDType = settings.GetHMDType();
 	config->APIKey = settings.APIKey;
 	config->GazeBatchSize = settings.GazeBatchSize;

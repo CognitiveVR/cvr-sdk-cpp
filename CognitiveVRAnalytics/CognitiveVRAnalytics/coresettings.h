@@ -39,6 +39,8 @@ class CoreSettings
 		//which product to send data to. Ex companyname1234-productname-test
 		::std::string APIKey = "asdf1234hjkl5678";
 
+		::std::string CustomGateway;
+
 		//how many sensor data points to batch before sending to SceneExplorer
 		int SensorDataLimit = 64;
 		//how many dynamic objects registered and snapshotted to batch before sending to SceneExplorer
