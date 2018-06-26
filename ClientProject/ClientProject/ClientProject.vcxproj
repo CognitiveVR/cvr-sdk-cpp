@@ -71,8 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Users\calder\Documents\GitHub\googletest-master\googletest\msvc\2010\gtest-md\Win32-Debug;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\calder\Documents\GitHub\googletest-master\googletest\include;C:\Users\calder\Documents\GitHub\googletest-master\googletest;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -91,14 +91,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\CognitiveVRAnalytics\CognitiveVRAnalytics;%(AdditionalLibraryDirectories);C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\curl;C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\googletest\include\gtest</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\googletest\include;C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\CognitiveVRAnalytics\CognitiveVRAnalytics;%(AdditionalLibraryDirectories);C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\curl;C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\googletest\include\gtest</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>CognitiveVRAnalytics.lib;gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\CognitiveVRAnalytics\$(IntDir);C:\Users\calder\Documents\GitHub\googletest-master\googletest\msvc\2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CognitiveVRAnalytics.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\CognitiveVRAnalytics\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d "..\..\CognitiveVRAnalytics\$(IntDir)CognitiveVRAnalytics.dll" "$(OutDir)"
@@ -160,6 +160,7 @@ xcopy /y /d "lib\libcurl.lib" "$(OutDir)"</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="include\googletest\CMakeLists.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -179,11 +180,37 @@ xcopy /y /d "lib\libcurl.lib" "$(OutDir)"</Command>
     <ClInclude Include="include\curl\stdcheaders.h" />
     <ClInclude Include="include\curl\system.h" />
     <ClInclude Include="include\curl\typecheck-gcc.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest-death-test.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest-message.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest-param-test.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest-printers.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest-spi.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest-test-part.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest-typed-test.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest_pred_impl.h" />
+    <ClInclude Include="include\googletest\include\gtest\gtest_prod.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\custom\gtest-port.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\custom\gtest-printers.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\custom\gtest.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-death-test-internal.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-filepath.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-internal.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-linked_ptr.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-param-util-generated.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-param-util.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-port-arch.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-port.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-string.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-tuple.h" />
+    <ClInclude Include="include\googletest\include\gtest\internal\gtest-type-util.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientProject.cpp" />
+    <ClCompile Include="include\googletest\codegear\gtest_all.cc" />
+    <ClCompile Include="include\googletest\codegear\gtest_link.cc" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -192,6 +219,20 @@ xcopy /y /d "lib\libcurl.lib" "$(OutDir)"</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\googletest\CHANGES" />
+    <None Include="include\googletest\codegear\gtest.cbproj" />
+    <None Include="include\googletest\codegear\gtest.groupproj" />
+    <None Include="include\googletest\codegear\gtest_main.cbproj" />
+    <None Include="include\googletest\codegear\gtest_unittest.cbproj" />
+    <None Include="include\googletest\configure.ac" />
+    <None Include="include\googletest\CONTRIBUTORS" />
+    <None Include="include\googletest\include\gtest\gtest-param-test.h.pump" />
+    <None Include="include\googletest\include\gtest\internal\gtest-param-util-generated.h.pump" />
+    <None Include="include\googletest\include\gtest\internal\gtest-tuple.h.pump" />
+    <None Include="include\googletest\include\gtest\internal\gtest-type-util.h.pump" />
+    <None Include="include\googletest\LICENSE" />
+    <None Include="include\googletest\Makefile.am" />
+    <None Include="include\googletest\README.md" />
     <None Include="lib\curl.exe" />
     <None Include="lib\libcurl.dll" />
   </ItemGroup>
