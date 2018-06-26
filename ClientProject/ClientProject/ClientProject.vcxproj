@@ -91,13 +91,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\googletest\include;C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\CognitiveVRAnalytics\CognitiveVRAnalytics;%(AdditionalLibraryDirectories);C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\curl;C:\Users\calder\Documents\GitHub\cvr-sdk-cpp\ClientProject\ClientProject\include\googletest\include\gtest</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalLibraryDirectories);include\googletest\include\gtest;include\curl;..\..\CognitiveVRAnalytics\CognitiveVRAnalytics;include\googletest\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>CognitiveVRAnalytics.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CognitiveVRAnalytics.lib;include/googletest/msvc/2010/gtest-md/Win32-Debug/gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\CognitiveVRAnalytics\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -107,6 +107,13 @@ xcopy /y /d "lib\curl.exe" "$(OutDir)"
 xcopy /y /d "lib\libcurl.dll" "$(OutDir)"
 xcopy /y /d "lib\libcurl.lib" "$(OutDir)"</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>devenv "$(SolutionDir)..\CognitiveVRAnalytics\CognitiveVRAnalytics.sln" /build Debug
+devenv "$(SolutionDir)ClientProject\include\googletest\msvc\2010\gtest-md.sln" /build Debug</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>build cognitivevranalytics lib and gtest lib</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -209,8 +216,6 @@ xcopy /y /d "lib\libcurl.lib" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientProject.cpp" />
-    <ClCompile Include="include\googletest\codegear\gtest_all.cc" />
-    <ClCompile Include="include\googletest\codegear\gtest_link.cc" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -220,10 +225,6 @@ xcopy /y /d "lib\libcurl.lib" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\googletest\CHANGES" />
-    <None Include="include\googletest\codegear\gtest.cbproj" />
-    <None Include="include\googletest\codegear\gtest.groupproj" />
-    <None Include="include\googletest\codegear\gtest_main.cbproj" />
-    <None Include="include\googletest\codegear\gtest_unittest.cbproj" />
     <None Include="include\googletest\configure.ac" />
     <None Include="include\googletest\CONTRIBUTORS" />
     <None Include="include\googletest\include\gtest\gtest-param-test.h.pump" />

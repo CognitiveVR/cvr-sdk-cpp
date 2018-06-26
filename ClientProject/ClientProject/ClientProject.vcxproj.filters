@@ -153,12 +153,6 @@
     <ClCompile Include="ClientProject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\googletest\codegear\gtest_all.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="include\googletest\codegear\gtest_link.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\libcurl.dll" />
@@ -167,10 +161,6 @@
     <None Include="include\googletest\include\gtest\internal\gtest-tuple.h.pump" />
     <None Include="include\googletest\include\gtest\internal\gtest-type-util.h.pump" />
     <None Include="include\googletest\include\gtest\gtest-param-test.h.pump" />
-    <None Include="include\googletest\codegear\gtest.cbproj" />
-    <None Include="include\googletest\codegear\gtest.groupproj" />
-    <None Include="include\googletest\codegear\gtest_main.cbproj" />
-    <None Include="include\googletest\codegear\gtest_unittest.cbproj" />
     <None Include="include\googletest\CHANGES" />
     <None Include="include\googletest\configure.ac" />
     <None Include="include\googletest\CONTRIBUTORS" />
