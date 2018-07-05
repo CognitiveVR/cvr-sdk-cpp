@@ -24,7 +24,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 	#ifdef COGNITIVEVRANALYTICS_EXPORTS  
 		#define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 	#else  
-		#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+		#define COGNITIVEVRANALYTICS_API
 	#endif
 #elif defined(__GNUC__)
 	//  GCC
@@ -113,41 +113,34 @@ private:
 	::std::string DeviceId = "";
 	std::string LobbyId;
 
-public:
-
 	//unique id of scene that that receives recorded data
 	::std::string CurrentSceneId = "";
 	::std::string CurrentSceneVersionNumber = "";
 	int CurrentSceneVersionId = 0;
-	void SetLobbyId(std::string lobbyId);
-	std::string GetLobbyId();
 
-	//this may return null. constructor should call this manually before referencing instance!
-	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
-	::std::unique_ptr<CognitiveLog> log = nullptr;
-	::std::unique_ptr<CustomEvent> customevent = nullptr;
-	::std::unique_ptr<Sensor> sensor = nullptr;
-	::std::unique_ptr<GazeTracker> gaze = nullptr;
-	::std::unique_ptr<DynamicObject> dynamicobject = nullptr;
-	::std::unique_ptr<ExitPoll> exitpoll = nullptr;
-
-	CognitiveVRAnalyticsCore(CoreSettings settings);
-	CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&);
-	
-	~CognitiveVRAnalyticsCore();
-
-	std::map<std::string, std::string> NewSessionProperties;
-	std::map<std::string, std::string> AllSessionProperties;
+	nlohmann::json NewSessionProperties = nlohmann::json();
+	nlohmann::json AllSessionProperties = nlohmann::json();
+	//std::map<std::string, std::string> NewSessionProperties;
+	//std::map<std::string, std::string> AllSessionProperties;
 	//std::map<std::string, std::string> NewUserProperties;
 	//std::map<std::string, std::string> NewDeviceProperties;
 
-	void SetUserName(std::string name);
-	void SetDeviceName(std::string name);
-	void SetSessionProperty(::std::string propertyType, ::std::string value);
-	void SetSessionProperty(::std::string propertyType, float value);
-	void SetSessionProperty(::std::string propertyType, int value);
-	std::map<std::string, std::string> GetNewSessionProperties();
-	
+public:
+
+	CognitiveVRAnalyticsCore(CoreSettings settings);
+	CognitiveVRAnalyticsCore(const CognitiveVRAnalyticsCore&);
+
+	~CognitiveVRAnalyticsCore();
+
+	//this may return null. constructor should call this manually before referencing instance!
+	static ::std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
+
+	std::unique_ptr<CognitiveLog> log = nullptr;
+	std::unique_ptr<CustomEvent> customevent = nullptr;
+	std::unique_ptr<Sensor> sensor = nullptr;
+	std::unique_ptr<GazeTracker> gaze = nullptr;
+	std::unique_ptr<DynamicObject> dynamicobject = nullptr;
+	std::unique_ptr<ExitPoll> exitpoll = nullptr;
 
 	//the identifying key for the product. used to send to sceneexplorer
 	::std::string GetAPIKey();
@@ -155,16 +148,13 @@ public:
 	double GetSessionTimestamp();
 	//returns the current timestamp
 	double GetTimestamp();
+
 	//the session timestamp and userid. creates a unique session in SceneExplorer
 	::std::string GetSessionID();
 
 	void SetSessionName(std::string sessionName);
 	
 	bool IsSessionActive();
-
-	//TODO this should only return true if IsSessionActive and network can access sceneexplorer
-	//OBSOLETE this returns true if session has begun
-	bool WasInitSuccessful();
 
 	/** start a session. returns true if successfully starting session. ie, not already started
 	*/
@@ -178,11 +168,23 @@ public:
 	//send all outstanding data to scene. if scene doesn't exist, clear data - it's not relevant to other scenes anyway
 	void SendData();
 
+	void SetUserName(std::string name);
+	void SetDeviceName(std::string name);
+	void SetSessionProperty(::std::string propertyType, ::std::string value);
+	void SetSessionProperty(::std::string propertyType, float value);
+	void SetSessionProperty(::std::string propertyType, int value);
+	//returns any properties not sent to this scene
+	nlohmann::json GetNewSessionProperties();
+
 	/** set which scene on SceneExplorer should recieve the recorded data
 		if the current scene is not null, this will also send data before changing the active scene
 		@param std::string scenename
 	*/
 	void SetScene(::std::string scenename);
 	::std::string GetSceneId();
+
+	void SetLobbyId(std::string lobbyId);
+	std::string GetLobbyId();
+
 };
 }

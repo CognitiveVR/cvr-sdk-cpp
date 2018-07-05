@@ -76,26 +76,61 @@ void ExitPoll::ClearQuestionSet()
 	fullResponse.user.clear();
 }
 
-void ExitPoll::AddAnswer(FExitPollAnswer answer)
+void ExitPoll::AddAnswer(ExitPollAnswer answer)
 {
 	fullResponse.answers.push_back(answer);
 }
 
-void ExitPoll::SendAllAnswers()
+nlohmann::json ExitPoll::SendAllAnswers()
 {
 	std::vector<float> pos = { 0,0,0 };
-	SendAllAnswers(pos);
+	return SendAllAnswers(pos);
 }
 
-void ExitPoll::SendAllAnswers(::std::vector<float> pos)
+nlohmann::json ExitPoll::SendAllAnswers(::std::vector<float> pos)
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: no session active"); return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: no session active"); return nlohmann::json(); }
 
-	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
+	if (fullResponse.answers.size() == 0) { cvr->log->Info("ExitPoll::SendAllAnswers failed: oustanding answers"); return nlohmann::json(); }
 
-	nlohmann::json full = fullResponse.ToJson();
+	nlohmann::json response = nlohmann::json();
 
-	cvr->network->NetworkExitpollPost(fullResponse.questionSetName, fullResponse.questionSetVersion, full.dump());
+	response["userId"] = cvr->UserId;
+	response["questionSetId"] = fullResponse.questionSetId;
+	response["hook"] = fullResponse.hook;
+	response["sceneId"] = cvr->CurrentSceneId;
+	response["versionNumber"] = cvr->CurrentSceneVersionNumber;
+	response["versionId"] = cvr->CurrentSceneVersionId;
+
+	for (auto& an : fullResponse.answers)
+	{
+		nlohmann::json tempAnswer = nlohmann::json();
+		if (an.AnswerValueType == EAnswerValueTypeReturn::kBool)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", an.boolValue ? 1 : 0 } };
+		}
+		else if (an.AnswerValueType == EAnswerValueTypeReturn::kNumber)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", an.numberValue } };
+		}
+		else if (an.AnswerValueType == EAnswerValueTypeReturn::kNull)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", -32768 } };
+		}
+		else if (an.AnswerValueType == EAnswerValueTypeReturn::kString)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", an.stringValue } };
+		}
+
+		response["answers"].push_back(tempAnswer);
+	}
+
+	cvr->network->NetworkExitpollPost(fullResponse.questionSetName, fullResponse.questionSetVersion, response.dump());
+
+
+
+
+
 
 	//send this as a transaction too
 	nlohmann::json properties = nlohmann::json();
@@ -122,8 +157,10 @@ void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 		}
 	}
 
-	cvr->customevent->Send("cvr.exitpoll", pos, properties);
+	cvr->customevent->RecordEvent("cvr.exitpoll", pos, properties);
 
 	ClearQuestionSet();
+
+	return response;
 }
 }

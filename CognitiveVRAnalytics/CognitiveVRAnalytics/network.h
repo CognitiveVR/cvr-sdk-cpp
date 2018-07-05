@@ -14,7 +14,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 #else  
-#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+#define COGNITIVEVRANALYTICS_API
 #endif
 #elif defined(__GNUC__)
 //  GCC
@@ -43,8 +43,6 @@ class Network
 
 		//used for posting gaze/events/dynamics/sensors to dashboard and scene explorer
 		void NetworkCall(::std::string suburl, ::std::string content);
-		
-		//void NetworkCall(::std::string suburl, ::std::string content, WebResponse response);
 
 		//used by exitpolls
 		void NetworkExitpollGet(::std::string hook);

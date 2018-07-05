@@ -10,6 +10,9 @@
 /CognitiveVRAnalytics/Debug/
 /CognitiveVRAnalytics/x64/Debug/
 
+/build
+/ClientProject/ClientProject/include/googletest/msvc/
+
 # Misc
 **/.DS_Store
 .DS_Store

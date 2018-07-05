@@ -19,11 +19,11 @@ void Callback(::std::string body)
 	//check that body can be parsed to json
 	if (body.empty())
 	{
-		cvr->log->Info("Generic callback has no body");
+		//cvr->log->Info("Generic callback has no body");
 	}
 	else
 	{
-		cvr->log->Info("Generic callback");
+		//cvr->log->Info("Generic callback");
 	}
 }
 
@@ -35,7 +35,7 @@ void ExitPollCallback(::std::string body)
 	//check that body can be parsed to json
 	if (body.empty())
 	{
-		cvr->log->Error("ExitPoll Callback Error: no response body");
+		//cvr->log->Error("ExitPoll Callback Error: no response body");
 		return;
 	}
 
@@ -49,7 +49,7 @@ void ExitPollCallback(::std::string body)
 
 	if (errorcode == 0)
 	{
-		cvr->log->Info("ExitPollCallback callback successful");
+		//cvr->log->Info("ExitPollCallback callback successful");
 
 		cvr->exitpoll->ReceiveQuestionSet(body, jsonresponse);
 	}
@@ -57,7 +57,7 @@ void ExitPollCallback(::std::string body)
 	{
 		::std::string message = jsonresponse["message"].get<::std::string>();
 
-		cvr->log->Error("ExitPoll Callback Error: " + message);
+		//cvr->log->Error("ExitPoll Callback Error: " + message);
 	}
 }
 
