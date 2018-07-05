@@ -264,7 +264,7 @@ TEST(Initialization, SessionStartNoWeb) {
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
 	cognitive::CoreSettings settings;
-	settings.loggingLevel == cognitive::LoggingLevel::kAll;
+	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
@@ -278,7 +278,7 @@ TEST(Initialization, SessionStartNoWebResponse) {
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
 
 	cognitive::CoreSettings settings;
-	settings.loggingLevel == cognitive::LoggingLevel::kAll;
+	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.webRequest = &NORESPONSE_DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -349,6 +349,23 @@ TEST(Initialization, SessionStartEnd) {
 }
 
 //----------------------GENERAL
+
+TEST(CustomEvent, UniquePtr) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::unique_ptr<cognitive::CognitiveVRAnalyticsCore> cog(new cognitive::CognitiveVRAnalyticsCore(settings));
+
+	std::vector<float> pos = { 0,0,0 };
+	cog->customevent->Send("testing1", pos);
+
+	cog->StartSession();
+	auto c = cog->customevent->SendData();
+	EXPECT_EQ(c["data"].size(), 2);	
+}
 
 TEST(General, CoreSendDataPreSession) {
 	if (TestDelay > 0)
