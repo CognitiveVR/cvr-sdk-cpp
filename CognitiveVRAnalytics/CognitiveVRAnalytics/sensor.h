@@ -38,11 +38,11 @@ class COGNITIVEVRANALYTICS_API Sensor
 	friend class CognitiveVRAnalyticsCore;
 
     private:
-		Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+		Sensor(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
-		::std::map<::std::string, nlohmann::json> allsensors;
+		std::map<std::string, nlohmann::json> allsensors;
 		int jsonPart = 1;
 		//TODO should be private. tests shouldn't directly test this value
 		int sensorCount = 0;
@@ -57,7 +57,7 @@ class COGNITIVEVRANALYTICS_API Sensor
 			@param std::string name
 			@param float value
 		*/
-		void RecordSensor(::std::string name, float value);
+		void RecordSensor(std::string name, float value);
 		nlohmann::json SendData();
 };
 }

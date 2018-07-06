@@ -6,7 +6,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #include "dynamicobject.h"
 
 namespace cognitive {
-DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, std::string objectId)
+DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId)
 {
 	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
@@ -15,7 +15,7 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::st
 	Id = objectId;
 }
 
-DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, std::string objectId, nlohmann::json properties)
+DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, nlohmann::json properties)
 {
 	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
@@ -28,7 +28,7 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::st
 	}
 }
 
-DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(std::string parentId, ::std::string engagementName, int engagementNumber)
+DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(std::string parentId, std::string engagementName, int engagementNumber)
 {
 	ParentObjectId = parentId;
 	Name = engagementName;
@@ -37,13 +37,13 @@ DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(std::string parentId,
 }
 
 static int nextObjectId;
-DynamicObject::DynamicObject(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 	nextObjectId = generatedIdOffset;
 }
 
-void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string meshname, std::string customid, ::std::vector<float> position, ::std::vector<float> rotation)
+void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
 {
 	for (auto& element : objectIds)
 	{
@@ -67,7 +67,7 @@ void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mes
 	RecordDynamic(customid, position, rotation, props);
 }
 
-std::string DynamicObject::RegisterObject(::std::string name, ::std::string meshname, ::std::vector<float> position, ::std::vector<float> rotation)
+std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
 {
 	bool foundRecycledId = false;
 	DynamicObjectId newObjectId = DynamicObjectId("0", meshname);
@@ -111,21 +111,21 @@ bool isInactive(DynamicObjectEngagementEvent* engagement)
 	return engagement->isActive == false;
 }
 
-void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> position, ::std::vector<float> rotation)
+void DynamicObject::AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation)
 {
 	RecordDynamic(objectId, position, rotation, cognitive::nlohmann::json());
 }
-void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> position, ::std::vector<float> rotation, nlohmann::json properties)
+void DynamicObject::AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties)
 {
 	RecordDynamic(objectId, position, rotation, properties);
 }
 
-void DynamicObject::RecordDynamic(std::string objectId, ::std::vector<float> position, ::std::vector<float> rotation)
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation)
 {
 	RecordDynamic(objectId, position, rotation, cognitive::nlohmann::json());
 }
 
-void DynamicObject::RecordDynamic(std::string objectId, ::std::vector<float> position, ::std::vector<float> rotation, nlohmann::json properties)
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties)
 {
 	//if dynamic object id is not in manifest, display warning. likely object ids were cleared from scene change
 	bool foundId = false;
@@ -170,7 +170,7 @@ void DynamicObject::RecordDynamic(std::string objectId, ::std::vector<float> pos
 		//cvr->log->Info("active engagements pre " + std::to_string(activeEngagements[objectId].size()));
 		//remove inactive engagements https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 		allEngagements[objectId].erase(std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
-		activeEngagements[objectId].erase(::std::remove_if(activeEngagements[objectId].begin(), activeEngagements[objectId].end(), isInactive), activeEngagements[objectId].end());
+		activeEngagements[objectId].erase(std::remove_if(activeEngagements[objectId].begin(), activeEngagements[objectId].end(), isInactive), activeEngagements[objectId].end());
 		//cvr->log->Info("all engagements post " + std::to_string(allEngagements[objectId].size()));
 		//cvr->log->Info("active engagements post " + std::to_string(activeEngagements[objectId].size()));
 	}
@@ -183,7 +183,7 @@ void DynamicObject::RecordDynamic(std::string objectId, ::std::vector<float> pos
 	}
 }
 
-void DynamicObject::BeginEngagement(std::string objectId, ::std::string name)
+void DynamicObject::BeginEngagement(std::string objectId, std::string name)
 {
 	BeginEngagement(objectId, name, "0");
 }

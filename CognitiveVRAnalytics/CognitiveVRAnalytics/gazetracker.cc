@@ -7,7 +7,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 namespace cognitive {
 // Sets default values for this component's properties
-GazeTracker::GazeTracker(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+GazeTracker::GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
@@ -17,12 +17,12 @@ void GazeTracker::SetInterval(float interval)
 	PlayerSnapshotInterval = interval;
 }
 
-void GazeTracker::SetHMDType(::std::string hmdtype)
+void GazeTracker::SetHMDType(std::string hmdtype)
 {
 	HMDType = hmdtype;
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze)
+void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze)
 {
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -40,7 +40,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	}
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, std::string objectId)
+void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId)
 {
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -59,7 +59,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	}
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation)
+void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
 {
 	//TODO conversion for xyz = -xzy or whatever
 

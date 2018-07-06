@@ -5,9 +5,9 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #include "stdafx.h"
 #include "CognitiveVRAnalytics.h"
 namespace cognitive {
-static ::std::shared_ptr<CognitiveVRAnalyticsCore> instance;
+static std::shared_ptr<CognitiveVRAnalyticsCore> instance;
 
-::std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
+std::shared_ptr<CognitiveVRAnalyticsCore> CognitiveVRAnalyticsCore::Instance()
 {
 	return instance;
 }
@@ -20,7 +20,7 @@ struct D {
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 {
-	instance = ::std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
+	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
 
 	sendFunctionPointer = settings.webRequest;
 
@@ -110,13 +110,13 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	isSessionActive = true;
 
-	::std::vector<float> pos = { 0,0,0 };
+	std::vector<float> pos = { 0,0,0 };
 	customevent->RecordEvent("Start Session", pos);
 
 	return true;
 }
 
-::std::string CognitiveVRAnalyticsCore::GetAPIKey()
+std::string CognitiveVRAnalyticsCore::GetAPIKey()
 {
 	return config->APIKey;
 }
@@ -129,7 +129,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 
 	nlohmann::json props = nlohmann::json();
 
-	::std::vector<float> endPos = { 0,0,0 };
+	std::vector<float> endPos = { 0,0,0 };
 
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
@@ -166,14 +166,14 @@ double CognitiveVRAnalyticsCore::GetTimestamp()
 	return (double)milliseconds*0.001;
 }
 
-::std::string CognitiveVRAnalyticsCore::GetSessionID()
+std::string CognitiveVRAnalyticsCore::GetSessionID()
 {
 	if (SessionId.empty())
 	{
 		if (UserId.empty())
-			SessionId = ::std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
+			SessionId = std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
 		else
-			SessionId = ::std::to_string((int)GetSessionTimestamp()) + "_" + UserId;
+			SessionId = std::to_string((int)GetSessionTimestamp()) + "_" + UserId;
 	}
 	return SessionId;
 }
@@ -195,19 +195,19 @@ void CognitiveVRAnalyticsCore::SetUserName(std::string name)
 	NewSessionProperties["userid"] = name;
 }
 
-void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, int value)
+void CognitiveVRAnalyticsCore::SetSessionProperty(std::string propertyType, int value)
 {
 	AllSessionProperties[propertyType] = value;
 	NewSessionProperties[propertyType] = value;
 }
 
-void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, std::string value)
+void CognitiveVRAnalyticsCore::SetSessionProperty(std::string propertyType, std::string value)
 {
 	AllSessionProperties[propertyType] = value;
 	NewSessionProperties[propertyType] = value;
 }
 
-void CognitiveVRAnalyticsCore::SetSessionProperty(::std::string propertyType, float value)
+void CognitiveVRAnalyticsCore::SetSessionProperty(std::string propertyType, float value)
 {
 	AllSessionProperties[propertyType] = value;
 	NewSessionProperties[propertyType] = value;
@@ -232,7 +232,7 @@ void CognitiveVRAnalyticsCore::SetSessionName(std::string sessionName)
 	NewSessionProperties["cvr.sessionname"] = sessionName;
 }
 
-void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
+void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 {
 	log->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
 	if (CurrentSceneId.size() > 0)
@@ -271,12 +271,12 @@ void CognitiveVRAnalyticsCore::SetScene(::std::string sceneName)
 	}
 }
 
-::std::string CognitiveVRAnalyticsCore::GetSceneId()
+std::string CognitiveVRAnalyticsCore::GetSceneId()
 {
 	return CurrentSceneId;
 }
 
-::std::string CognitiveVRAnalyticsCore::DevicePropertyToString(EDeviceProperty propertyType)
+std::string CognitiveVRAnalyticsCore::DevicePropertyToString(EDeviceProperty propertyType)
 {
 	if (propertyType == EDeviceProperty::kAppName) { return"cvr.app.name"; }
 	if (propertyType == EDeviceProperty::kAppVersion) { return"cvr.app.version"; }

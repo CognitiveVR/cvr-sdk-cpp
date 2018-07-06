@@ -37,9 +37,9 @@ class CoreSettings
 		LoggingLevel loggingLevel = LoggingLevel::kAll;
 
 		//which product to send data to. Ex companyname1234-productname-test
-		::std::string APIKey = "asdf1234hjkl5678";
+		std::string APIKey = "asdf1234hjkl5678";
 
-		::std::string CustomGateway;
+		std::string CustomGateway;
 
 		//how many sensor data points to batch before sending to SceneExplorer
 		int SensorDataLimit = 64;
@@ -50,12 +50,12 @@ class CoreSettings
 		//how many gaze data points to batch before sending to SceneExplorer
 		int GazeBatchSize = 64;
 
-		//the expected interval for gaze snapshots. used by SceneExplorer's timeline
+		//the expected interval for gaze snapshots in SECONDS. used by SceneExplorer's timeline
 		float GazeInterval = 0.1f;
 
 		//the type of HMD the user has. used by SceneExplorer to display the correct player mesh
 		ECognitiveHMDType HMDType = ECognitiveHMDType::kUnknown;
-		::std::string GetHMDType()
+		std::string GetHMDType()
 		{
 			if (HMDType == ECognitiveHMDType::kUnknown) { return "unknown"; }
 			if (HMDType == ECognitiveHMDType::kGear) { return "gear"; }
@@ -68,8 +68,8 @@ class CoreSettings
 		//all 'scenes' the user might encounter. must contain at least one to use SceneExplorer
 		std::vector<SceneData> AllSceneData;
 
-		//::std::map < ::std::string, ::std::string> sceneIds;
+		//std::map < std::string, std::string> sceneIds;
 		//the default scene to load after Cognitive Analytics constructor
-		::std::string DefaultSceneName = "";
+		std::string DefaultSceneName = "";
 };
 }

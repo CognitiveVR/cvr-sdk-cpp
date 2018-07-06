@@ -38,10 +38,10 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 	friend class CognitiveVRAnalyticsCore;
 
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 		int jsonPart = 1;
 
-		CustomEvent(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+		CustomEvent(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 		nlohmann::json BatchedCustomEvents = nlohmann::json();
 		//send and clear saved events
@@ -63,8 +63,8 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 		nlohmann::json SendData();
 
 		//deprecated! Use RecordEvent instead
-		void Send(::std::string category, ::std::vector<float> &Position);
+		void Send(std::string category, std::vector<float> &Position);
 		//deprecated! Use RecordEvent instead
-		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
+		void Send(std::string category, std::vector<float> &Position, nlohmann::json properties);
 };
 }

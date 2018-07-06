@@ -62,13 +62,13 @@ struct ExitPollAnswer
 
 private:
 	//this is only used internally. use one of the constructors and an enum
-	::std::string type = "";
+	std::string type = "";
 	EAnswerValueTypeReturn AnswerValueType = EAnswerValueTypeReturn::kNull;
 	int numberValue = -1;
 	bool boolValue = false; //converted to 0 or 1
-	::std::string stringValue = "";; //for base64 voice
+	std::string stringValue = "";; //for base64 voice
 
-	::std::string GetQuestionTypeString(EQuestionType questionType)
+	std::string GetQuestionTypeString(EQuestionType questionType)
 	{
 		if (questionType == EQuestionType::kBoolean)
 			return "BOOLEAN";
@@ -93,7 +93,7 @@ public:
 			AnswerValueType = EAnswerValueTypeReturn::kNumber;
 			numberValue = number;
 		}
-		ExitPollAnswer(EQuestionType questionType, ::std::string string)
+		ExitPollAnswer(EQuestionType questionType, std::string string)
 		{
 			type = GetQuestionTypeString(questionType);
 			AnswerValueType = EAnswerValueTypeReturn::kString;
@@ -107,14 +107,14 @@ struct ExitPollResponse
 	friend class ExitPoll;
 
 private:
-		::std::string user = "";
-		::std::string questionSetId = "";
-		::std::string sessionId = "";
-		::std::string hook = "";
-		::std::vector<ExitPollAnswer> answers = ::std::vector<ExitPollAnswer>();
+		std::string user = "";
+		std::string questionSetId = "";
+		std::string sessionId = "";
+		std::string hook = "";
+		std::vector<ExitPollAnswer> answers = std::vector<ExitPollAnswer>();
 
-		::std::string questionSetName = "";
-		::std::string questionSetVersion = "";
+		std::string questionSetName = "";
+		std::string questionSetVersion = "";
 };
 
 class COGNITIVEVRANALYTICS_API ExitPoll
@@ -122,29 +122,29 @@ class COGNITIVEVRANALYTICS_API ExitPoll
 	friend class Network;
 
 private:
-	::std::string lastHook = "";
-	::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+	std::string lastHook = "";
+	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	nlohmann::json currentQuestionSet = nlohmann::json();
-	::std::string currentQuestionSetString = "";
+	std::string currentQuestionSetString = "";
 
 	ExitPollResponse fullResponse = ExitPollResponse();
 
 public:
-	ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+	ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 	/** Get a set of questions from the web api
 
 	@param std::string hook
 	*/
-	void RequestQuestionSet(::std::string hook);
+	void RequestQuestionSet(std::string hook);
 
 	//Receive question set as raw string and json
-	void ReceiveQuestionSet(::std::string questionsetstring, nlohmann::json questionset);
+	void ReceiveQuestionSet(std::string questionsetstring, nlohmann::json questionset);
 
 	//can return empty json if request failed
 	nlohmann::json GetQuestionSet();
 	//can return empty string if request failed
-	::std::string GetQuestionSetString();
+	std::string GetQuestionSetString();
 
 	//returns true if question set successfully recieved
 	bool HasQuestionSet()
@@ -163,7 +163,7 @@ public:
 		@param std::vector<float> position - Optional
 	*/
 	nlohmann::json SendAllAnswers();
-	nlohmann::json SendAllAnswers(::std::vector<float> position);
+	nlohmann::json SendAllAnswers(std::vector<float> position);
 
 	//called after SendQuestionResponse. clears the currentQuestionSetData and response
 	void ClearQuestionSet();

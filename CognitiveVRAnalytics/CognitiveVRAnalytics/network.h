@@ -35,18 +35,18 @@ class CognitiveVRAnalyticsCore;
 class Network
 {
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-		::std::vector<::std::string> headers;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+		std::vector<std::string> headers;
 
     public:
-        Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+        Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 		//used for posting gaze/events/dynamics/sensors to dashboard and scene explorer
-		void NetworkCall(::std::string suburl, ::std::string content);
+		void NetworkCall(std::string suburl, std::string content);
 
 		//used by exitpolls
-		void NetworkExitpollGet(::std::string hook);
+		void NetworkExitpollGet(std::string hook);
 		//used by exitpolls
-		void NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, ::std::string content);
+		void NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, std::string content);
 };
 }
