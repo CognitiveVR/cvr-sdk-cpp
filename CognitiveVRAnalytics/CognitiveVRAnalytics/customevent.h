@@ -14,7 +14,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 #else  
-#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+#define COGNITIVEVRANALYTICS_API
 #endif
 #elif defined(__GNUC__)
 //  GCC
@@ -32,32 +32,39 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 namespace cognitive
 {
-class CognitiveVRAnalyticsCore;
-
+	class CognitiveVRAnalyticsCore;
 class COGNITIVEVRANALYTICS_API CustomEvent
 {
+	friend class CognitiveVRAnalyticsCore;
+
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 		int jsonPart = 1;
 
-    public:
-		CustomEvent(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+		CustomEvent(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 		nlohmann::json BatchedCustomEvents = nlohmann::json();
-
-        /** Record a new custom event
-
-			@param std::string category
-			@param std::vector<float> position of event
-            @param nlohmann::json properties - Optional
-        */
-		void Send(::std::string category, ::std::vector<float> &Position);
-		void Send(::std::string category, ::std::vector<float> &Position, nlohmann::json properties);
-
-
-		void SendData();
-		
 		//send and clear saved events
 		void EndSession();
+
+    public:
+
+
+		/** Record a new custom event
+
+		@param std::string category
+		@param std::vector<float> position of event
+		@param nlohmann::json properties - Optional
+		*/
+
+		void RecordEvent(std::string category, std::vector<float> &Position);
+		void RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties);
+
+		nlohmann::json SendData();
+
+		//deprecated! Use RecordEvent instead
+		void Send(std::string category, std::vector<float> &Position);
+		//deprecated! Use RecordEvent instead
+		void Send(std::string category, std::vector<float> &Position, nlohmann::json properties);
 };
 }

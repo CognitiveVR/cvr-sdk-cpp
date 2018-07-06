@@ -5,12 +5,12 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #include "stdafx.h"
 #include "exitpoll.h"
 namespace cognitive {
-ExitPoll::ExitPoll(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+ExitPoll::ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
 
-void ExitPoll::RequestQuestionSet(::std::string Hook)
+void ExitPoll::RequestQuestionSet(std::string Hook)
 {
 	//cannot request question set without successful init first!
 	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::RequestQuestionSet failed: no session active"); return; }
@@ -22,10 +22,10 @@ void ExitPoll::RequestQuestionSet(::std::string Hook)
 	fullResponse.hook = Hook;
 }
 
-::std::vector<::std::string> split(const ::std::string &text, char sep) {
-	::std::vector<::std::string> tokens;
-	::std::size_t start = 0, end = 0;
-	while ((end = text.find(sep, start)) != ::std::string::npos) {
+std::vector<std::string> split(const std::string &text, char sep) {
+	std::vector<std::string> tokens;
+	std::size_t start = 0, end = 0;
+	while ((end = text.find(sep, start)) != std::string::npos) {
 		tokens.push_back(text.substr(start, end - start));
 		start = end + 1;
 	}
@@ -33,18 +33,18 @@ void ExitPoll::RequestQuestionSet(::std::string Hook)
 	return tokens;
 }
 
-void ExitPoll::ReceiveQuestionSet(::std::string questionsetstring, nlohmann::json questionset)
+void ExitPoll::ReceiveQuestionSet(std::string questionsetstring, nlohmann::json questionset)
 {
 	currentQuestionSetString = questionsetstring;
 
-	fullResponse.questionSetId = questionset["id"].get<::std::string>();
+	fullResponse.questionSetId = questionset["id"].get<std::string>();
 	auto splitquestionid = split(fullResponse.questionSetId, ':');
 	fullResponse.questionSetName = splitquestionid[0];
 	fullResponse.questionSetVersion = splitquestionid[1];
 	currentQuestionSet = questionset;
 }
 
-::std::string ExitPoll::GetQuestionSetString()
+std::string ExitPoll::GetQuestionSetString()
 {
 	if (currentQuestionSetString.size() == 0)
 	{
@@ -76,26 +76,61 @@ void ExitPoll::ClearQuestionSet()
 	fullResponse.user.clear();
 }
 
-void ExitPoll::AddAnswer(FExitPollAnswer answer)
+void ExitPoll::AddAnswer(ExitPollAnswer answer)
 {
 	fullResponse.answers.push_back(answer);
 }
 
-void ExitPoll::SendAllAnswers()
+nlohmann::json ExitPoll::SendAllAnswers()
 {
 	std::vector<float> pos = { 0,0,0 };
-	SendAllAnswers(pos);
+	return SendAllAnswers(pos);
 }
 
-void ExitPoll::SendAllAnswers(::std::vector<float> pos)
+nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: no session active"); return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: no session active"); return nlohmann::json(); }
 
-	//companyname1234-productname-test/questionSets/:questionset_name/:version#/responses
+	if (fullResponse.answers.size() == 0) { cvr->log->Info("ExitPoll::SendAllAnswers failed: oustanding answers"); return nlohmann::json(); }
 
-	nlohmann::json full = fullResponse.ToJson();
+	nlohmann::json response = nlohmann::json();
 
-	cvr->network->NetworkExitpollPost(fullResponse.questionSetName, fullResponse.questionSetVersion, full.dump());
+	response["userId"] = cvr->UserId;
+	response["questionSetId"] = fullResponse.questionSetId;
+	response["hook"] = fullResponse.hook;
+	response["sceneId"] = cvr->CurrentSceneId;
+	response["versionNumber"] = cvr->CurrentSceneVersionNumber;
+	response["versionId"] = cvr->CurrentSceneVersionId;
+
+	for (auto& an : fullResponse.answers)
+	{
+		nlohmann::json tempAnswer = nlohmann::json();
+		if (an.AnswerValueType == EAnswerValueTypeReturn::kBool)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", an.boolValue ? 1 : 0 } };
+		}
+		else if (an.AnswerValueType == EAnswerValueTypeReturn::kNumber)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", an.numberValue } };
+		}
+		else if (an.AnswerValueType == EAnswerValueTypeReturn::kNull)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", -32768 } };
+		}
+		else if (an.AnswerValueType == EAnswerValueTypeReturn::kString)
+		{
+			tempAnswer = nlohmann::json{ { "type", an.type },{ "value", an.stringValue } };
+		}
+
+		response["answers"].push_back(tempAnswer);
+	}
+
+	cvr->network->NetworkExitpollPost(fullResponse.questionSetName, fullResponse.questionSetVersion, response.dump());
+
+
+
+
+
 
 	//send this as a transaction too
 	nlohmann::json properties = nlohmann::json();
@@ -114,16 +149,18 @@ void ExitPoll::SendAllAnswers(::std::vector<float> pos)
 		if (fullResponse.answers[i].AnswerValueType == EAnswerValueTypeReturn::kString)
 		{
 			//strings are only for voice responses. these do not show up in dash
-			properties["Answer" + ::std::to_string(i)] = 0;
+			properties["Answer" + std::to_string(i)] = 0;
 		}
 		else //bool(0-1), null(-32768),number(0-10)
 		{
-			properties["Answer" + ::std::to_string(i)] = fullResponse.answers[i].numberValue;
+			properties["Answer" + std::to_string(i)] = fullResponse.answers[i].numberValue;
 		}
 	}
 
-	cvr->customevent->Send("cvr.exitpoll", pos, properties);
+	cvr->customevent->RecordEvent("cvr.exitpoll", pos, properties);
 
 	ClearQuestionSet();
+
+	return response;
 }
 }

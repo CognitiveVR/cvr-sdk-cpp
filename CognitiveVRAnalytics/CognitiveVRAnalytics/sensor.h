@@ -15,7 +15,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 #else  
-#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+#define COGNITIVEVRANALYTICS_API
 #endif
 #elif defined(__GNUC__)
 //  GCC
@@ -35,26 +35,29 @@ class CognitiveVRAnalyticsCore;
 
 class COGNITIVEVRANALYTICS_API Sensor
 {
+	friend class CognitiveVRAnalyticsCore;
+
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+		Sensor(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-		::std::map<::std::string, nlohmann::json> allsensors;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+
+		std::map<std::string, nlohmann::json> allsensors;
 		int jsonPart = 1;
-    public:
-
 		//TODO should be private. tests shouldn't directly test this value
 		int sensorCount = 0;
-		Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
+		
+
+		//clear all saved sensor data
+		void EndSession();
+    public:
 		/** Record data for a sensor
 
 			@param std::string name
 			@param float value
 		*/
-		void RecordSensor(::std::string name, float value);
-		void SendData();
-
-		//clear all saved sensor data
-		void EndSession();
+		void RecordSensor(std::string name, float value);
+		nlohmann::json SendData();
 };
 }

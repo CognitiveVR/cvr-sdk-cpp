@@ -5,12 +5,12 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #include "stdafx.h"
 #include "sensor.h"
 namespace cognitive {
-Sensor::Sensor(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+Sensor::Sensor(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
 
-void Sensor::RecordSensor(::std::string Name, float value)
+void Sensor::RecordSensor(std::string Name, float value)
 {
 	//initialize json as array if needed
 	auto search = allsensors.find(Name);
@@ -32,19 +32,19 @@ void Sensor::RecordSensor(::std::string Name, float value)
 	}
 }
 
-void Sensor::SendData()
+nlohmann::json Sensor::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
 		cvr->log->Info("Sensor::SendData failed: no session active");
 		sensorCount = 0;
 		allsensors.clear();
-		return;
+		return nlohmann::json();
 	}
 
 	if (allsensors.size() == 0)
 	{
-		return;
+		return nlohmann::json();
 	}
 
 	//put together all json
@@ -56,6 +56,7 @@ void Sensor::SendData()
 	data["sessionid"] = cvr->GetSessionID();
 	data["timestamp"] = (int)cvr->GetTimestamp();
 	data["part"] = jsonPart;
+	data["formatversion"] = "1.0";
 	jsonPart++;
 
 	nlohmann::json sensors = nlohmann::json::array();
@@ -72,6 +73,8 @@ void Sensor::SendData()
 	cvr->network->NetworkCall("sensors", data.dump());
 	sensorCount = 0;
 	allsensors.clear();
+
+	return data;
 }
 
 void Sensor::EndSession()

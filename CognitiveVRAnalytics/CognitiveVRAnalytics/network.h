@@ -14,7 +14,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #ifdef COGNITIVEVRANALYTICS_EXPORTS  
 #define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 #else  
-#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+#define COGNITIVEVRANALYTICS_API
 #endif
 #elif defined(__GNUC__)
 //  GCC
@@ -35,20 +35,18 @@ class CognitiveVRAnalyticsCore;
 class Network
 {
     private:
-		::std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
-		::std::vector<::std::string> headers;
+		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
+		std::vector<std::string> headers;
 
     public:
-        Network(::std::shared_ptr<CognitiveVRAnalyticsCore> cog);
+        Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 		//used for posting gaze/events/dynamics/sensors to dashboard and scene explorer
-		void NetworkCall(::std::string suburl, ::std::string content);
-		
-		//void NetworkCall(::std::string suburl, ::std::string content, WebResponse response);
+		void NetworkCall(std::string suburl, std::string content);
 
 		//used by exitpolls
-		void NetworkExitpollGet(::std::string hook);
+		void NetworkExitpollGet(std::string hook);
 		//used by exitpolls
-		void NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, ::std::string content);
+		void NetworkExitpollPost(std::string questionsetname, std::string questionsetversion, std::string content);
 };
 }

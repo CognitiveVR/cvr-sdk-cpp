@@ -27,8 +27,8 @@ namespace cognitive
 		kNone = -2
 	};
 
-	typedef void(*WebResponse) (::std::string content);
-	typedef void(*WebRequest) (::std::string url, ::std::string content, ::std::vector<::std::string> headers, WebResponse response);
+	typedef void(*WebResponse) (std::string content);
+	typedef void(*WebRequest) (std::string url, std::string content, std::vector<std::string> headers, WebResponse response);
 
 	class SceneData
 	{

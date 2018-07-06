@@ -7,7 +7,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 namespace cognitive {
 // Sets default values for this component's properties
-GazeTracker::GazeTracker(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+GazeTracker::GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
 }
@@ -17,12 +17,12 @@ void GazeTracker::SetInterval(float interval)
 	PlayerSnapshotInterval = interval;
 }
 
-void GazeTracker::SetHMDType(::std::string hmdtype)
+void GazeTracker::SetHMDType(std::string hmdtype)
 {
 	HMDType = hmdtype;
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze)
+void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze)
 {
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -40,7 +40,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	}
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation, ::std::vector<float> &Gaze, std::string objectId)
+void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId)
 {
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -59,7 +59,7 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	}
 }
 
-void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float> &Rotation)
+void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
 {
 	//TODO conversion for xyz = -xzy or whatever
 
@@ -76,20 +76,20 @@ void GazeTracker::RecordGaze(::std::vector<float> &Position, ::std::vector<float
 	}
 }
 
-void GazeTracker::SendData()
+nlohmann::json GazeTracker::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
 		cvr->log->Info("GazeTracker::SendData failed: no session active");
 		BatchedGaze.clear();
-		return;
+		return nlohmann::json();
 	}
 
 	auto properties = cvr->GetNewSessionProperties();
 
 	if (BatchedGaze.size() == 0 && properties.size() == 0)
 	{
-		return;
+		return nlohmann::json();
 	}
 
 	//send to sceneexplorer
@@ -104,7 +104,7 @@ void GazeTracker::SendData()
 	se["hmdtype"] = HMDType;
 	se["interval"] = PlayerSnapshotInterval;
 	se["data"] = BatchedGaze;
-
+	se["formatversion"] = "1.0";
 	
 	if (properties.size() > 0)
 	{
@@ -113,6 +113,7 @@ void GazeTracker::SendData()
 
 	cvr->network->NetworkCall("gaze", se.dump());
 	BatchedGaze.clear();
+	return se;
 }
 
 void GazeTracker::EndSession()

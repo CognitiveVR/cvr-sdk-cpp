@@ -6,7 +6,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #include "dynamicobject.h"
 
 namespace cognitive {
-DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, std::string objectId)
+DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId)
 {
 	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
@@ -15,7 +15,7 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::st
 	Id = objectId;
 }
 
-DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::std::vector<float> rotation, std::string objectId, nlohmann::json properties)
+DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, nlohmann::json properties)
 {
 	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
@@ -28,20 +28,22 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(::std::vector<float> position, ::st
 	}
 }
 
-DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(std::string id, ::std::string engagementName, int engagementNumber)
+DynamicObjectEngagementEvent::DynamicObjectEngagementEvent(std::string parentId, std::string engagementName, int engagementNumber)
 {
-	ObjectId = id;
+	ParentObjectId = parentId;
 	Name = engagementName;
 	startTime = CognitiveVRAnalyticsCore::Instance()->GetTimestamp();
 	EngagementNumber = engagementNumber;
 }
 
-DynamicObject::DynamicObject(::std::shared_ptr<CognitiveVRAnalyticsCore> cog)
+static int nextObjectId;
+DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 {
 	cvr = cog;
+	nextObjectId = generatedIdOffset;
 }
 
-void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string meshname, std::string customid, ::std::vector<float> position, ::std::vector<float> rotation)
+void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
 {
 	for (auto& element : objectIds)
 	{
@@ -62,24 +64,21 @@ void DynamicObject::RegisterObjectCustomId(::std::string name, ::std::string mes
 
 	cognitive::nlohmann::json props = cognitive::nlohmann::json();
 	props["enabled"] = true;
-	AddSnapshot(customid, position, rotation, props);
-
-	if (snapshots.size() + manifestEntries.size() >= cvr->config->DynamicDataLimit)
-	{
-		SendData();
-	}
+	RecordDynamic(customid, position, rotation, props);
 }
 
-std::string DynamicObject::RegisterObject(::std::string name, ::std::string meshname, ::std::vector<float> position, ::std::vector<float> rotation)
+std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
 {
 	bool foundRecycledId = false;
 	DynamicObjectId newObjectId = DynamicObjectId("0", meshname);
 	
-	static int nextObjectId = generatedIdOffset;
 	for (auto& element : objectIds)
 	{
-		if (element.Id == std::to_string(nextObjectId)) { nextObjectId++; continue; }
-		if (element.Used) { continue; }
+		if (element.Used)
+		{
+			if (element.Id == std::to_string(nextObjectId)) { nextObjectId++; }
+			continue;
+		}
 		if (element.MeshName == meshname)
 		{
 			//found an unused objectid
@@ -102,27 +101,31 @@ std::string DynamicObject::RegisterObject(::std::string name, ::std::string mesh
 
 	cognitive::nlohmann::json props = cognitive::nlohmann::json();
 	props["enabled"] = true;
-	AddSnapshot(newObjectId.Id, position, rotation, props);
-
-	if (snapshots.size() + manifestEntries.size() >= cvr->config->DynamicDataLimit)
-	{
-		SendData();
-	}
+	RecordDynamic(newObjectId.Id, position, rotation, props);
 
 	return newObjectId.Id;
 }
 
-bool isInactive(DynamicObjectEngagementEvent engagement)
+bool isInactive(DynamicObjectEngagementEvent* engagement)
 {
-	return engagement.isActive == false;
+	return engagement->isActive == false;
 }
 
-void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> position, ::std::vector<float> rotation)
+void DynamicObject::AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation)
 {
-	AddSnapshot(objectId, position, rotation, cognitive::nlohmann::json());
+	RecordDynamic(objectId, position, rotation, cognitive::nlohmann::json());
+}
+void DynamicObject::AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties)
+{
+	RecordDynamic(objectId, position, rotation, properties);
 }
 
-void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> position, ::std::vector<float> rotation, nlohmann::json properties)
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation)
+{
+	RecordDynamic(objectId, position, rotation, cognitive::nlohmann::json());
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties)
 {
 	//if dynamic object id is not in manifest, display warning. likely object ids were cleared from scene change
 	bool foundId = false;
@@ -150,24 +153,26 @@ void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> posit
 		int i = 0;
 
 		//add engagements to snapshot
-		for (auto& e : allEngagements[objectId])
+		for (auto& e : activeEngagements[objectId])
 		{
-			if (e.isActive)
-			{
+			//if (e.isActive)
+			//{
 				nlohmann::json engagementEvent = nlohmann::json();
-				engagementEvent["engagementparent"] = e.ObjectId;
-				engagementEvent["engagement_count"] = e.EngagementNumber;
-				engagementEvent["engagement_time"] = (e.endTime > 0 ? e.endTime - e.startTime : cvr->GetTimestamp() - e.startTime);
-				engagementEvent["engagementtype"] = e.Name;
+				engagementEvent["engagementparent"] = e->ParentObjectId;
+				engagementEvent["engagement_count"] = e->EngagementNumber;
+				engagementEvent["engagement_time"] = (e->endTime > 0 ? e->endTime - e->startTime : cvr->GetTimestamp() - e->startTime);
+				engagementEvent["engagementtype"] = e->Name;
 				snapshot.Engagements.emplace_back(engagementEvent);
-			}
+			//}
 		}
 
-		cvr->log->Info("all engagements pre " + std::to_string(allEngagements[objectId].size()));
+		//cvr->log->Info("all engagements pre " + std::to_string(allEngagements[objectId].size()));
+		//cvr->log->Info("active engagements pre " + std::to_string(activeEngagements[objectId].size()));
 		//remove inactive engagements https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
-		allEngagements[objectId].erase(::std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
-		activeEngagements[objectId].erase(::std::remove_if(activeEngagements[objectId].begin(), activeEngagements[objectId].end(), isInactive), activeEngagements[objectId].end());
-		cvr->log->Info("all engagements post " + std::to_string(allEngagements[objectId].size()));
+		allEngagements[objectId].erase(std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
+		activeEngagements[objectId].erase(std::remove_if(activeEngagements[objectId].begin(), activeEngagements[objectId].end(), isInactive), activeEngagements[objectId].end());
+		//cvr->log->Info("all engagements post " + std::to_string(allEngagements[objectId].size()));
+		//cvr->log->Info("active engagements post " + std::to_string(activeEngagements[objectId].size()));
 	}
 
 	snapshots.emplace_back(snapshot);
@@ -178,25 +183,35 @@ void DynamicObject::AddSnapshot(std::string objectId, ::std::vector<float> posit
 	}
 }
 
-void DynamicObject::BeginEngagement(std::string objectId, ::std::string name)
+void DynamicObject::BeginEngagement(std::string objectId, std::string name)
+{
+	BeginEngagement(objectId, name, "0");
+}
+
+void DynamicObject::BeginEngagement(std::string objectId, std::string name, std::string parentId)
 {
 	cvr->log->Info("DynamicObject::BeginEngagement engagement " + name + " on object " + objectId);
 
 	engagementCounts[objectId][name] += 1;
 
-	DynamicObjectEngagementEvent engagement = DynamicObjectEngagementEvent(objectId, name, engagementCounts[objectId][name]);
+	DynamicObjectEngagementEvent* engagement = new DynamicObjectEngagementEvent(parentId, name, engagementCounts[objectId][name]);
 	activeEngagements[objectId].emplace_back(engagement);
-	allEngagements[objectId].emplace_back(engagement);	
+	allEngagements[objectId].emplace_back(engagement);
 }
 
-void DynamicObject::EndEngagement(std::string objectId, ::std::string name)
+void DynamicObject::EndEngagement(std::string objectId, std::string name)
 {
-	for (auto& e : activeEngagements[objectId])
+	EndEngagement(objectId, name, "0");
+}
+
+void DynamicObject::EndEngagement(std::string objectId, std::string name, std::string parentId)
+{
+	for (auto& e : allEngagements[objectId])
 	{
-		if (e.Name == name)
+		if (e->Name == name && e->ParentObjectId == parentId)
 		{
-			e.isActive = false;
-			e.endTime = cvr->GetTimestamp();
+			e->isActive = false;
+			e->endTime = cvr->GetTimestamp();
 			return;
 		}
 	}
@@ -204,27 +219,29 @@ void DynamicObject::EndEngagement(std::string objectId, ::std::string name)
 	//otherwise create and end the engagement
 
 	cvr->log->Info("DynamicObject::EndEngagement engagement " + name + " not found on object"+ objectId +". Begin+End");
-	BeginEngagement(objectId, name);
+	BeginEngagement(objectId, name, parentId);
 
-	auto rit = activeEngagements[objectId].rbegin();
-	for (; rit != activeEngagements[objectId].rend(); ++rit)
+	auto rit = allEngagements[objectId].rbegin();
+	for (; rit != allEngagements[objectId].rend(); ++rit)
 	{
-		if (rit->Name == name)
+		if ((*rit)->Name == name && (*rit)->ParentObjectId == parentId)
 		{
-			rit->isActive = false;
-			rit->endTime = cvr->GetTimestamp();
+			(*rit)->isActive = false;
+			(*rit)->endTime = cvr->GetTimestamp();
+			cvr->log->Info("end engagement just started");
 			return;
 		}
 	}
+	cvr->log->Info("FAIL ------------------- cannot find just started engagement to end");
 }
 
-void DynamicObject::SendData()
+nlohmann::json DynamicObject::SendData()
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("DynamicObject::SendData failed: no session active"); return; }
+	if (!cvr->IsSessionActive()) { cvr->log->Info("DynamicObject::SendData failed: no session active"); return nlohmann::json(); }
 
 	if (manifestEntries.size() + snapshots.size() == 0)
 	{
-		return;
+		return nlohmann::json();
 	}
 
 	nlohmann::json sendJson = nlohmann::json();
@@ -235,6 +252,8 @@ void DynamicObject::SendData()
 	sendJson["timestamp"] = cvr->GetTimestamp();
 	sendJson["sessionid"] = cvr->GetSessionID();
 	sendJson["part"] = jsonpart;
+	jsonpart++;
+	sendJson["formatversion"] = "1.0";
 
 	nlohmann::json manifest = nlohmann::json();
 
@@ -258,6 +277,10 @@ void DynamicObject::SendData()
 		entry["time"] = element.Time;
 		entry["p"] = element.Position;
 		entry["r"] = element.Rotation;
+		if (element.Properties.size() > 0)
+			entry["properties"] = element.Properties;
+		if (element.Engagements.size() > 0)
+			entry["engagements"] = element.Engagements;
 		data.emplace_back(entry);
 	}
 	sendJson["data"] = data;
@@ -266,15 +289,16 @@ void DynamicObject::SendData()
 	cvr->network->NetworkCall("dynamic", sendJson.dump());
 	manifestEntries.clear();
 	snapshots.clear();
+	return sendJson;
 }
 
 void DynamicObject::EndActiveEngagements(std::string objectid)
 {
 	for (auto& element : activeEngagements[objectid])
 	{
-		if (element.isActive)
+		if (element->isActive)
 		{
-			EndEngagement(objectid, element.Name);
+			EndEngagement(objectid, element->Name);
 		}
 	}
 }
@@ -287,7 +311,7 @@ void DynamicObject::RemoveObject(std::string objectid, std::vector<float> positi
 	//one final snapshot to send all the ended engagements
 	cognitive::nlohmann::json props = cognitive::nlohmann::json();
 	props["enabled"] = false;
-	AddSnapshot(objectid, position, rotation,props);
+	RecordDynamic(objectid, position, rotation,props);
 
 	//set the object as not used
 	for (auto& element : objectIds)
