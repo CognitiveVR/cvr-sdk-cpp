@@ -24,7 +24,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 	#ifdef COGNITIVEVRANALYTICS_EXPORTS  
 		#define COGNITIVEVRANALYTICS_API __declspec(dllexport)
 	#else  
-		#define COGNITIVEVRANALYTICS_API __declspec(dllimport)
+		#define COGNITIVEVRANALYTICS_API
 	#endif
 #elif defined(__GNUC__)
 	//  GCC
