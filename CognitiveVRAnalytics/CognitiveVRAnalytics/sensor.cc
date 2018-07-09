@@ -50,7 +50,7 @@ nlohmann::json Sensor::SendData()
 	//put together all json
 	nlohmann::json data = nlohmann::json();
 
-	data["name"] = cvr->UserId;
+	data["name"] = cvr->GetUniqueID();
 	if (!cvr->GetLobbyId().empty())
 		data["lobbyId"] = cvr->GetLobbyId();
 	data["sessionid"] = cvr->GetSessionID();

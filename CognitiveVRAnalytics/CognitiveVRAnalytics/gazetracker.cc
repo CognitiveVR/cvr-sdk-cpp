@@ -94,7 +94,7 @@ nlohmann::json GazeTracker::SendData()
 
 	//send to sceneexplorer
 	nlohmann::json se = nlohmann::json();
-	se["userid"] = cvr->UserId;
+	se["userid"] = cvr->GetUniqueID();
 	if (!cvr->GetLobbyId().empty())
 		se["lobbyId"] = cvr->GetLobbyId();
 	se["timestamp"] = (int)cvr->GetTimestamp();

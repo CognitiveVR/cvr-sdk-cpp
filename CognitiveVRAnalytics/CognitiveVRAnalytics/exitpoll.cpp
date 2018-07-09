@@ -17,7 +17,7 @@ void ExitPoll::RequestQuestionSet(std::string Hook)
 
 	cvr->network->NetworkExitpollGet(Hook);
 
-	fullResponse.user = cvr->UserId;
+	fullResponse.user = cvr->GetUniqueID();
 	fullResponse.sessionId = cvr->GetSessionID();
 	fullResponse.hook = Hook;
 }
@@ -95,7 +95,7 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 
 	nlohmann::json response = nlohmann::json();
 
-	response["userId"] = cvr->UserId;
+	response["userId"] = cvr->GetUniqueID();
 	response["questionSetId"] = fullResponse.questionSetId;
 	response["hook"] = fullResponse.hook;
 	response["sceneId"] = cvr->CurrentSceneId;
@@ -134,7 +134,7 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 
 	//send this as a transaction too
 	nlohmann::json properties = nlohmann::json();
-	properties["userId"] = cvr->UserId;
+	properties["userId"] = cvr->GetUniqueID();
 	if (!cvr->GetLobbyId().empty())
 		properties["lobbyId"] = cvr->GetLobbyId();
 	properties["questionSetId"] = fullResponse.questionSetId;

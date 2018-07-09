@@ -246,7 +246,7 @@ nlohmann::json DynamicObject::SendData()
 
 	nlohmann::json sendJson = nlohmann::json();
 
-	sendJson["userid"] = cvr->UserId;
+	sendJson["userid"] = cvr->GetUniqueID();
 	if (!cvr->GetLobbyId().empty())
 		sendJson["lobbyId"] = cvr->GetLobbyId();
 	sendJson["timestamp"] = cvr->GetTimestamp();

@@ -170,12 +170,23 @@ std::string CognitiveVRAnalyticsCore::GetSessionID()
 {
 	if (SessionId.empty())
 	{
-		if (UserId.empty())
-			SessionId = std::to_string((int)GetSessionTimestamp()) + "_" + DeviceId;
-		else
-			SessionId = std::to_string((int)GetSessionTimestamp()) + "_" + UserId;
+		SessionId = std::to_string((int)GetSessionTimestamp()) + "_" + GetUniqueID();
 	}
 	return SessionId;
+}
+
+std::string CognitiveVRAnalyticsCore::GetUniqueID()
+{
+	if (UniqueId.empty())
+	{
+		if (UserId.empty())
+			UniqueId = DeviceId;
+		else
+			UniqueId = UserId;
+		//should this fall back to 'anonymous'?
+		//if (UniqueId.empty()) log->Error("CognitiveVRAnalyticsCore::GetUniqueID requires either DeviceId or UserId to be set!");
+	}
+	return UniqueId;
 }
 
 void CognitiveVRAnalyticsCore::SendData()
