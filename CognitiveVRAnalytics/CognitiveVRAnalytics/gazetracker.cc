@@ -59,6 +59,28 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 	}
 }
 
+void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId, std::string mediaId, long mediaTime, std::vector<float> &uvs)
+{
+	//TODO conversion for xyz = -xzy or whatever
+
+	nlohmann::json data = nlohmann::json();
+	data["time"] = cvr->GetTimestamp();
+	data["p"] = { Position[0],Position[1],Position[2] };
+	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
+	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
+	data["o"] = objectId;
+	data["mediaId"] = mediaId;
+	data["mediatime"] = mediaTime;
+	data["uvs"] = { uvs[0],uvs[1] };
+
+	BatchedGaze.emplace_back(data);
+
+	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
+	{
+		SendData();
+	}
+}
+
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
 {
 	//TODO conversion for xyz = -xzy or whatever
@@ -103,7 +125,8 @@ nlohmann::json GazeTracker::SendData()
 	jsonPart++;
 	se["hmdtype"] = HMDType;
 	se["interval"] = PlayerSnapshotInterval;
-	se["data"] = BatchedGaze;
+	if (BatchedGaze.size() > 0)
+		se["data"] = BatchedGaze;
 	se["formatversion"] = "1.0";
 	
 	if (properties.size() > 0)

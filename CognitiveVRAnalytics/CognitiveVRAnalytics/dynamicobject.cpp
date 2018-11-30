@@ -283,7 +283,8 @@ nlohmann::json DynamicObject::SendData()
 			entry["engagements"] = element.Engagements;
 		data.emplace_back(entry);
 	}
-	sendJson["data"] = data;
+	if (data.size() > 0)
+		sendJson["data"] = data;
 
 	//send to sceneexplorer
 	cvr->network->NetworkCall("dynamic", sendJson.dump());

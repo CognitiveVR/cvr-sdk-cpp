@@ -33,8 +33,11 @@ namespace cognitive
 	class SceneData
 	{
 	public:
+		//internal name to identify the scene
 		std::string SceneName;
+		//GUID used to send data to correct scene context on the dashboard
 		std::string SceneId;
+		//integer representing the version of the scene on the dashboard
 		std::string VersionNumber;
 		int VersionId;
 
