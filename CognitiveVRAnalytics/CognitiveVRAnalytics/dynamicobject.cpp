@@ -287,7 +287,7 @@ nlohmann::json DynamicObject::SendData()
 		sendJson["data"] = data;
 
 	//send to sceneexplorer
-	cvr->network->NetworkCall("dynamic", sendJson.dump());
+	cvr->network->NetworkCall("dynamics", sendJson.dump());
 	manifestEntries.clear();
 	snapshots.clear();
 	return sendJson;

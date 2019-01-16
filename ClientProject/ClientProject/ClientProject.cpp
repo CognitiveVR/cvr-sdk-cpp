@@ -884,18 +884,26 @@ TEST(CustomEvent, Values) {
 	prop["text"] = "rewrite";
 	prop["text"] = "string";
 
+	std::string dynamicId = "asdf1234";
+
 	cog.StartSession();
-	cog.customevent->Send("testing1", pos, prop);
+	cog.customevent->RecordEvent("testing1", pos, prop);
+	cog.customevent->RecordEvent("testing2", pos, prop,dynamicId);
 	auto c = cog.customevent->SendData();
 	EXPECT_EQ(c["userid"], "");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
-	EXPECT_EQ(c["data"].size(), 2);
+	EXPECT_EQ(c["data"].size(), 3);
 	EXPECT_EQ(c["data"][0]["name"], "Start Session");
 	EXPECT_EQ(c["data"][1]["name"], "testing1");
 	EXPECT_EQ(c["data"][1]["properties"].size(), 2);
 	EXPECT_EQ(c["data"][1]["properties"]["number"], 1);
 	EXPECT_EQ(c["data"][1]["properties"]["text"], "string");
+	EXPECT_EQ(c["data"][2]["name"], "testing2");
+	EXPECT_EQ(c["data"][2]["dynamicId"], "asdf1234");
+	EXPECT_EQ(c["data"][2]["properties"].size(), 2);
+	EXPECT_EQ(c["data"][2]["properties"]["number"], 1);
+	EXPECT_EQ(c["data"][2]["properties"]["text"], "string");
 }
 
 TEST(CustomEvent, LimitPreSession) {
@@ -965,6 +973,49 @@ TEST(CustomEvent, LimitPostSession) {
 
 	auto c = cog.customevent->SendData();
 	EXPECT_EQ(c["data"].size(), 3);
+}
+
+TEST(CustomEvent, WithDynamic) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0 };
+	std::string dynamicId = cog.dynamicobject->RegisterObject("lamp01", "lamp", pos, rot);
+
+	cog.customevent->Send("testing1", pos,dynamicId);
+
+	cog.StartSession();
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"][0]["name"], "Start Session");
+	EXPECT_EQ(c["data"][1]["name"], "testing1");
+	EXPECT_EQ(c["data"][1]["dynamicId"], "asdf1234");
+}
+
+TEST(CustomEvent, NoDynamic) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	std::vector<float> pos = { 0,0,0 };
+	std::string dynamicId;
+
+	cog.customevent->Send("testing1", pos, dynamicId);
+
+	cog.StartSession();
+	auto c = cog.customevent->SendData();
+	EXPECT_EQ(c["data"][0]["name"], "Start Session");
+	EXPECT_EQ(c["data"][1]["name"], "testing1");
+	EXPECT_EQ(c["data"][1]["dynamicId"], "");
 }
 
 //-----------------------------------SCENES
@@ -1670,6 +1721,30 @@ TEST(Gaze, LimitPostSession) {
 
 	auto c = cog.gaze->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
+}
+
+TEST(Gaze, Media) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+
+	bool first = cog.StartSession();
+
+	std::vector<float> hmdpos = { 0,0,0 }; //xyz location in world space of the hmd
+	std::vector<float> localgazepos = { 0,0,0 }; //xyz location of the raycast hit point in local space of the hit object
+	std::vector<float> hmdrot = { 0,0,0,1 }; //xyzw world rotation in quaternions of the hmd
+	std::string hitObjectId = "DynamicObjectUniqueId"; //the unique identifier of the dynamic object instance
+	std::string mediaId = "MediaUniqueId"; //this comes from the dashboard
+	long mediaTime = 1000; //the current frame number of a video media, or 0 for images
+	std::vector<float> uvs = { 0.5,0.5 }; //the U and V texture coordinates
+	cog.gaze->RecordGaze(hmdpos, hmdrot, localgazepos, hitObjectId, mediaId, mediaTime, uvs);
+
+	auto c = cog.gaze->SendData();
+	EXPECT_EQ(c["data"].size(), 8);
 }
 
 
