@@ -988,13 +988,13 @@ TEST(CustomEvent, WithDynamic) {
 	std::vector<float> rot = { 0,0,0 };
 	std::string dynamicId = cog.dynamicobject->RegisterObject("lamp01", "lamp", pos, rot);
 
-	cog.customevent->Send("testing1", pos,dynamicId);
+	cog.customevent->RecordEvent("testing1", pos, dynamicId);
 
 	cog.StartSession();
 	auto c = cog.customevent->SendData();
-	EXPECT_EQ(c["data"][0]["name"], "Start Session");
-	EXPECT_EQ(c["data"][1]["name"], "testing1");
-	EXPECT_EQ(c["data"][1]["dynamicId"], "asdf1234");
+	EXPECT_EQ(c["data"][0]["name"], "testing1");
+	EXPECT_EQ(c["data"][0]["dynamicId"], "1000"); //generated
+	EXPECT_EQ(c["data"][1]["name"], "Start Session");
 }
 
 TEST(CustomEvent, NoDynamic) {
@@ -1009,13 +1009,13 @@ TEST(CustomEvent, NoDynamic) {
 	std::vector<float> pos = { 0,0,0 };
 	std::string dynamicId;
 
-	cog.customevent->Send("testing1", pos, dynamicId);
+	cog.customevent->RecordEvent("testing1", pos, dynamicId);
 
 	cog.StartSession();
 	auto c = cog.customevent->SendData();
-	EXPECT_EQ(c["data"][0]["name"], "Start Session");
-	EXPECT_EQ(c["data"][1]["name"], "testing1");
-	EXPECT_EQ(c["data"][1]["dynamicId"], "");
+	EXPECT_EQ(c["data"][0]["name"], "testing1");
+	EXPECT_EQ(c["data"][0]["dynamicId"], "");
+	EXPECT_EQ(c["data"][1]["name"], "Start Session");
 }
 
 //-----------------------------------SCENES
@@ -1740,11 +1740,17 @@ TEST(Gaze, Media) {
 	std::string hitObjectId = "DynamicObjectUniqueId"; //the unique identifier of the dynamic object instance
 	std::string mediaId = "MediaUniqueId"; //this comes from the dashboard
 	long mediaTime = 1000; //the current frame number of a video media, or 0 for images
-	std::vector<float> uvs = { 0.5,0.5 }; //the U and V texture coordinates
+	std::vector<float> uvs = { 0.3f,0.9f }; //the U and V texture coordinates
 	cog.gaze->RecordGaze(hmdpos, hmdrot, localgazepos, hitObjectId, mediaId, mediaTime, uvs);
 
 	auto c = cog.gaze->SendData();
-	EXPECT_EQ(c["data"].size(), 8);
+	EXPECT_EQ(c["data"].size(), 1);
+	EXPECT_EQ(c["data"][0]["o"], "DynamicObjectUniqueId");
+	EXPECT_EQ(c["data"][0]["mediaId"], "MediaUniqueId");
+	EXPECT_EQ(c["data"][0]["mediatime"], 1000);
+	EXPECT_EQ(c["data"][0]["uvs"].size(), 2);
+	EXPECT_EQ(c["data"][0]["uvs"][0], 0.3f);
+	EXPECT_EQ(c["data"][0]["uvs"][1], 0.9f);
 }
 
 
