@@ -1014,7 +1014,7 @@ TEST(CustomEvent, NoDynamic) {
 	cog.StartSession();
 	auto c = cog.customevent->SendData();
 	EXPECT_EQ(c["data"][0]["name"], "testing1");
-	EXPECT_EQ(c["data"][0]["dynamicId"], "");
+	EXPECT_EQ(c["data"][0]["dynamicId"], nullptr);
 	EXPECT_EQ(c["data"][1]["name"], "Start Session");
 }
 
