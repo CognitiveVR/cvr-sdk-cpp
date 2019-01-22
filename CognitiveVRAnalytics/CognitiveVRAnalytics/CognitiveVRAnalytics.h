@@ -111,6 +111,7 @@ private:
 
 	std::string UserId = "";
 	std::string DeviceId = "";
+	std::string UniqueId = "";
 	std::string LobbyId;
 
 	//unique id of scene that that receives recorded data
@@ -148,6 +149,8 @@ public:
 	double GetSessionTimestamp();
 	//returns the current timestamp
 	double GetTimestamp();
+
+	std::string GetUniqueID();
 
 	//the session timestamp and userid. creates a unique session in SceneExplorer
 	std::string GetSessionID();

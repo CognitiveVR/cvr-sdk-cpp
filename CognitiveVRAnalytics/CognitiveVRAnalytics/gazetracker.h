@@ -76,10 +76,22 @@ public:
 	*/
 	void RecordGaze(std::vector<float> &hmdposition, std::vector<float> &hmdrotation, std::vector<float> &localgazepoint, std::string objectid);
 
+	/** Record HMD position, rotation, gaze and object hit
+
+	@param std::vector<float> hmd position
+	@param std::vector<float> hmd rotation
+	@param std::vector<float> localgazepoint - position local to dynamic object looked at
+	@param std::string objectid - object id of hit dynamic object
+	@param std::string mediaId - identifier for media as uploaded on the cognitive dashboard
+	@param long mediaTime - frame number of video media. 0 if image
+	@param std::vector<float> uvs -u and v coordinate of the texture on the hit triange
+	*/
+	void RecordGaze(std::vector<float> &hmdposition, std::vector<float> &hmdrotation, std::vector<float> &localgazepoint, std::string objectid, std::string mediaId, long mediaTime, std::vector<float> &uvs);
+
 	/** Record HMD position and rotation. used when looking at sky or something without a distinct surface
 
-	@param std::vector<float> position
-	@param std::vector<float> rotation
+	@param std::vector<float> hmd position
+	@param std::vector<float> hmd rotation
 	*/
 	void RecordGaze(std::vector<float> &hmdposition, std::vector<float> &hmdrotation);
 

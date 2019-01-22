@@ -246,7 +246,7 @@ nlohmann::json DynamicObject::SendData()
 
 	nlohmann::json sendJson = nlohmann::json();
 
-	sendJson["userid"] = cvr->UserId;
+	sendJson["userid"] = cvr->GetUniqueID();
 	if (!cvr->GetLobbyId().empty())
 		sendJson["lobbyId"] = cvr->GetLobbyId();
 	sendJson["timestamp"] = cvr->GetTimestamp();
@@ -283,10 +283,11 @@ nlohmann::json DynamicObject::SendData()
 			entry["engagements"] = element.Engagements;
 		data.emplace_back(entry);
 	}
-	sendJson["data"] = data;
+	if (data.size() > 0)
+		sendJson["data"] = data;
 
 	//send to sceneexplorer
-	cvr->network->NetworkCall("dynamic", sendJson.dump());
+	cvr->network->NetworkCall("dynamics", sendJson.dump());
 	manifestEntries.clear();
 	snapshots.clear();
 	return sendJson;

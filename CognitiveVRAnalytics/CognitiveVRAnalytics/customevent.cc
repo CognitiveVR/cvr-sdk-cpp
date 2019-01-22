@@ -13,20 +13,30 @@ CustomEvent::CustomEvent(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 
 void CustomEvent::Send(std::string category, std::vector<float> &Position)
 {
-	RecordEvent(category, Position, nlohmann::json());
+	RecordEvent(category, Position, nlohmann::json(), "");
 }
 
 void CustomEvent::Send(std::string category, std::vector<float> &Position, nlohmann::json properties)
 {
-	RecordEvent(category, Position, properties);
+	RecordEvent(category, Position, properties, "");
 }
 
 void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position)
 {
-	RecordEvent(category, Position, nlohmann::json());
+	RecordEvent(category, Position, nlohmann::json(),"");
 }
 
 void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties)
+{
+	RecordEvent(category, Position, properties, "");
+}
+
+void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position, std::string dynamicObjectId)
+{
+	RecordEvent(category, Position, nlohmann::json(), dynamicObjectId);
+}
+
+void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties, std::string dynamicObjectId)
 {
 	double ts = cvr->GetTimestamp();
 
@@ -35,6 +45,8 @@ void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position
 	nlohmann::json se = nlohmann::json();
 	se["name"] = category;
 	se["time"] = ts;
+	if (!dynamicObjectId.empty())
+		se["dynamicId"] = dynamicObjectId;
 	se["point"] = { Position[0],Position[1] ,Position[2] };
 	if (properties.size() > 0)
 	{
@@ -64,7 +76,7 @@ nlohmann::json CustomEvent::SendData()
 	}
 
 	nlohmann::json se = nlohmann::json();
-	se["userid"] = cvr->UserId;
+	se["userid"] = cvr->GetUniqueID();
 	if (!cvr->GetLobbyId().empty())
 		se["lobbyId"] = cvr->GetLobbyId();
 	se["timestamp"] = (int)cvr->GetTimestamp();

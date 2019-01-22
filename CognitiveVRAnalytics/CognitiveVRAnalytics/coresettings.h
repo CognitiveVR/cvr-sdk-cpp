@@ -39,6 +39,7 @@ class CoreSettings
 		//which product to send data to. Ex companyname1234-productname-test
 		std::string APIKey = "asdf1234hjkl5678";
 
+		//the server to send recorded session data. if not set, defaults to data.cognitive3d.com
 		std::string CustomGateway;
 
 		//how many sensor data points to batch before sending to SceneExplorer
@@ -68,7 +69,6 @@ class CoreSettings
 		//all 'scenes' the user might encounter. must contain at least one to use SceneExplorer
 		std::vector<SceneData> AllSceneData;
 
-		//std::map < std::string, std::string> sceneIds;
 		//the default scene to load after Cognitive Analytics constructor
 		std::string DefaultSceneName = "";
 };
