@@ -96,6 +96,12 @@ bool CognitiveVRAnalyticsCore::StartSession()
 		return false;
 	}
 
+	if (GetUniqueID().empty())
+	{
+		log->Error("CognitiveVRAnalytics::StartSession failed - DeviceId or UserId must be set");
+		return false;
+	}
+
 	log->Info("CognitiveVRAnalytics::StartSession");
 
 	//TODO maybe set device and user ids here if not previously set?
