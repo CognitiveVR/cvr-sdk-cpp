@@ -1443,7 +1443,7 @@ TEST(ExitPoll, AnswerValues) {
 	cog.exitpoll->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kBoolean, -32768)); //skip
 	auto a = cog.exitpoll->SendAllAnswers();
 
-	EXPECT_EQ(a["userId"], "");
+	EXPECT_EQ(a["userId"], "travis");
 	EXPECT_EQ(a["questionSetId"], "testing:1");
 	EXPECT_EQ(a["hook"], "testing_new_sdk");
 
