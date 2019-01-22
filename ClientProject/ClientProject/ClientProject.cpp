@@ -120,6 +120,22 @@ TEST(Initialization, StartSession) {
 	EXPECT_EQ(first, true);
 }
 
+TEST(Initialization, StartSessionNoUser) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	//cog.SetUserName("travis");
+
+	EXPECT_EQ(cog.IsSessionActive(), false);
+	bool first = cog.StartSession();
+	EXPECT_EQ(first, false);
+}
+
 TEST(Initialization, StartSessionNoApiKey) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
@@ -2125,6 +2141,33 @@ TEST(Dynamics, DuringSessionOverwriteManifest) {
 
 	EXPECT_EQ(c["data"].size(), 5);
 	EXPECT_EQ(c["manifest"].size(), 2);
+}
+
+TEST(Dynamics, MultipleManifests) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	cog.StartSession();
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.dynamicobject->RegisterObjectCustomId("name1", "mesh1", "1000", pos, rot);
+	cog.dynamicobject->RegisterObject("name", "mesh", pos, rot); //id 1001
+	cog.dynamicobject->RegisterObject("name", "mesh", pos, rot); //id 1002
+	auto c = cog.dynamicobject->SendData();
+	EXPECT_EQ(c["data"].size(), 3);
+	EXPECT_EQ(c["manifest"].size(), 3);
+
+	cog.dynamicobject->RecordDynamic("1", pos, rot);
+	cog.dynamicobject->RecordDynamic("1", pos, rot);
+	c = cog.dynamicobject->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+	EXPECT_EQ(c["manifest"], nullptr);
 }
 
 TEST(Dynamics, PostSession) {

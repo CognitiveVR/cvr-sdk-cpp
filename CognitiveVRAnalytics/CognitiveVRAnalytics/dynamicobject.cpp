@@ -255,18 +255,21 @@ nlohmann::json DynamicObject::SendData()
 	jsonpart++;
 	sendJson["formatversion"] = "1.0";
 
-	nlohmann::json manifest = nlohmann::json();
-
-	for (auto& element : manifestEntries)
+	if (manifestEntries.size() > 0)
 	{
-		nlohmann::json entry = nlohmann::json();
-		nlohmann::json entryValues = nlohmann::json();
-		entryValues["name"] = element.Name;
-		entryValues["mesh"] = element.MeshName;
+		nlohmann::json manifest = nlohmann::json();
 
-		manifest[element.Id] = entryValues;
+		for (auto& element : manifestEntries)
+		{
+			nlohmann::json entry = nlohmann::json();
+			nlohmann::json entryValues = nlohmann::json();
+			entryValues["name"] = element.Name;
+			entryValues["mesh"] = element.MeshName;
+
+			manifest[element.Id] = entryValues;
+		}
+		sendJson["manifest"] = manifest;
 	}
-	sendJson["manifest"] = manifest;
 
 	nlohmann::json data = nlohmann::json::array();
 
