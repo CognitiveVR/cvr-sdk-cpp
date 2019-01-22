@@ -113,9 +113,9 @@ TEST(Initialization, StartSession) {
 	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	EXPECT_EQ(cog.IsSessionActive(), false);
-
 	bool first = cog.StartSession();
 	EXPECT_EQ(first, true);
 }
@@ -128,9 +128,9 @@ TEST(Initialization, StartSessionNoApiKey) {
 	settings.webRequest = &DoWebStuff;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	EXPECT_EQ(cog.IsSessionActive(), false);
-
 	bool first = cog.StartSession();
 	EXPECT_EQ(first, true);
 }
@@ -144,7 +144,8 @@ TEST(Initialization, StartSessionMultiple) {
 	settings.APIKey = TESTINGAPIKEY;
 	
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
-	
+	cog.SetUserName("travis");
+
 	bool first = cog.StartSession();
 	EXPECT_EQ(first, true);
 	bool second = cog.StartSession();
@@ -161,6 +162,7 @@ TEST(Initialization, MultipleStartEndSessions) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	bool first = cog.StartSession();
 	EXPECT_EQ(first, true);
@@ -186,6 +188,7 @@ TEST(Initialization, DefaultScene) {
 	settings.DefaultSceneName = "tutorial";
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	EXPECT_EQ(cog.GetSceneId(), "DELETE_ME_1");
 	cog.StartSession();
 }
@@ -202,6 +205,7 @@ TEST(Initialization, SetScene){
 	settings.AllSceneData = scenedatas;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	EXPECT_EQ(cog.GetSceneId(), "");
 	cog.StartSession();
 	EXPECT_EQ(cog.GetSceneId(), "");
@@ -218,6 +222,7 @@ TEST(Initialization, SetLobbyId){
 	settings.APIKey = TESTINGAPIKEY;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	cog.SetLobbyId("my lobby id");
 
 	cog.StartSession();
@@ -236,6 +241,7 @@ TEST(Initialization, SetSessionName) {
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "tutorial";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	cog.StartSession();
 	cog.SetSessionName("my friendly session name");
 
@@ -251,6 +257,7 @@ TEST(Initialization, SessionFullStartEnd) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.StartSession();
@@ -267,6 +274,7 @@ TEST(Initialization, SessionStartNoWeb) {
 	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	EXPECT_EQ(cog.IsSessionActive(), false);
 	cog.StartSession();
@@ -282,6 +290,7 @@ TEST(Initialization, SessionStartNoWebResponse) {
 	settings.webRequest = &NORESPONSE_DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	EXPECT_EQ(cog.IsSessionActive(), false);
 	cog.StartSession();
@@ -297,6 +306,7 @@ TEST(Initialization, SessionStartInvalidCustomerId) {
 	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	settings.APIKey = INVALIDAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	EXPECT_EQ(cog.GetAPIKey(), INVALIDAPIKEY);
 	EXPECT_EQ(cog.IsSessionActive(), false);
@@ -314,6 +324,7 @@ TEST(Initialization, InstancePreConstructor) {
 	
 	cognitive::CoreSettings settings;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	EXPECT_NE(cognitive::CognitiveVRAnalyticsCore::Instance(), nullptr);
 }
@@ -326,6 +337,7 @@ TEST(Initialization, SessionEnd) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	EXPECT_EQ(cog.IsSessionActive(), false);
 
 	cog.EndSession();
@@ -340,6 +352,7 @@ TEST(Initialization, SessionStartEnd) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	EXPECT_EQ(cog.IsSessionActive(), false);
 	cog.StartSession();
@@ -358,6 +371,7 @@ TEST(CustomEvent, UniquePtr) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	std::unique_ptr<cognitive::CognitiveVRAnalyticsCore> cog(new cognitive::CognitiveVRAnalyticsCore(settings));
+	cog->SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	cog->customevent->Send("testing1", pos);
@@ -375,6 +389,7 @@ TEST(General, CoreSendDataPreSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -403,6 +418,7 @@ TEST(General, CoreSendData) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -451,6 +467,7 @@ TEST(General, CoreSendDataEnd) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -482,6 +499,7 @@ TEST(General, JsonPartSendData) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -520,6 +538,7 @@ TEST(General, Lobby) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -576,8 +595,8 @@ TEST(SessionProperties, DuringSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.StartSession();
 	cog.SetUserName("john");
+	cog.StartSession();
 	cog.SetSessionProperty("age", 21);
 	cog.SetSessionProperty("location", "vancouver");
 	
@@ -594,8 +613,8 @@ TEST(SessionProperties, DuringSessionGaze) {
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.StartSession();
 	cog.SetUserName("john");
+	cog.StartSession();
 	cog.SetSessionProperty("age", 21);
 	cog.SetSessionProperty("location", "vancouver");
 
@@ -612,8 +631,8 @@ TEST(SessionProperties, DuringSessionValues) {
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.StartSession();
 	cog.SetUserName("john");
+	cog.StartSession();
 	cog.SetSessionProperty("age", 21);
 	cog.SetSessionProperty("location", "seattle");
 	cog.SetSessionProperty("location", "vancouver");
@@ -633,8 +652,8 @@ TEST(SessionProperties, PostSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.StartSession();
 	cog.SetUserName("john");
+	cog.StartSession();
 	cog.SetSessionProperty("age", 21);
 	cog.SetSessionProperty("location", "seattle");
 	cog.SetSessionProperty("location", "vancouver");
@@ -656,8 +675,8 @@ TEST(SessionProperties, SceneChange) {
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.StartSession();
 	cog.SetUserName("john");
+	cog.StartSession();
 	cog.SetSessionProperty("age", 21);
 	cog.SetSessionProperty("location", "vancouver");
 	auto p = cog.gaze->SendData();
@@ -684,8 +703,8 @@ TEST(SessionProperties, InvalidSceneChange) {
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.StartSession();
 	cog.SetUserName("john");
+	cog.StartSession();
 	cog.SetSessionProperty("age", 21);
 	cog.SetSessionProperty("location", "vancouver");
 	auto p = cog.gaze->SendData();
@@ -710,8 +729,8 @@ TEST(SessionProperties, SceneChangeMultiple) {
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 
-	cog.StartSession();
 	cog.SetUserName("john");
+	cog.StartSession();
 	cog.SetSessionProperty("age", 21);
 	cog.SetSessionProperty("location", "vancouver");
 
@@ -748,6 +767,7 @@ TEST(CustomEvent, PreSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.customevent->Send("testing1", pos);
@@ -764,6 +784,7 @@ TEST(CustomEvent, DuringSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.customevent->Send("testing1", pos);
@@ -781,6 +802,7 @@ TEST(CustomEvent, PostSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	
@@ -803,6 +825,7 @@ TEST(CustomEvent, PostSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 
@@ -827,6 +850,7 @@ TEST(CustomEvent, PostSceneChangeMultiple) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 
@@ -855,6 +879,7 @@ TEST(CustomEvent, PostInvalidSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 
@@ -877,6 +902,7 @@ TEST(CustomEvent, Values) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	cognitive::nlohmann::json prop = cognitive::nlohmann::json();
@@ -890,7 +916,7 @@ TEST(CustomEvent, Values) {
 	cog.customevent->RecordEvent("testing1", pos, prop);
 	cog.customevent->RecordEvent("testing2", pos, prop,dynamicId);
 	auto c = cog.customevent->SendData();
-	EXPECT_EQ(c["userid"], "");
+	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 	EXPECT_EQ(c["data"].size(), 3);
@@ -915,6 +941,7 @@ TEST(CustomEvent, LimitPreSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.CustomEventBatchSize = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 
@@ -938,6 +965,7 @@ TEST(CustomEvent, LimitDuringSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.CustomEventBatchSize = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 
@@ -961,6 +989,7 @@ TEST(CustomEvent, LimitPostSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.CustomEventBatchSize = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.StartSession(); //record
@@ -983,6 +1012,7 @@ TEST(CustomEvent, WithDynamic) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0 };
@@ -1005,6 +1035,7 @@ TEST(CustomEvent, NoDynamic) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::string dynamicId;
@@ -1028,6 +1059,7 @@ TEST(Scenes, NoScenes) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 
@@ -1060,6 +1092,7 @@ TEST(Scenes, InitScenes) {
 
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 
@@ -1091,6 +1124,7 @@ TEST(Scenes, InitSetScenes) {
 
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	EXPECT_EQ(cog.GetSceneId(), "");
@@ -1123,6 +1157,7 @@ TEST(Scenes, InitSetSceneSwitch) {
 	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.SetScene("tutorial");
@@ -1156,6 +1191,7 @@ TEST(Scenes, InitSetInvalidScene) {
 	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	EXPECT_EQ(cog.GetSceneId(), "");
@@ -1179,6 +1215,7 @@ TEST(Scenes, InitSetInvalidNoScene) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	EXPECT_EQ(cog.GetSceneId(), "");
@@ -1205,6 +1242,7 @@ TEST(Scenes, SetSceneMiddle) {
 	scenedatas.emplace_back(cognitive::SceneData("finalboss", "DELETE_ME_3", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.SetScene("non-existent");
@@ -1231,6 +1269,7 @@ TEST(ExitPoll, RequestSetNoInit) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
 
@@ -1248,6 +1287,7 @@ TEST(ExitPoll, BasicRequest) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.loggingLevel = cognitive::LoggingLevel::kAll;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
@@ -1303,6 +1343,7 @@ TEST(ExitPoll, GetThenRequest) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 
 	cog.StartSession();
@@ -1320,6 +1361,7 @@ TEST(ExitPoll, InvalidRequestThenGet) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("question-does-not-exist");
@@ -1335,6 +1377,7 @@ TEST(ExitPoll, RequestThenGetAnswersJson) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
@@ -1358,6 +1401,7 @@ TEST(ExitPoll, RequestThenGetAnswersString) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
@@ -1384,6 +1428,7 @@ TEST(ExitPoll, AnswerValues) {
 	settings.AllSceneData = scenedatas;
 	settings.DefaultSceneName = "tutorial";
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.exitpoll->RequestQuestionSet("testing_new_sdk");
@@ -1444,6 +1489,7 @@ TEST(Gaze, PreSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1465,6 +1511,7 @@ TEST(Gaze, DuringSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1488,6 +1535,7 @@ TEST(Gaze, PostSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1514,6 +1562,7 @@ TEST(Gaze, PostSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1543,6 +1592,7 @@ TEST(Gaze, PostSceneChangeMultiple) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1572,6 +1622,7 @@ TEST(Gaze, PostInvalidSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1597,6 +1648,7 @@ TEST(Gaze, Values) {
 	settings.HMDType = cognitive::ECognitiveHMDType::kVive;
 	settings.GazeInterval = 0.134f;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,2,3 };
 	std::vector<float> rot = { 4,5,6,7 };
@@ -1608,7 +1660,7 @@ TEST(Gaze, Values) {
 
 	auto c = cog.gaze->SendData();
 
-	EXPECT_EQ(c["userid"], "");
+	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["hmdtype"], "vive");
 	EXPECT_EQ(c["interval"],0.134f);
@@ -1659,6 +1711,7 @@ TEST(Gaze, LimitPreSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.GazeBatchSize = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1683,6 +1736,7 @@ TEST(Gaze, LimitDuringSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.GazeBatchSize = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 
@@ -1708,6 +1762,7 @@ TEST(Gaze, LimitPostSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.GazeBatchSize = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -1731,6 +1786,7 @@ TEST(Gaze, Media) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	bool first = cog.StartSession();
 
@@ -1764,6 +1820,7 @@ TEST(Sensors, PreSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.sensor->RecordSensor("testing1", 1);
 
@@ -1779,6 +1836,7 @@ TEST(Sensors, DuringSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.sensor->RecordSensor("testing1", 1);
 
@@ -1795,6 +1853,7 @@ TEST(Sensors, PostSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.sensor->RecordSensor("testing1", 1);
@@ -1815,6 +1874,7 @@ TEST(Sensors, PostSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.sensor->RecordSensor("testing1", 1);
@@ -1837,6 +1897,7 @@ TEST(Sensors, PostSceneChangeMultiple) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.sensor->RecordSensor("testing1", 1);
@@ -1863,6 +1924,7 @@ TEST(Sensors, PostInvalidSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.sensor->RecordSensor("testing1", 1);
@@ -1883,6 +1945,7 @@ TEST(Sensors, Values) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	
@@ -1899,7 +1962,7 @@ TEST(Sensors, Values) {
 	cog.sensor->RecordSensor("testing3", 3);
 
 	auto c = cog.sensor->SendData();
-	EXPECT_EQ(c["name"], "");
+	EXPECT_EQ(c["name"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 	EXPECT_EQ(c["data"].size(), 3);
@@ -1925,6 +1988,7 @@ TEST(Sensors, LimitPreSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.SensorDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.sensor->RecordSensor("testing1", 1);
 	cog.sensor->RecordSensor("testing1", 1);
@@ -1946,6 +2010,7 @@ TEST(Sensors, LimitDuringSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.SensorDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 
@@ -1968,6 +2033,7 @@ TEST(Sensors, LimitPostSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.SensorDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 	cog.sensor->RecordSensor("testing1", 1);
@@ -1993,6 +2059,7 @@ TEST(Dynamics, PreSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2015,6 +2082,7 @@ TEST(Dynamics, DuringSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2042,6 +2110,7 @@ TEST(Dynamics, DuringSessionOverwriteManifest) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	cog.StartSession();
 
 	std::vector<float> pos = { 0,0,0 };
@@ -2066,6 +2135,7 @@ TEST(Dynamics, PostSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2090,6 +2160,7 @@ TEST(Dynamics, RemovePreSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2113,6 +2184,7 @@ TEST(Dynamics, RemoveDuringSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2134,6 +2206,7 @@ TEST(Dynamics, RemoveDuringSessionPropertyValues) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2157,6 +2230,7 @@ TEST(Dynamics, RemoveDuringSessionUnregistered) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2177,6 +2251,7 @@ TEST(Dynamics, RemovePostSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2202,6 +2277,7 @@ TEST(Dynamics, PostSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2234,6 +2310,7 @@ TEST(Dynamics, PostSceneChangeMultiple) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2270,6 +2347,7 @@ TEST(Dynamics, PostInvalidSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2298,6 +2376,7 @@ TEST(Dynamics, Values) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,2,3 };
 	std::vector<float> rot = { 4,5,6,7 };
@@ -2313,7 +2392,7 @@ TEST(Dynamics, Values) {
 
 	auto c = cog.dynamicobject->SendData();
 
-	EXPECT_EQ(c["userid"], "");
+	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 
@@ -2366,6 +2445,7 @@ TEST(Dynamics, LimitPreSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.DynamicDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2391,6 +2471,7 @@ TEST(Dynamics, LimitDuringSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.DynamicDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 
@@ -2416,6 +2497,7 @@ TEST(Dynamics, LimitPostSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.DynamicDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2445,6 +2527,7 @@ TEST(Dynamics, IdReuse) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2476,6 +2559,7 @@ TEST(Engagements, PreSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2496,6 +2580,7 @@ TEST(Engagements, DuringSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2527,6 +2612,7 @@ TEST(Engagements, DuringSessionParentId) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 	cog.StartSession();
 
 	std::vector<float> pos = { 0,0,0 };
@@ -2566,6 +2652,7 @@ TEST(Engagements, DuringSessionOverwrite) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2588,6 +2675,7 @@ TEST(Engagements, PostSession) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2613,6 +2701,7 @@ TEST(Engagements, PostSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2645,6 +2734,7 @@ TEST(Engagements, PostSceneChangeMultiple) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2685,6 +2775,7 @@ TEST(Engagements, PostInvalidSceneChange) {
 	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
 	settings.AllSceneData = scenedatas;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2715,6 +2806,7 @@ TEST(Engagements, Values) {
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,2,3 };
 	std::vector<float> rot = { 4,5,6,7 };
@@ -2732,7 +2824,7 @@ TEST(Engagements, Values) {
 
 	auto c = cog.dynamicobject->SendData();
 
-	EXPECT_EQ(c["userid"], "");
+	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
 
 	//manifest
@@ -2767,6 +2859,7 @@ TEST(Engagements, LimitPreSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.DynamicDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
@@ -2794,6 +2887,7 @@ TEST(Engagements, LimitDuringSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.DynamicDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	cog.StartSession();
 
@@ -2821,6 +2915,7 @@ TEST(Engagements, LimitPostSession) {
 	settings.APIKey = TESTINGAPIKEY;
 	settings.DynamicDataLimit = 4;
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
