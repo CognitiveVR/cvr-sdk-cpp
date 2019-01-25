@@ -61,8 +61,11 @@ void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshnam
 	manifestEntries.push_back(dome);
 	fullManifest.push_back(dome);
 
-	cognitive::nlohmann::json props = cognitive::nlohmann::json();
-	props["enabled"] = true;
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+
 	RecordDynamic(customid, position, rotation, props);
 }
 
@@ -98,8 +101,11 @@ std::string DynamicObject::RegisterObject(std::string name, std::string meshname
 		fullManifest.push_back(dome);
 	}
 
-	cognitive::nlohmann::json props = cognitive::nlohmann::json();
-	props["enabled"] = true;
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+
 	RecordDynamic(newObjectId.Id, position, rotation, props);
 
 	return newObjectId.Id;
