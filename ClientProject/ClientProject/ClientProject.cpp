@@ -2279,8 +2279,14 @@ TEST(Dynamics, RemoveDuringSessionPropertyValues) {
 
 	EXPECT_EQ(c["data"].size(), 2);
 	EXPECT_EQ(c["manifest"].size(), 1);
-	EXPECT_EQ(c["data"][0]["properties"]["enabled"], true);
-	EXPECT_EQ(c["data"][1]["properties"]["enabled"], false);
+
+	cognitive::nlohmann::json truetarget = cognitive::nlohmann::json();
+	truetarget["enabled"] = true;
+	cognitive::nlohmann::json falsetarget = cognitive::nlohmann::json();
+	falsetarget["enabled"] = false;
+
+	EXPECT_EQ(c["data"][0]["properties"][0], truetarget);
+	EXPECT_EQ(c["data"][1]["properties"][0], falsetarget);
 }
 
 TEST(Dynamics, RemoveDuringSessionUnregistered) {
@@ -2446,12 +2452,33 @@ TEST(Dynamics, Values) {
 	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
 	cog.GetDynamicObject()->RegisterObject("name2", "mesh2", pos, rot);
 	cog.GetDynamicObject()->RecordDynamic("2", pos, rot);
-	cognitive::nlohmann::json props = cognitive::nlohmann::json();
-	props["color"] = "yellow";
-	props["size"] = 5;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+
+
+	cognitive::nlohmann::json color = cognitive::nlohmann::json();
+	color["color"] = "yellow";
+	props.push_back(color);
+
+	cognitive::nlohmann::json size = cognitive::nlohmann::json();
+	size["size"] = 5;
+	props.push_back(size);
+
+
+
+	//props["color"] = "yellow";
+	//props["size"] = 5;
 	cog.GetDynamicObject()->RecordDynamic("0", pos, rot,props);
 
 	auto c = cog.GetDynamicObject()->SendData();
+
+	
+
+	cognitive::nlohmann::json enabledtarget = cognitive::nlohmann::json();
+	enabledtarget["enabled"] = true;
+	cognitive::nlohmann::json colortarget = cognitive::nlohmann::json();
+	colortarget["color"] = "yellow";
+	cognitive::nlohmann::json sizetarget = cognitive::nlohmann::json();
+	sizetarget["size"] = 5;
 
 	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
@@ -2472,14 +2499,14 @@ TEST(Dynamics, Values) {
 	EXPECT_EQ(c["data"][0]["p"][0], 1);
 	EXPECT_EQ(c["data"][0]["p"][1], 2);
 	EXPECT_EQ(c["data"][0]["p"][2], 3);
-	EXPECT_EQ(c["data"][0]["properties"]["enabled"], true);
+	EXPECT_EQ(c["data"][0]["properties"][0], enabledtarget);
 	
 	//dynamic 2
 	EXPECT_EQ(c["data"][1]["id"], "1000");
 	EXPECT_EQ(c["data"][1]["p"][0], 1);
 	EXPECT_EQ(c["data"][1]["p"][1], 2);
 	EXPECT_EQ(c["data"][1]["p"][2], 3);
-	EXPECT_EQ(c["data"][1]["properties"]["enabled"], true);
+	EXPECT_EQ(c["data"][1]["properties"][0], enabledtarget);
 
 	//dynamic 3
 	EXPECT_EQ(c["data"][2]["id"], "2");
@@ -2493,8 +2520,8 @@ TEST(Dynamics, Values) {
 	EXPECT_EQ(c["data"][3]["p"][0], 1);
 	EXPECT_EQ(c["data"][3]["p"][1], 2);
 	EXPECT_EQ(c["data"][3]["p"][2], 3);
-	EXPECT_EQ(c["data"][3]["properties"]["color"], "yellow");
-	EXPECT_EQ(c["data"][3]["properties"]["size"], 5);
+	EXPECT_EQ(c["data"][3]["properties"][0], colortarget);
+	EXPECT_EQ(c["data"][3]["properties"][1], sizetarget);
 }
 
 TEST(Dynamics, LimitPreSession) {
@@ -2699,7 +2726,7 @@ TEST(Engagements, DuringSessionParentId) {
 	cog.GetDynamicObject()->EndEngagement("0", "grab", "left");
 	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
 	c = cog.GetDynamicObject()->SendData();
-	std::cout << c.dump() << "\n";
+	
 	EXPECT_EQ(c["data"][0]["engagements"].size(), 2);
 	EXPECT_EQ(c["data"][0]["engagements"][0]["engagementparent"], "right");
 	EXPECT_EQ(c["data"][0]["engagements"][1]["engagementparent"], "left");
@@ -2876,14 +2903,29 @@ TEST(Engagements, Values) {
 	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
 	cog.GetDynamicObject()->BeginEngagement("0", "grab");
 	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
-	cognitive::nlohmann::json props = cognitive::nlohmann::json();
-	props["color"] = "yellow";
-	props["size"] = 5;
+
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	
+	cognitive::nlohmann::json color = cognitive::nlohmann::json();
+	color["color"] = "yellow";
+	props.push_back(color);
+
+	cognitive::nlohmann::json size = cognitive::nlohmann::json();
+	size["size"] = 5;
+	props.push_back(size);
+
 	cog.GetDynamicObject()->EndEngagement("0", "grab");
 	cog.GetDynamicObject()->EndEngagement("0", "hover");
 	cog.GetDynamicObject()->RecordDynamic("0", pos, rot, props);
 
 	auto c = cog.GetDynamicObject()->SendData();
+
+	cognitive::nlohmann::json enabledtarget = cognitive::nlohmann::json();
+	enabledtarget["enabled"] = true;
+	cognitive::nlohmann::json colortarget = cognitive::nlohmann::json();
+	colortarget["color"] = "yellow";
+	cognitive::nlohmann::json sizetarget = cognitive::nlohmann::json();
+	sizetarget["size"] = 5;
 
 	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
@@ -2894,7 +2936,7 @@ TEST(Engagements, Values) {
 
 	//snapshot 1 register
 	EXPECT_EQ(c["data"][0]["id"], "0");
-	EXPECT_EQ(c["data"][0]["properties"]["enabled"], true);
+	EXPECT_EQ(c["data"][0]["properties"][0], enabledtarget);
 
 	//snapshot 2 grab engagement begin
 	EXPECT_EQ(c["data"][1]["id"], "0");
@@ -2903,8 +2945,8 @@ TEST(Engagements, Values) {
 
 	//snapshot 3 properties, grab end, hover begin/end
 	EXPECT_EQ(c["data"][2]["id"], "0");
-	EXPECT_EQ(c["data"][2]["properties"]["color"], "yellow");
-	EXPECT_EQ(c["data"][2]["properties"]["size"], 5);
+	EXPECT_EQ(c["data"][2]["properties"][1], sizetarget);
+	EXPECT_EQ(c["data"][2]["properties"][0],colortarget);	
 	EXPECT_EQ(c["data"][2]["engagements"][0]["engagementtype"], "grab");
 	EXPECT_GE(c["data"][2]["engagements"][0]["engagement_time"], 0);
 	EXPECT_EQ(c["data"][2]["engagements"][1]["engagementtype"], "hover");

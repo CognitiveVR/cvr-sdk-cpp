@@ -318,8 +318,10 @@ void DynamicObject::RemoveObject(std::string objectid, std::vector<float> positi
 	EndActiveEngagements(objectid);
 
 	//one final snapshot to send all the ended engagements
-	cognitive::nlohmann::json props = cognitive::nlohmann::json();
-	props["enabled"] = false;
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = false;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
 	RecordDynamic(objectid, position, rotation,props);
 
 	//set the object as not used
