@@ -18,6 +18,107 @@ struct D {
 	}
 };
 
+std::string CognitiveVRAnalyticsCore::GetCurrentSceneId()
+{
+	return CurrentSceneId;
+}
+int CognitiveVRAnalyticsCore::GetCurrentSceneVersionId()
+{
+	return CurrentSceneVersionId;
+}
+std::string CognitiveVRAnalyticsCore::GetCurrentSceneVersionNumber()
+{
+	return CurrentSceneVersionNumber;
+}
+
+//log
+std::unique_ptr<CognitiveLog> const& CognitiveVRAnalyticsCore::GetLog() const
+{
+	return log;
+}
+
+//void CognitiveVRAnalyticsCore::SetLog(CognitiveLog newLog)
+//{
+//	log = make_unique_cognitive<CognitiveLog>(newLog);
+//}
+
+//exitpoll
+std::unique_ptr<ExitPoll> const& CognitiveVRAnalyticsCore::GetExitPoll() const
+{
+	return exitpoll;
+}
+
+//void CognitiveVRAnalyticsCore::SetExitPoll(cognitive::ExitPoll newLog)
+//{
+//	exitpoll = make_unique_cognitive<cognitive::ExitPoll>(newLog);
+//}
+
+//custom event
+std::unique_ptr<CustomEvent> const& CognitiveVRAnalyticsCore::GetCustomEvent() const
+{
+	return customevent;
+}
+
+//void CognitiveVRAnalyticsCore::SetCustomEvent(cognitive::CustomEvent newLog)
+//{
+//	customevent = make_unique_cognitive<cognitive::CustomEvent>(newLog);
+//}
+
+//gaze
+std::unique_ptr<cognitive::GazeTracker> const& CognitiveVRAnalyticsCore::GetGazeTracker() const
+{
+	return gaze;
+}
+
+//void CognitiveVRAnalyticsCore::SetGazeTracker(cognitive::GazeTracker newLog)
+//{
+//	gaze = make_unique_cognitive<cognitive::GazeTracker>(newLog);
+//}
+
+//sensor
+std::unique_ptr<Sensor> const& CognitiveVRAnalyticsCore::GetSensor() const
+{
+	return sensor;
+}
+
+//void CognitiveVRAnalyticsCore::SetSensor(cognitive::Sensor newLog)
+//{
+//	sensor = make_unique_cognitive<cognitive::Sensor>(newLog);
+//}
+
+//dynamic
+std::unique_ptr<DynamicObject> const& CognitiveVRAnalyticsCore::GetDynamicObject() const
+{
+	return dynamicobject;
+}
+
+//void CognitiveVRAnalyticsCore::SetDynamicObject(cognitive::DynamicObject newLog)
+//{
+//	dynamicobject = make_unique_cognitive<cognitive::DynamicObject>(newLog);
+//}
+
+//network
+std::unique_ptr<Network> const& CognitiveVRAnalyticsCore::GetNetwork() const
+{
+	return network;
+}
+
+//void CognitiveVRAnalyticsCore::SetNetwork(cognitive::Network newLog)
+//{
+//	network = make_unique_cognitive<cognitive::Network>(newLog);
+//}
+
+//config
+std::unique_ptr<Config> const& CognitiveVRAnalyticsCore::GetConfig() const
+{
+	return config;
+}
+
+//void CognitiveVRAnalyticsCore::SetConfig(cognitive::Config newLog)
+//{
+//	config = make_unique_cognitive<cognitive::Config>(newLog);
+//}
+
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 {
 	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
@@ -25,29 +126,33 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	sendFunctionPointer = settings.webRequest;
 
 	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
-	log->SetLoggingLevel(settings.loggingLevel);
-	log->Info("CognitiveVRAnalyticsCore()");
+	//SetLog(CognitiveLog(instance));
+	GetLog()->SetLoggingLevel(settings.loggingLevel);
+	GetLog()->Info("CognitiveVRAnalyticsCore()");
 
 	if (settings.webRequest == nullptr)
 	{
-		log->Error("CognitiveVRAnalyticsCore() webRequest is null!");
+		GetLog()->Error("CognitiveVRAnalyticsCore() webRequest is null!");
 	}
 
 	config = make_unique_cognitive<Config>(Config(instance));
+	//SetConfig(cognitive::Config(instance));
+
 	//SET VALUES FROM SETTINGS
 	if (!settings.CustomGateway.empty())
 	{
-		config->kNetworkHost = settings.CustomGateway;
+		GetConfig()->kNetworkHost = settings.CustomGateway;
 	}
-	config->HMDType = settings.GetHMDType();
-	config->APIKey = settings.APIKey;
-	config->GazeBatchSize = settings.GazeBatchSize;
-	config->CustomEventBatchSize = settings.CustomEventBatchSize;
-	config->SensorDataLimit = settings.SensorDataLimit;
-	config->DynamicDataLimit = settings.DynamicDataLimit;
-	config->GazeInterval = settings.GazeInterval;
+	GetConfig()->HMDType = settings.GetHMDType();
+	GetConfig()->APIKey = settings.APIKey;
+	GetConfig()->GazeBatchSize = settings.GazeBatchSize;
+	GetConfig()->CustomEventBatchSize = settings.CustomEventBatchSize;
+	GetConfig()->SensorDataLimit = settings.SensorDataLimit;
+	GetConfig()->DynamicDataLimit = settings.DynamicDataLimit;
+	GetConfig()->GazeInterval = settings.GazeInterval;
 
 	network = make_unique_cognitive<Network>(Network(instance));
+	//SetNetwork(cognitive::Network(instance));
 
 	customevent = make_unique_cognitive<CustomEvent>(CustomEvent(instance));
 	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
@@ -55,15 +160,21 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
 	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
 
+	//SetCustomEvent(cognitive::CustomEvent(instance));
+	//SetGazeTracker(cognitive::GazeTracker(instance));
+	//SetSensor(cognitive::Sensor(instance));
+	//SetDynamicObject(cognitive::DynamicObject(instance));
+	//SetExitPoll(cognitive::ExitPoll(instance));
+
 	//set scenes
-	config->AllSceneData = settings.AllSceneData;
+	GetConfig()->AllSceneData = settings.AllSceneData;
 	if (settings.DefaultSceneName.size() > 0)
 		SetScene(settings.DefaultSceneName);
 }
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
-	log->Info("~CognitiveVRAnalyticsCore");
+	GetLog()->Info("~CognitiveVRAnalyticsCore");
 	config.reset();
 	log.reset();
 	network.reset();
@@ -98,26 +209,24 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	if (GetUniqueID().empty())
 	{
-		log->Error("CognitiveVRAnalytics::StartSession failed - DeviceId or UserId must be set");
+		GetLog()->Error("CognitiveVRAnalytics::StartSession failed - DeviceId or UserId must be set");
 		return false;
 	}
 
-	log->Info("CognitiveVRAnalytics::StartSession");
+	GetLog()->Info("CognitiveVRAnalytics::StartSession");
 
 	//TODO maybe set device and user ids here if not previously set?
 
 	GetSessionTimestamp();
 	GetSessionID();
 
-	double ts = GetSessionTimestamp();
-
-	gaze->SetInterval(config->GazeInterval);
-	gaze->SetHMDType(config->HMDType);
+	GetGazeTracker()->SetInterval(config->GazeInterval);
+	GetGazeTracker()->SetHMDType(config->HMDType);
 
 	isSessionActive = true;
 
 	std::vector<float> pos = { 0,0,0 };
-	customevent->RecordEvent("Start Session", pos);
+	GetCustomEvent()->RecordEvent("Start Session", pos);
 
 	return true;
 }
@@ -131,7 +240,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 {
 	if (!IsSessionActive()) { return; }
 
-	log->Info("CognitiveVRAnalytics::EndSession");
+	GetLog()->Info("CognitiveVRAnalytics::EndSession");
 
 	nlohmann::json props = nlohmann::json();
 
@@ -140,7 +249,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
 
-	customevent->RecordEvent("End Session", endPos, props);
+	GetCustomEvent()->RecordEvent("End Session", endPos, props);
 
 	SendData();
 
@@ -149,10 +258,10 @@ void CognitiveVRAnalyticsCore::EndSession()
 
 	isSessionActive = false;
 
-	gaze->EndSession();
-	customevent->EndSession();
-	dynamicobject->EndSession();
-	sensor->EndSession();
+	GetGazeTracker()->EndSession();
+	GetCustomEvent()->EndSession();
+	GetDynamicObject()->EndSession();
+	GetSensor()->EndSession();
 }
 
 double CognitiveVRAnalyticsCore::GetSessionTimestamp()
@@ -199,10 +308,10 @@ void CognitiveVRAnalyticsCore::SendData()
 {
 	//if (!IsSessionActive()) { log->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
 
-	customevent->SendData();
-	gaze->SendData();
-	sensor->SendData();
-	dynamicobject->SendData();
+	GetCustomEvent()->SendData();
+	GetGazeTracker()->SendData();
+	GetSensor()->SendData();
+	GetDynamicObject()->SendData();
 }
 
 void CognitiveVRAnalyticsCore::SetUserName(std::string name)
@@ -251,7 +360,7 @@ void CognitiveVRAnalyticsCore::SetSessionName(std::string sessionName)
 
 void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 {
-	log->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
+	GetLog()->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
 	if (CurrentSceneId.size() > 0)
 	{
 		//send any remaining data to current scene, if there is a current scene
@@ -276,7 +385,7 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 
 	if (!foundScene)
 	{
-		log->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
+		GetLog()->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
 		CurrentSceneId = "";
 		CurrentSceneVersionNumber = "";
 		CurrentSceneVersionId = 0;

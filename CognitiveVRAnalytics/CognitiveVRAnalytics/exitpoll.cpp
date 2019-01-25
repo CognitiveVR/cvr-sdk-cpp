@@ -13,9 +13,9 @@ ExitPoll::ExitPoll(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 void ExitPoll::RequestQuestionSet(std::string Hook)
 {
 	//cannot request question set without successful init first!
-	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::RequestQuestionSet failed: no session active"); return; }
+	if (!cvr->IsSessionActive()) { cvr->GetLog()->Info("ExitPoll::RequestQuestionSet failed: no session active"); return; }
 
-	cvr->network->NetworkExitpollGet(Hook);
+	cvr->GetNetwork()->NetworkExitpollGet(Hook);
 
 	fullResponse.user = cvr->GetUniqueID();
 	fullResponse.sessionId = cvr->GetSessionID();
@@ -48,7 +48,7 @@ std::string ExitPoll::GetQuestionSetString()
 {
 	if (currentQuestionSetString.size() == 0)
 	{
-		cvr->log->Warning("ExitPoll:currentQuestionSetString no active question set. Returning empty json string");
+		cvr->GetLog()->Warning("ExitPoll:currentQuestionSetString no active question set. Returning empty json string");
 	}
 
 	return currentQuestionSetString;
@@ -58,7 +58,7 @@ nlohmann::json ExitPoll::GetQuestionSet()
 {
 	if (currentQuestionSet.size() == 0)
 	{
-		cvr->log->Warning("ExitPoll:GetQuestionSet no active question set. Returning empty json");
+		cvr->GetLog()->Warning("ExitPoll:GetQuestionSet no active question set. Returning empty json");
 	}
 
 	return currentQuestionSet;
@@ -89,18 +89,18 @@ nlohmann::json ExitPoll::SendAllAnswers()
 
 nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 {
-	if (!cvr->IsSessionActive()) { cvr->log->Info("ExitPoll::SendAllAnswers failed: no session active"); return nlohmann::json(); }
+	if (!cvr->IsSessionActive()) { cvr->GetLog()->Info("ExitPoll::SendAllAnswers failed: no session active"); return nlohmann::json(); }
 
-	if (fullResponse.answers.size() == 0) { cvr->log->Info("ExitPoll::SendAllAnswers failed: oustanding answers"); return nlohmann::json(); }
+	if (fullResponse.answers.size() == 0) { cvr->GetLog()->Info("ExitPoll::SendAllAnswers failed: oustanding answers"); return nlohmann::json(); }
 
 	nlohmann::json response = nlohmann::json();
 
 	response["userId"] = cvr->GetUniqueID();
 	response["questionSetId"] = fullResponse.questionSetId;
 	response["hook"] = fullResponse.hook;
-	response["sceneId"] = cvr->CurrentSceneId;
-	response["versionNumber"] = cvr->CurrentSceneVersionNumber;
-	response["versionId"] = cvr->CurrentSceneVersionId;
+	response["sceneId"] = cvr->GetCurrentSceneId();
+	response["versionNumber"] = cvr->GetCurrentSceneVersionNumber();
+	response["versionId"] = cvr->GetCurrentSceneVersionId();
 
 	for (auto& an : fullResponse.answers)
 	{
@@ -125,7 +125,7 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 		response["answers"].push_back(tempAnswer);
 	}
 
-	cvr->network->NetworkExitpollPost(fullResponse.questionSetName, fullResponse.questionSetVersion, response.dump());
+	cvr->GetNetwork()->NetworkExitpollPost(fullResponse.questionSetName, fullResponse.questionSetVersion, response.dump());
 
 
 
@@ -139,9 +139,9 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 		properties["lobbyId"] = cvr->GetLobbyId();
 	properties["questionSetId"] = fullResponse.questionSetId;
 	properties["hook"] = fullResponse.hook;
-	properties["sceneId"] = cvr->CurrentSceneId;
-	properties["versionNumber"] = cvr->CurrentSceneVersionNumber;
-	properties["versionId"] = cvr->CurrentSceneVersionId;
+	properties["sceneId"] = cvr->GetCurrentSceneId();
+	properties["versionNumber"] = cvr->GetCurrentSceneVersionNumber();
+	properties["versionId"] = cvr->GetCurrentSceneVersionId();
 
 	//add answers as properties
 	for (int i = 0; i < fullResponse.answers.size(); ++i)
@@ -157,7 +157,7 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 		}
 	}
 
-	cvr->customevent->RecordEvent("cvr.exitpoll", pos, properties);
+	cvr->GetCustomEvent()->RecordEvent("cvr.exitpoll", pos, properties);
 
 	ClearQuestionSet();
 

@@ -53,9 +53,9 @@ void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position
 		se["properties"] = properties;
 	}
 
-	BatchedCustomEvents.emplace_back(se);
+	BatchedCustomEvents.push_back(se);
 
-	if (BatchedCustomEvents.size() >= cvr->config->CustomEventBatchSize)
+	if (BatchedCustomEvents.size() >= cvr->GetConfig()->CustomEventBatchSize)
 	{
 		SendData();
 	}
@@ -65,7 +65,7 @@ nlohmann::json CustomEvent::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
-		cvr->log->Info("CustomEvent::SendData failed: no session active");
+		cvr->GetLog()->Info("CustomEvent::SendData failed: no session active");
 		BatchedCustomEvents.clear();
 		return nlohmann::json();
 	}
@@ -85,7 +85,7 @@ nlohmann::json CustomEvent::SendData()
 	se["formatversion"] = "1.0";
 	jsonPart++;
 	se["data"] = BatchedCustomEvents;
-	cvr->network->NetworkCall("events", se.dump());
+	cvr->GetNetwork()->NetworkCall("events", se.dump());
 	BatchedCustomEvents.clear();
 	return se;
 }

@@ -20,13 +20,13 @@ void Sensor::RecordSensor(std::string Name, float value)
 	}
 
 	nlohmann::json data = nlohmann::json::array();
-	data.emplace_back(cvr->GetTimestamp());
-	data.emplace_back(value);
+	data.push_back(cvr->GetTimestamp());
+	data.push_back(value);
 
-	allsensors[Name].emplace_back(data);
+	allsensors[Name].push_back(data);
 
 	sensorCount++;
-	if (sensorCount >= cvr->config->SensorDataLimit)
+	if (sensorCount >= cvr->GetConfig()->SensorDataLimit)
 	{
 		SendData();
 	}
@@ -36,7 +36,7 @@ nlohmann::json Sensor::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
-		cvr->log->Info("Sensor::SendData failed: no session active");
+		cvr->GetLog()->Info("Sensor::SendData failed: no session active");
 		sensorCount = 0;
 		allsensors.clear();
 		return nlohmann::json();
@@ -66,11 +66,11 @@ nlohmann::json Sensor::SendData()
 		nlohmann::json obj = nlohmann::json();
 		obj["name"] = ent1.first;
 		obj["data"] = ent1.second;
-		sensors.emplace_back(obj);
+		sensors.push_back(obj);
 	}
 	data["data"] = sensors;
 
-	cvr->network->NetworkCall("sensors", data.dump());
+	cvr->GetNetwork()->NetworkCall("sensors", data.dump());
 	sensorCount = 0;
 	allsensors.clear();
 
