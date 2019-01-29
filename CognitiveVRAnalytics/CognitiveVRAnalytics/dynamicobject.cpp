@@ -150,7 +150,14 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, objectId);
 	if (properties.size() > 0)
 	{
-		snapshot.Properties = properties;
+		if (!properties.is_array())
+		{
+			cvr->GetLog()->Warning("Record Dynamic properties json must be formatted as array!");
+		}
+		else
+		{
+			snapshot.Properties = properties;
+		}
 	}
 
 	if (allEngagements[objectId].size() > 0)

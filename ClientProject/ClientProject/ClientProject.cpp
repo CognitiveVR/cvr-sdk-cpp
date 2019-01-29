@@ -13,7 +13,7 @@
 #include <thread>
 
 //requires a valid API key from travis command line. if testing and expecting not to have this key, can disable all tests that are expected to fail
-//#define EXITPOLLVALID
+#define EXITPOLLVALID
 
 #if defined(_MSC_VER)
 #include "gtest.h"
@@ -2450,32 +2450,21 @@ TEST(Dynamics, Values) {
 	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
 	cog.GetDynamicObject()->RegisterObject("name2", "mesh2", pos, rot);
 	cog.GetDynamicObject()->RecordDynamic("2", pos, rot);
-	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 
-
-	cognitive::nlohmann::json color = cognitive::nlohmann::json();
+	cognitive::nlohmann::json color;
 	color["color"] = "yellow";
-	props.push_back(color);
-
-	cognitive::nlohmann::json size = cognitive::nlohmann::json();
+	cognitive::nlohmann::json size;
 	size["size"] = 5;
-	props.push_back(size);
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array({color,size});
 
-
-
-	//props["color"] = "yellow";
-	//props["size"] = 5;
 	cog.GetDynamicObject()->RecordDynamic("0", pos, rot,props);
-
 	auto c = cog.GetDynamicObject()->SendData();
 
-	
-
-	cognitive::nlohmann::json enabledtarget = cognitive::nlohmann::json();
+	cognitive::nlohmann::json enabledtarget;
 	enabledtarget["enabled"] = true;
-	cognitive::nlohmann::json colortarget = cognitive::nlohmann::json();
+	cognitive::nlohmann::json colortarget;
 	colortarget["color"] = "yellow";
-	cognitive::nlohmann::json sizetarget = cognitive::nlohmann::json();
+	cognitive::nlohmann::json sizetarget;
 	sizetarget["size"] = 5;
 
 	EXPECT_EQ(c["userid"], "travis");
@@ -2520,6 +2509,49 @@ TEST(Dynamics, Values) {
 	EXPECT_EQ(c["data"][3]["p"][2], 3);
 	EXPECT_EQ(c["data"][3]["properties"][0], colortarget);
 	EXPECT_EQ(c["data"][3]["properties"][1], sizetarget);
+}
+
+TEST(Dynamics, PropertyJsonType) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	cog.GetDynamicObject()->RegisterObject("name2", "mesh2", pos, rot);
+
+	cognitive::nlohmann::json color;
+	color["color"] = "yellow";
+
+	cognitive::nlohmann::json size;
+	size["size"] = 5;
+
+	cog.GetDynamicObject()->RecordDynamic("1000", pos, rot, color);
+
+	//send json object to properties - ignore
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"][1]["id"], "1000");
+	EXPECT_EQ(c["data"][1]["properties"], nullptr);
+
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array({ color,size });
+	cog.GetDynamicObject()->RecordDynamic("1000", pos, rot, props);
+	c = cog.GetDynamicObject()->SendData();
+
+	cognitive::nlohmann::json colortarget;
+	colortarget["color"] = "yellow";
+	cognitive::nlohmann::json sizetarget;
+	sizetarget["size"] = 5;
+
+	EXPECT_EQ(c["data"][0]["id"], "1000");
+	EXPECT_EQ(c["data"][0]["properties"][0], colortarget);
+	EXPECT_EQ(c["data"][0]["properties"][1], sizetarget);
 }
 
 TEST(Dynamics, LimitPreSession) {
@@ -2902,15 +2934,13 @@ TEST(Engagements, Values) {
 	cog.GetDynamicObject()->BeginEngagement("0", "grab");
 	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
 
-	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
-	
-	cognitive::nlohmann::json color = cognitive::nlohmann::json();
+	cognitive::nlohmann::json color;
 	color["color"] = "yellow";
-	props.push_back(color);
 
-	cognitive::nlohmann::json size = cognitive::nlohmann::json();
+	cognitive::nlohmann::json size;
 	size["size"] = 5;
-	props.push_back(size);
+
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array({ color,size });
 
 	cog.GetDynamicObject()->EndEngagement("0", "grab");
 	cog.GetDynamicObject()->EndEngagement("0", "hover");
@@ -2918,11 +2948,11 @@ TEST(Engagements, Values) {
 
 	auto c = cog.GetDynamicObject()->SendData();
 
-	cognitive::nlohmann::json enabledtarget = cognitive::nlohmann::json();
+	cognitive::nlohmann::json enabledtarget;
 	enabledtarget["enabled"] = true;
-	cognitive::nlohmann::json colortarget = cognitive::nlohmann::json();
+	cognitive::nlohmann::json colortarget;
 	colortarget["color"] = "yellow";
-	cognitive::nlohmann::json sizetarget = cognitive::nlohmann::json();
+	cognitive::nlohmann::json sizetarget;
 	sizetarget["size"] = 5;
 
 	EXPECT_EQ(c["userid"], "travis");
