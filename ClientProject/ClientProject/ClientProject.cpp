@@ -12,6 +12,9 @@
 #include <chrono>
 #include <thread>
 
+//requires a valid API key from travis command line. if testing and expecting not to have this key, can disable all tests that are expected to fail
+//#define EXITPOLLVALID
+
 #if defined(_MSC_VER)
 #include "gtest.h"
 #else
@@ -262,7 +265,7 @@ TEST(Initialization, SetSessionName) {
 	cog.SetSessionName("my friendly session name");
 
 	auto c = cog.GetGazeTracker()->SendData();
-	EXPECT_EQ(c["properties"]["cvr.sessionname"], "my friendly session name");
+	EXPECT_EQ(c["properties"]["c3d.sessionname"], "my friendly session name");
 }
 
 TEST(Initialization, SessionFullStartEnd) {
@@ -1308,50 +1311,50 @@ TEST(ExitPoll, BasicRequest) {
 	cog.StartSession();
 	cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
 	auto q = cog.GetExitPoll()->GetQuestionSet();
-	
-	EXPECT_EQ(cog.GetExitPoll()->GetQuestionSetString(), "");
 
-	//TEMPORARY DISABLE FOR DEBUGGING
-	//EXPECT_NE(cog.GetExitPoll()->GetQuestionSetString(), "");
-	//EXPECT_EQ(q["id"], "testing:1");
-	//EXPECT_EQ(q["version"], 1);
-	//EXPECT_EQ(q["title"], "Testing new dash Exitpoll");
-	//EXPECT_EQ(q["status"], "active");
-	//EXPECT_EQ(q["questions"].size(), 6);
-	//
-	////true false
-	//EXPECT_EQ(q["questions"][0]["title"], "TF");
-	//EXPECT_EQ(q["questions"][0]["type"], "BOOLEAN");
-	//
-	////happy sad
-	//EXPECT_EQ(q["questions"][1]["title"], "Happy");
-	//EXPECT_EQ(q["questions"][1]["type"], "HAPPYSAD");
-	//
-	////thumbs up down
-	//EXPECT_EQ(q["questions"][2]["title"], "Thumbs");
-	//EXPECT_EQ(q["questions"][2]["type"], "THUMBS");
-	//
-	////multiple choice
-	//EXPECT_EQ(q["questions"][3]["title"], "MC");
-	//EXPECT_EQ(q["questions"][3]["type"], "MULTIPLE");
-	//EXPECT_EQ(q["questions"][3]["answers"].size(), 4);
-	//EXPECT_EQ(q["questions"][3]["answers"][0]["answer"], "answer one");
-	//EXPECT_EQ(q["questions"][3]["answers"][1]["answer"], "answer two");
-	//EXPECT_EQ(q["questions"][3]["answers"][2]["answer"], "answer three");
-	//EXPECT_EQ(q["questions"][3]["answers"][3]["answer"], "answer four");
-	//
-	////multiple choice
-	//EXPECT_EQ(q["questions"][4]["title"], "scale");
-	//EXPECT_EQ(q["questions"][4]["type"], "SCALE");
-	//EXPECT_EQ(q["questions"][4]["minLabel"], "lower label");
-	//EXPECT_EQ(q["questions"][4]["maxLabel"], "upper label");
-	//EXPECT_EQ(q["questions"][4]["range"]["start"], 0);
-	//EXPECT_EQ(q["questions"][4]["range"]["end"], 10);
-	//
-	////multiple choice
-	//EXPECT_EQ(q["questions"][5]["title"], "voice q");
-	//EXPECT_EQ(q["questions"][5]["type"], "VOICE");
-	//EXPECT_EQ(q["questions"][5]["maxResponseLength"], 20);
+#ifdef EXITPOLLVALID
+
+	EXPECT_NE(cog.GetExitPoll()->GetQuestionSetString(), "");
+	EXPECT_EQ(q["id"], "testing:1");
+	EXPECT_EQ(q["version"], 1);
+	EXPECT_EQ(q["title"], "Testing new dash Exitpoll");
+	EXPECT_EQ(q["status"], "active");
+	EXPECT_EQ(q["questions"].size(), 6);
+	
+	//true false
+	EXPECT_EQ(q["questions"][0]["title"], "TF");
+	EXPECT_EQ(q["questions"][0]["type"], "BOOLEAN");
+	
+	//happy sad
+	EXPECT_EQ(q["questions"][1]["title"], "Happy");
+	EXPECT_EQ(q["questions"][1]["type"], "HAPPYSAD");
+	
+	//thumbs up down
+	EXPECT_EQ(q["questions"][2]["title"], "Thumbs");
+	EXPECT_EQ(q["questions"][2]["type"], "THUMBS");
+	
+	//multiple choice
+	EXPECT_EQ(q["questions"][3]["title"], "MC");
+	EXPECT_EQ(q["questions"][3]["type"], "MULTIPLE");
+	EXPECT_EQ(q["questions"][3]["answers"].size(), 4);
+	EXPECT_EQ(q["questions"][3]["answers"][0]["answer"], "answer one");
+	EXPECT_EQ(q["questions"][3]["answers"][1]["answer"], "answer two");
+	EXPECT_EQ(q["questions"][3]["answers"][2]["answer"], "answer three");
+	EXPECT_EQ(q["questions"][3]["answers"][3]["answer"], "answer four");
+	
+	//multiple choice
+	EXPECT_EQ(q["questions"][4]["title"], "scale");
+	EXPECT_EQ(q["questions"][4]["type"], "SCALE");
+	EXPECT_EQ(q["questions"][4]["minLabel"], "lower label");
+	EXPECT_EQ(q["questions"][4]["maxLabel"], "upper label");
+	EXPECT_EQ(q["questions"][4]["range"]["start"], 0);
+	EXPECT_EQ(q["questions"][4]["range"]["end"], 10);
+	
+	//multiple choice
+	EXPECT_EQ(q["questions"][5]["title"], "voice q");
+	EXPECT_EQ(q["questions"][5]["type"], "VOICE");
+	EXPECT_EQ(q["questions"][5]["maxResponseLength"], 20);
+#endif // EXITPOLLVALID
 }
 
 TEST(ExitPoll, GetThenRequest) {
@@ -1364,18 +1367,13 @@ TEST(ExitPoll, GetThenRequest) {
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
 	cog.SetUserName("travis");
 
-	//TEMPORARY DISABLE FOR DEBUGGING
-	//cog.StartSession();
-	//EXPECT_EQ(cog.GetExitPoll()->GetQuestionSetString(), "");
-	//cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
-	//EXPECT_NE(cog.GetExitPoll()->GetQuestionSetString(), "");
-	//cog.EndSession();
-
+#ifdef EXITPOLLVALID
 	cog.StartSession();
 	EXPECT_EQ(cog.GetExitPoll()->GetQuestionSetString(), "");
 	cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
-	EXPECT_EQ(cog.GetExitPoll()->GetQuestionSetString(), "");
+	EXPECT_NE(cog.GetExitPoll()->GetQuestionSetString(), "");
 	cog.EndSession();
+#endif // EXITPOLLVALID
 }
 
 TEST(ExitPoll, InvalidRequestThenGet) {
@@ -1408,10 +1406,9 @@ TEST(ExitPoll, RequestThenGetAnswersJson) {
 	cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
 	cognitive::nlohmann::json questions = cog.GetExitPoll()->GetQuestionSet();
 
-	//TEMPORARY DISABLE FOR DEBUGGING
-	//EXPECT_EQ(questions.size(), 7);
-	EXPECT_EQ(questions.size(), 0);
-	
+#ifdef EXITPOLLVALID
+	EXPECT_EQ(questions.size(), 7);
+#endif
 
 	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
 	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
@@ -1435,9 +1432,10 @@ TEST(ExitPoll, RequestThenGetAnswersString) {
 	cog.StartSession();
 	cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
 	std::string questionString = cog.GetExitPoll()->GetQuestionSetString();
-	//TEMPORARY DISABLE FOR DEBUGGING
-	//EXPECT_NE(questionString, "");
-	EXPECT_EQ(questionString, "");
+
+#ifdef EXITPOLLVALID
+	EXPECT_NE(questionString, "");
+#endif
 
 	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
 	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
@@ -1474,42 +1472,42 @@ TEST(ExitPoll, AnswerValues) {
 	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kBoolean, -32768)); //skip
 	auto a = cog.GetExitPoll()->SendAllAnswers();
 
+#ifdef EXITPOLLVALID
 	EXPECT_EQ(a["userId"], "travis");
-	EXPECT_EQ(a["questionSetId"], "");
 
-	//TEMPORARY DISABLE FOR DEBUGGING
-	//EXPECT_EQ(a["questionSetId"], "testing:1");
-	//EXPECT_EQ(a["hook"], "testing_new_sdk");
-	//
-	//EXPECT_EQ(a["sceneId"], "DELETE_ME_1");
-	//EXPECT_EQ(a["versionNumber"], "6");
-	//EXPECT_EQ(a["versionId"], 2);
-	//
-	//EXPECT_EQ(a["answers"].size(), 8);
-	//
-	//EXPECT_EQ(a["answers"][0]["type"], "BOOLEAN");
-	//EXPECT_EQ(a["answers"][0]["value"], 1);
-	//
-	//EXPECT_EQ(a["answers"][1]["type"], "HAPPYSAD");
-	//EXPECT_EQ(a["answers"][1]["value"], 0);
-	//
-	//EXPECT_EQ(a["answers"][2]["type"], "THUMBS");
-	//EXPECT_EQ(a["answers"][2]["value"], 1);
-	//
-	//EXPECT_EQ(a["answers"][3]["type"], "MULTIPLE");
-	//EXPECT_EQ(a["answers"][3]["value"], 2);
-	//
-	//EXPECT_EQ(a["answers"][4]["type"], "SCALE");
-	//EXPECT_EQ(a["answers"][4]["value"], 9);
-	//
-	//EXPECT_EQ(a["answers"][5]["type"], "VOICE");
-	//EXPECT_EQ(a["answers"][5]["value"], "ASDF==");
-	//
-	//EXPECT_EQ(a["answers"][6]["type"], "BOOLEAN");
-	//EXPECT_EQ(a["answers"][6]["value"], -1);
-	//
-	//EXPECT_EQ(a["answers"][7]["type"], "BOOLEAN");
-	//EXPECT_EQ(a["answers"][7]["value"], -32768);
+	EXPECT_EQ(a["questionSetId"], "testing:1");
+	EXPECT_EQ(a["hook"], "testing_new_sdk");
+	
+	EXPECT_EQ(a["sceneId"], "DELETE_ME_1");
+	EXPECT_EQ(a["versionNumber"], "6");
+	EXPECT_EQ(a["versionId"], 2);
+	
+	EXPECT_EQ(a["answers"].size(), 8);
+	
+	EXPECT_EQ(a["answers"][0]["type"], "BOOLEAN");
+	EXPECT_EQ(a["answers"][0]["value"], 1);
+	
+	EXPECT_EQ(a["answers"][1]["type"], "HAPPYSAD");
+	EXPECT_EQ(a["answers"][1]["value"], 0);
+	
+	EXPECT_EQ(a["answers"][2]["type"], "THUMBS");
+	EXPECT_EQ(a["answers"][2]["value"], 1);
+	
+	EXPECT_EQ(a["answers"][3]["type"], "MULTIPLE");
+	EXPECT_EQ(a["answers"][3]["value"], 2);
+	
+	EXPECT_EQ(a["answers"][4]["type"], "SCALE");
+	EXPECT_EQ(a["answers"][4]["value"], 9);
+	
+	EXPECT_EQ(a["answers"][5]["type"], "VOICE");
+	EXPECT_EQ(a["answers"][5]["value"], "ASDF==");
+	
+	EXPECT_EQ(a["answers"][6]["type"], "BOOLEAN");
+	EXPECT_EQ(a["answers"][6]["value"], -1);
+	
+	EXPECT_EQ(a["answers"][7]["type"], "BOOLEAN");
+	EXPECT_EQ(a["answers"][7]["value"], -32768);
+#endif
 }
 
 
