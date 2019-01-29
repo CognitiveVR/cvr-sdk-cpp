@@ -53,8 +53,6 @@ private:
 	void SetInterval(float interval);
 	void SetHMDType(std::string hmdtype);
 
-
-	
 	//clear gaze points
 	void EndSession();
 

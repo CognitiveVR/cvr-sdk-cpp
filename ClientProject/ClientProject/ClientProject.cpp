@@ -280,7 +280,7 @@ TEST(Initialization, SessionFullStartEnd) {
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.StartSession();
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	cog.EndSession();
 	EXPECT_EQ(cog.IsSessionActive(), false);
 }
@@ -393,7 +393,7 @@ TEST(CustomEvent, UniquePtr) {
 	cog->SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
-	cog->GetCustomEvent()->Send("testing1", pos);
+	cog->GetCustomEvent()->RecordEvent("testing1", pos);
 
 	cog->StartSession();
 	auto c = cog->GetCustomEvent()->SendData();
@@ -415,7 +415,7 @@ TEST(General, CoreSendDataPreSession) {
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
-	cog.GetCustomEvent()->Send("event", pos);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
 	cog.SendData();
 
@@ -444,7 +444,7 @@ TEST(General, CoreSendData) {
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
-	cog.GetCustomEvent()->Send("event", pos);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
 
 	cog.StartSession();
@@ -461,7 +461,7 @@ TEST(General, CoreSendData) {
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
-	cog.GetCustomEvent()->Send("event", pos);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
 
 	//sends all data
@@ -493,7 +493,7 @@ TEST(General, CoreSendDataEnd) {
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
-	cog.GetCustomEvent()->Send("event", pos);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
 
 	cog.StartSession();
@@ -527,14 +527,14 @@ TEST(General, JsonPartSendData) {
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
-	cog.GetCustomEvent()->Send("event", pos);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
 
 	cog.SendData();
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
-	cog.GetCustomEvent()->Send("event", pos);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
 
 
@@ -567,7 +567,7 @@ TEST(General, Lobby) {
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
-	cog.GetCustomEvent()->Send("event", pos);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
 
 	//send any data
@@ -789,7 +789,7 @@ TEST(CustomEvent, PreSession) {
 	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c.size(), 0);
@@ -806,7 +806,7 @@ TEST(CustomEvent, DuringSession) {
 	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 0,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 
 	cog.StartSession();
 	auto c = cog.GetCustomEvent()->SendData();
@@ -826,7 +826,7 @@ TEST(CustomEvent, PostSession) {
 	std::vector<float> pos = { 0,0,0 };
 	
 	cog.StartSession();
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	cog.EndSession();
 
 	auto c = cog.GetCustomEvent()->SendData();
@@ -849,7 +849,7 @@ TEST(CustomEvent, PostSceneChange) {
 	std::vector<float> pos = { 0,0,0 };
 
 	cog.StartSession();
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
 
@@ -874,15 +874,15 @@ TEST(CustomEvent, PostSceneChangeMultiple) {
 	std::vector<float> pos = { 0,0,0 };
 
 	cog.StartSession();
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
 
 	cog.SetScene("tutorial");
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 
 	cog.SetScene("tutorial");
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 1);
 }
@@ -903,11 +903,11 @@ TEST(CustomEvent, PostInvalidSceneChange) {
 	std::vector<float> pos = { 0,0,0 };
 
 	cog.StartSession();
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
 
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	cog.SetScene("invalid");
 	c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 1);
@@ -964,10 +964,10 @@ TEST(CustomEvent, LimitPreSession) {
 
 	std::vector<float> pos = { 0,0,0 };
 
-	cog.GetCustomEvent()->Send("testing1", pos);
-	cog.GetCustomEvent()->Send("testing1", pos);
-	cog.GetCustomEvent()->Send("testing1", pos);
-	cog.GetCustomEvent()->Send("testing1", pos); //clear
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos); //clear
 
 	cog.StartSession();
 	
@@ -990,10 +990,10 @@ TEST(CustomEvent, LimitDuringSession) {
 
 	std::vector<float> pos = { 0,0,0 };
 
-	cog.GetCustomEvent()->Send("testing1", pos);
-	cog.GetCustomEvent()->Send("testing1", pos);
-	cog.GetCustomEvent()->Send("testing1", pos);//clear
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);//clear
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 1);
@@ -1012,11 +1012,11 @@ TEST(CustomEvent, LimitPostSession) {
 
 	std::vector<float> pos = { 0,0,0 };
 	cog.StartSession(); //record
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	cog.EndSession(); //send
 
-	cog.GetCustomEvent()->Send("testing1", pos);
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	cog.StartSession();
 
 	auto c = cog.GetCustomEvent()->SendData();
@@ -1083,11 +1083,11 @@ TEST(Scenes, NoScenes) {
 	cog.StartSession();
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	pos[0] = 2;
-	cog.GetCustomEvent()->Send("testing2", pos);
+	cog.GetCustomEvent()->RecordEvent("testing2", pos);
 	pos[0] = 3;
-	cog.GetCustomEvent()->Send("testing3", pos);
+	cog.GetCustomEvent()->RecordEvent("testing3", pos);
 	EXPECT_EQ(cog.GetSceneId(), "");
 
 	auto c = cog.GetCustomEvent()->SendData();
@@ -1116,11 +1116,11 @@ TEST(Scenes, InitScenes) {
 	cog.StartSession();
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	pos[0] = 2;
-	cog.GetCustomEvent()->Send("testing2", pos);
+	cog.GetCustomEvent()->RecordEvent("testing2", pos);
 	pos[0] = 3;
-	cog.GetCustomEvent()->Send("testing3", pos);
+	cog.GetCustomEvent()->RecordEvent("testing3", pos);
 
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 4);
@@ -1151,11 +1151,11 @@ TEST(Scenes, InitSetScenes) {
 	EXPECT_EQ(cog.GetSceneId(), "DELETE_ME_1");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	pos[0] = 2;
-	cog.GetCustomEvent()->Send("testing2", pos);
+	cog.GetCustomEvent()->RecordEvent("testing2", pos);
 	pos[0] = 3;
-	cog.GetCustomEvent()->Send("testing3", pos);
+	cog.GetCustomEvent()->RecordEvent("testing3", pos);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 4);
 	cog.SendData();
@@ -1182,15 +1182,15 @@ TEST(Scenes, InitSetSceneSwitch) {
 	cog.SetScene("tutorial");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	cog.SetScene("menu");
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c.size(), 0);
-	cog.GetCustomEvent()->Send("testing2", pos);
+	cog.GetCustomEvent()->RecordEvent("testing2", pos);
 	c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 1);
 	cog.SetScene("finalboss");
-	cog.GetCustomEvent()->Send("testing3", pos);
+	cog.GetCustomEvent()->RecordEvent("testing3", pos);
 	c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 1);
 	cog.EndSession();
@@ -1218,7 +1218,7 @@ TEST(Scenes, InitSetInvalidScene) {
 	EXPECT_EQ(cog.GetSceneId(), "");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
 
@@ -1242,7 +1242,7 @@ TEST(Scenes, InitSetInvalidNoScene) {
 	EXPECT_EQ(cog.GetSceneId(), "");
 
 	std::vector<float> pos = { 1,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
 
@@ -1266,12 +1266,12 @@ TEST(Scenes, SetSceneMiddle) {
 	cog.StartSession();
 	cog.SetScene("non-existent");
 	std::vector<float> pos = { 1,0,0 };
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
 	cog.SetScene("finalboss");
-	cog.GetCustomEvent()->Send("testing1", pos);
-	cog.GetCustomEvent()->Send("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
+	cog.GetCustomEvent()->RecordEvent("testing1", pos);
 
 	c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);

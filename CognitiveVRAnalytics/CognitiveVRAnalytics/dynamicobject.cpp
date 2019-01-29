@@ -8,7 +8,6 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 namespace cognitive {
 DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId)
 {
-	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
 	Rotation = rotation;
 	Time = CognitiveVRAnalyticsCore::Instance()->GetTimestamp();
@@ -17,7 +16,6 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::v
 
 DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, nlohmann::json properties)
 {
-	//TODO conversion for xyz = -xzy or whatever
 	Position = position;
 	Rotation = rotation;
 	Time = CognitiveVRAnalyticsCore::Instance()->GetTimestamp();
@@ -116,15 +114,6 @@ bool isInactive(DynamicObjectEngagementEvent* engagement)
 	return engagement->isActive == false;
 }
 
-void DynamicObject::AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation)
-{
-	RecordDynamic(objectId, position, rotation, cognitive::nlohmann::json());
-}
-void DynamicObject::AddSnapshot(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties)
-{
-	RecordDynamic(objectId, position, rotation, properties);
-}
-
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation)
 {
 	RecordDynamic(objectId, position, rotation, cognitive::nlohmann::json());
@@ -167,24 +156,16 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 		//add engagements to snapshot
 		for (auto& e : activeEngagements[objectId])
 		{
-			//if (e.isActive)
-			//{
-				nlohmann::json engagementEvent = nlohmann::json();
-				engagementEvent["engagementparent"] = e->ParentObjectId;
-				engagementEvent["engagement_count"] = e->EngagementNumber;
-				engagementEvent["engagement_time"] = (e->endTime > 0 ? e->endTime - e->startTime : cvr->GetTimestamp() - e->startTime);
-				engagementEvent["engagementtype"] = e->Name;
-				snapshot.Engagements.push_back(engagementEvent);
-			//}
+			nlohmann::json engagementEvent = nlohmann::json();
+			engagementEvent["engagementparent"] = e->ParentObjectId;
+			engagementEvent["engagement_count"] = e->EngagementNumber;
+			engagementEvent["engagement_time"] = (e->endTime > 0 ? e->endTime - e->startTime : cvr->GetTimestamp() - e->startTime);
+			engagementEvent["engagementtype"] = e->Name;
+			snapshot.Engagements.push_back(engagementEvent);
 		}
-
-		//cvr->log->Info("all engagements pre " + std::to_string(allEngagements[objectId].size()));
-		//cvr->log->Info("active engagements pre " + std::to_string(activeEngagements[objectId].size()));
 		//remove inactive engagements https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 		allEngagements[objectId].erase(std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
 		activeEngagements[objectId].erase(std::remove_if(activeEngagements[objectId].begin(), activeEngagements[objectId].end(), isInactive), activeEngagements[objectId].end());
-		//cvr->log->Info("all engagements post " + std::to_string(allEngagements[objectId].size()));
-		//cvr->log->Info("active engagements post " + std::to_string(activeEngagements[objectId].size()));
 	}
 
 	snapshots.push_back(snapshot);

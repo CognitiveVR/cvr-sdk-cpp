@@ -64,10 +64,5 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 		void RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties, std::string dynamicObjectId);
 
 		nlohmann::json SendData();
-
-		//deprecated! Use RecordEvent instead
-		void Send(std::string category, std::vector<float> &Position);
-		//deprecated! Use RecordEvent instead
-		void Send(std::string category, std::vector<float> &Position, nlohmann::json properties);
 };
 }

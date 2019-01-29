@@ -24,8 +24,6 @@ void GazeTracker::SetHMDType(std::string hmdtype)
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
@@ -42,8 +40,6 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
@@ -61,8 +57,6 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId, std::string mediaId, long mediaTime, std::vector<float> &uvs)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
@@ -83,8 +77,6 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
