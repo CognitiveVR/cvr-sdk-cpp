@@ -14,8 +14,8 @@ namespace cognitive
 {
 class CognitiveLog
 {
-	friend class Network;
-	friend class CognitiveVRAnalyticsCore;
+	//friend class Network;
+	//friend class CognitiveVRAnalyticsCore;
 
 	private:
 		LoggingLevel logLevel = LoggingLevel::kAll;

@@ -51,7 +51,7 @@ void ExitPollCallback(std::string body)
 	{
 		//cvr->log->Info("ExitPollCallback callback successful");
 
-		cvr->exitpoll->ReceiveQuestionSet(body, jsonresponse);
+		cvr->GetExitPoll()->ReceiveQuestionSet(body, jsonresponse);
 	}
 	else
 	{
@@ -69,7 +69,7 @@ void Network::NetworkCall(std::string suburl, std::string content)
 
 	std::string path = "https://"+cvr->config->kNetworkHost+"/v"+cvr->config->networkVersion+"/"+suburl+"/"+cvr->CurrentSceneId+"?version="+cvr->CurrentSceneVersionNumber;
 
-	cvr->log->Info("API call: " + path);
+	cvr->GetLog()->Info("API call: " + path);
 
 	cvr->sendFunctionPointer(path, content, headers, nullptr);
 }
@@ -80,7 +80,7 @@ void Network::NetworkExitpollGet(std::string hook)
 
 	std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSetHooks/" + hook + "/questionSet";
 
-	cvr->log->Info("Network::NetworkExitpollGet: " + path);
+	cvr->GetLog()->Info("Network::NetworkExitpollGet: " + path);
 
 	cvr->sendFunctionPointer(path, "", headers, &ExitPollCallback);
 }

@@ -22,7 +22,7 @@ enum class CommonMeshName
 };
 
 //created when registering dynamic objects. sent to SceneExplorer
-class DynamicObjectManifestEntry
+struct DynamicObjectManifestEntry
 {
 	friend class DynamicObject;
 private:
@@ -40,7 +40,7 @@ private:
 };
 
 //used in the client to track which ids are used and which can be reused
-class DynamicObjectId
+struct DynamicObjectId
 {
 	friend class DynamicObject;
 private:
@@ -72,7 +72,7 @@ private:
 };
 
 //an interaction the player has with a dynamic object
-class DynamicObjectEngagementEvent
+struct DynamicObjectEngagementEvent
 {
 	friend class DynamicObject;
 public:
@@ -96,6 +96,8 @@ private:
 	int jsonpart = 1;
 
 	int generatedIdOffset = 1000;
+	int nextObjectId = 0;
+
 
 	//public for testing, but shouldn't be used outside this class
 
