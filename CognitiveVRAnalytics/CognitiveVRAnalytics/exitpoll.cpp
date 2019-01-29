@@ -157,7 +157,7 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 		}
 	}
 
-	cvr->GetCustomEvent()->RecordEvent("cvr.exitpoll", pos, properties);
+	cvr->GetCustomEvent()->RecordEvent("c3d.exitpoll", pos, properties);
 
 	ClearQuestionSet();
 
