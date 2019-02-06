@@ -37,21 +37,11 @@ std::unique_ptr<CognitiveLog> const& CognitiveVRAnalyticsCore::GetLog() const
 	return log;
 }
 
-//void CognitiveVRAnalyticsCore::SetLog(CognitiveLog newLog)
-//{
-//	log = make_unique_cognitive<CognitiveLog>(newLog);
-//}
-
 //exitpoll
 std::unique_ptr<ExitPoll> const& CognitiveVRAnalyticsCore::GetExitPoll() const
 {
 	return exitpoll;
 }
-
-//void CognitiveVRAnalyticsCore::SetExitPoll(cognitive::ExitPoll newLog)
-//{
-//	exitpoll = make_unique_cognitive<cognitive::ExitPoll>(newLog);
-//}
 
 //custom event
 std::unique_ptr<CustomEvent> const& CognitiveVRAnalyticsCore::GetCustomEvent() const
@@ -59,21 +49,11 @@ std::unique_ptr<CustomEvent> const& CognitiveVRAnalyticsCore::GetCustomEvent() c
 	return customevent;
 }
 
-//void CognitiveVRAnalyticsCore::SetCustomEvent(cognitive::CustomEvent newLog)
-//{
-//	customevent = make_unique_cognitive<cognitive::CustomEvent>(newLog);
-//}
-
 //gaze
 std::unique_ptr<cognitive::GazeTracker> const& CognitiveVRAnalyticsCore::GetGazeTracker() const
 {
 	return gaze;
 }
-
-//void CognitiveVRAnalyticsCore::SetGazeTracker(cognitive::GazeTracker newLog)
-//{
-//	gaze = make_unique_cognitive<cognitive::GazeTracker>(newLog);
-//}
 
 //sensor
 std::unique_ptr<Sensor> const& CognitiveVRAnalyticsCore::GetSensor() const
@@ -81,21 +61,11 @@ std::unique_ptr<Sensor> const& CognitiveVRAnalyticsCore::GetSensor() const
 	return sensor;
 }
 
-//void CognitiveVRAnalyticsCore::SetSensor(cognitive::Sensor newLog)
-//{
-//	sensor = make_unique_cognitive<cognitive::Sensor>(newLog);
-//}
-
 //dynamic
 std::unique_ptr<DynamicObject> const& CognitiveVRAnalyticsCore::GetDynamicObject() const
 {
 	return dynamicobject;
 }
-
-//void CognitiveVRAnalyticsCore::SetDynamicObject(cognitive::DynamicObject newLog)
-//{
-//	dynamicobject = make_unique_cognitive<cognitive::DynamicObject>(newLog);
-//}
 
 //network
 std::unique_ptr<Network> const& CognitiveVRAnalyticsCore::GetNetwork() const
@@ -103,21 +73,11 @@ std::unique_ptr<Network> const& CognitiveVRAnalyticsCore::GetNetwork() const
 	return network;
 }
 
-//void CognitiveVRAnalyticsCore::SetNetwork(cognitive::Network newLog)
-//{
-//	network = make_unique_cognitive<cognitive::Network>(newLog);
-//}
-
 //config
 std::unique_ptr<Config> const& CognitiveVRAnalyticsCore::GetConfig() const
 {
 	return config;
 }
-
-//void CognitiveVRAnalyticsCore::SetConfig(cognitive::Config newLog)
-//{
-//	config = make_unique_cognitive<cognitive::Config>(newLog);
-//}
 
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 {
@@ -126,7 +86,6 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	sendFunctionPointer = settings.webRequest;
 
 	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
-	//SetLog(CognitiveLog(instance));
 	GetLog()->SetLoggingLevel(settings.loggingLevel);
 	GetLog()->Info("CognitiveVRAnalyticsCore()");
 
@@ -136,7 +95,6 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	}
 
 	config = make_unique_cognitive<Config>(Config(instance));
-	//SetConfig(cognitive::Config(instance));
 
 	//SET VALUES FROM SETTINGS
 	if (!settings.CustomGateway.empty())
@@ -150,21 +108,15 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	GetConfig()->SensorDataLimit = settings.SensorDataLimit;
 	GetConfig()->DynamicDataLimit = settings.DynamicDataLimit;
 	GetConfig()->GazeInterval = settings.GazeInterval;
+	GetConfig()->DynamicObjectFileType = settings.DynamicObjectFileType;
 
 	network = make_unique_cognitive<Network>(Network(instance));
-	//SetNetwork(cognitive::Network(instance));
 
 	customevent = make_unique_cognitive<CustomEvent>(CustomEvent(instance));
 	gaze = make_unique_cognitive<GazeTracker>(GazeTracker(instance));
 	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
 	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
 	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
-
-	//SetCustomEvent(cognitive::CustomEvent(instance));
-	//SetGazeTracker(cognitive::GazeTracker(instance));
-	//SetSensor(cognitive::Sensor(instance));
-	//SetDynamicObject(cognitive::DynamicObject(instance));
-	//SetExitPoll(cognitive::ExitPoll(instance));
 
 	//set scenes
 	GetConfig()->AllSceneData = settings.AllSceneData;
@@ -214,8 +166,6 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	}
 
 	GetLog()->Info("CognitiveVRAnalytics::StartSession");
-
-	//TODO maybe set device and user ids here if not previously set?
 
 	GetSessionTimestamp();
 	GetSessionID();
@@ -306,7 +256,7 @@ std::string CognitiveVRAnalyticsCore::GetUniqueID()
 
 void CognitiveVRAnalyticsCore::SendData()
 {
-	//if (!IsSessionActive()) { log->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
+	if (!IsSessionActive()) { GetLog()->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
 
 	GetCustomEvent()->SendData();
 	GetGazeTracker()->SendData();
@@ -349,8 +299,8 @@ nlohmann::json CognitiveVRAnalyticsCore::GetNewSessionProperties()
 void CognitiveVRAnalyticsCore::SetDeviceName(std::string name)
 {
 	DeviceId = name;
-	AllSessionProperties["deviceid"] = name;
-	NewSessionProperties["deviceid"] = name;
+	AllSessionProperties["c3d.deviceid"] = name;
+	NewSessionProperties["c3d.deviceid"] = name;
 }
 void CognitiveVRAnalyticsCore::SetSessionName(std::string sessionName)
 {

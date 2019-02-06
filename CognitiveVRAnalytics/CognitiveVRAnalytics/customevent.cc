@@ -11,16 +11,6 @@ CustomEvent::CustomEvent(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	BatchedCustomEvents = nlohmann::json::array();
 }
 
-void CustomEvent::Send(std::string category, std::vector<float> &Position)
-{
-	RecordEvent(category, Position, nlohmann::json(), "");
-}
-
-void CustomEvent::Send(std::string category, std::vector<float> &Position, nlohmann::json properties)
-{
-	RecordEvent(category, Position, properties, "");
-}
-
 void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position)
 {
 	RecordEvent(category, Position, nlohmann::json(),"");
@@ -39,8 +29,6 @@ void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position
 void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties, std::string dynamicObjectId)
 {
 	double ts = cvr->GetTimestamp();
-
-	//TODO conversion for xyz = -xzy or whatever
 
 	nlohmann::json se = nlohmann::json();
 	se["name"] = category;

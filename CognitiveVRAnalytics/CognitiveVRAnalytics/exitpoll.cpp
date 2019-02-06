@@ -127,11 +127,6 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 
 	cvr->GetNetwork()->NetworkExitpollPost(fullResponse.questionSetName, fullResponse.questionSetVersion, response.dump());
 
-
-
-
-
-
 	//send this as a transaction too
 	nlohmann::json properties = nlohmann::json();
 	properties["userId"] = cvr->GetUniqueID();

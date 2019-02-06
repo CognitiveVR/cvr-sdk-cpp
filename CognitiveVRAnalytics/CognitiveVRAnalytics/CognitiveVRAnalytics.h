@@ -82,19 +82,10 @@ class Network;
 class CustomEvent;
 class Sensor;
 class CoreSettings;
-//class SceneData;
 
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
-	//friend class CognitiveLog;
 	friend class Network;
-	//friend class CustomEvent;
-	//friend class Sensor;
-	//friend class Config;
-	//friend class DynamicObject;
-	//friend class GazeTracker;
-	//friend class ExitPoll;
-	//friend class CoreSettings;
 
 private:
 	
@@ -121,10 +112,6 @@ private:
 
 	nlohmann::json NewSessionProperties = nlohmann::json();
 	nlohmann::json AllSessionProperties = nlohmann::json();
-	//std::map<std::string, std::string> NewSessionProperties;
-	//std::map<std::string, std::string> AllSessionProperties;
-	//std::map<std::string, std::string> NewUserProperties;
-	//std::map<std::string, std::string> NewDeviceProperties;
 
 	std::unique_ptr<CognitiveLog> log = nullptr;
 	std::unique_ptr<CustomEvent> customevent = nullptr;
@@ -143,40 +130,14 @@ public:
 	//this may return null. constructor should call this manually before referencing instance!
 	static std::shared_ptr<CognitiveVRAnalyticsCore> Instance();
 
-	//return a const reference
 	std::unique_ptr<CognitiveLog> const& GetLog() const;
-	//take a value, make a pointer
-	//void SetLog(CognitiveLog newLog);
-
 	std::unique_ptr<CustomEvent> const& GetCustomEvent() const;
-	//void SetCustomEvent(cognitive::CustomEvent newCustomEvent);
-
 	std::unique_ptr<Sensor> const& GetSensor() const;
-	//void SetSensor(cognitive::Sensor newCustomEvent);
-
 	std::unique_ptr<GazeTracker> const& GetGazeTracker() const;
-	//void SetGazeTracker(cognitive::GazeTracker newCustomEvent);
-
 	std::unique_ptr<DynamicObject> const& GetDynamicObject() const;
-	//void SetDynamicObject(cognitive::DynamicObject newCustomEvent);
-
 	std::unique_ptr<ExitPoll> const& GetExitPoll() const;
-	//void SetExitPoll(cognitive::ExitPoll newCustomEvent);
-
 	std::unique_ptr<Network> const& GetNetwork() const;
-	//void SetNetwork(cognitive::Network newCustomEvent);
-
 	std::unique_ptr<Config> const& GetConfig() const;
-	//void SetConfig(cognitive::Config newCustomEvent);
-
-
-
-	//std::unique_ptr<CognitiveLog> log = nullptr;
-	//std::unique_ptr<CustomEvent> customevent = nullptr;
-	//std::unique_ptr<Sensor> sensor = nullptr;
-	//std::unique_ptr<GazeTracker> gaze = nullptr;
-	//std::unique_ptr<DynamicObject> dynamicobject = nullptr;
-	//std::unique_ptr<ExitPoll> exitpoll = nullptr;
 
 	std::string GetCurrentSceneId();
 	int GetCurrentSceneVersionId();
