@@ -71,5 +71,7 @@ class CoreSettings
 
 		//the default scene to load after Cognitive Analytics constructor
 		std::string DefaultSceneName = "";
+
+		std::string DynamicObjectFileType = "obj";
 };
 }

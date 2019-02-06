@@ -2511,6 +2511,55 @@ TEST(Dynamics, Values) {
 	EXPECT_EQ(c["data"][3]["properties"][1], sizetarget);
 }
 
+TEST(Dynamics, DynamicMeshFileType) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+
+	auto c = cog.GetDynamicObject()->SendData();
+
+	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["part"], 1);
+	EXPECT_EQ(c["formatversion"], "1.0");
+
+	//manifest
+	EXPECT_EQ(c["manifest"].size(), 1);
+	EXPECT_EQ(c["manifest"]["0"]["name"], "name");
+	EXPECT_EQ(c["manifest"]["0"]["mesh"], "mesh");
+	EXPECT_EQ(c["manifest"]["0"]["fileType"], "obj");
+	cog.EndSession();
+
+	//part 2
+
+	settings.DynamicObjectFileType = "customfiletype";
+	auto cog2 = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog2.SetUserName("travis");
+	cog2.StartSession();
+	cog2.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+
+	c = cog2.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["part"], 1);
+	EXPECT_EQ(c["formatversion"], "1.0");
+
+	//manifest
+	EXPECT_EQ(c["manifest"].size(), 1);
+	EXPECT_EQ(c["manifest"]["0"]["name"], "name");
+	EXPECT_EQ(c["manifest"]["0"]["mesh"], "mesh");
+	EXPECT_EQ(c["manifest"]["0"]["fileType"], "customfiletype");
+}
+
 TEST(Dynamics, PropertyJsonType) {
 	if (TestDelay > 0)
 		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));

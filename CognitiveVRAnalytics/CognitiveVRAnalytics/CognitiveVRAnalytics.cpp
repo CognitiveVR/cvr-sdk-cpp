@@ -108,6 +108,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	GetConfig()->SensorDataLimit = settings.SensorDataLimit;
 	GetConfig()->DynamicDataLimit = settings.DynamicDataLimit;
 	GetConfig()->GazeInterval = settings.GazeInterval;
+	GetConfig()->DynamicObjectFileType = settings.DynamicObjectFileType;
 
 	network = make_unique_cognitive<Network>(Network(instance));
 

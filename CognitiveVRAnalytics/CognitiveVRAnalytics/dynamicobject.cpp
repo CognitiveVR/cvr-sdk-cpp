@@ -258,6 +258,7 @@ nlohmann::json DynamicObject::SendData()
 			nlohmann::json entryValues = nlohmann::json();
 			entryValues["name"] = element.Name;
 			entryValues["mesh"] = element.MeshName;
+			entryValues["fileType"] = cvr->GetConfig()->DynamicObjectFileType;
 
 			manifest[element.Id] = entryValues;
 		}
