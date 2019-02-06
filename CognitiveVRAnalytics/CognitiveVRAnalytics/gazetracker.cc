@@ -24,17 +24,15 @@ void GazeTracker::SetHMDType(std::string hmdtype)
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 
-	BatchedGaze.emplace_back(data);
+	BatchedGaze.push_back(data);
 
-	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
+	if (BatchedGaze.size() >= cvr->GetConfig()->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -42,8 +40,6 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
@@ -51,9 +47,9 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 	data["o"] = objectId;
 
-	BatchedGaze.emplace_back(data);
+	BatchedGaze.push_back(data);
 
-	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
+	if (BatchedGaze.size() >= cvr->GetConfig()->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -61,8 +57,6 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId, std::string mediaId, long mediaTime, std::vector<float> &uvs)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
@@ -73,9 +67,9 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 	data["mediatime"] = mediaTime;
 	data["uvs"] = { uvs[0],uvs[1] };
 
-	BatchedGaze.emplace_back(data);
+	BatchedGaze.push_back(data);
 
-	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
+	if (BatchedGaze.size() >= cvr->GetConfig()->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -83,16 +77,14 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
 {
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json data = nlohmann::json();
 	data["time"] = cvr->GetTimestamp();
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 
-	BatchedGaze.emplace_back(data);
+	BatchedGaze.push_back(data);
 
-	if (BatchedGaze.size() >= cvr->config->GazeBatchSize)
+	if (BatchedGaze.size() >= cvr->GetConfig()->GazeBatchSize)
 	{
 		SendData();
 	}
@@ -102,7 +94,7 @@ nlohmann::json GazeTracker::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
-		cvr->log->Info("GazeTracker::SendData failed: no session active");
+		cvr->GetLog()->Info("GazeTracker::SendData failed: no session active");
 		BatchedGaze.clear();
 		return nlohmann::json();
 	}
@@ -134,7 +126,7 @@ nlohmann::json GazeTracker::SendData()
 		se["properties"] = properties;
 	}
 
-	cvr->network->NetworkCall("gaze", se.dump());
+	cvr->GetNetwork()->NetworkCall("gaze", se.dump());
 	BatchedGaze.clear();
 	return se;
 }

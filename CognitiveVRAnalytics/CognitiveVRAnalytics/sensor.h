@@ -44,10 +44,7 @@ class COGNITIVEVRANALYTICS_API Sensor
 
 		std::map<std::string, nlohmann::json> allsensors;
 		int jsonPart = 1;
-		//TODO should be private. tests shouldn't directly test this value
 		int sensorCount = 0;
-
-		
 
 		//clear all saved sensor data
 		void EndSession();

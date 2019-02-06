@@ -27,7 +27,7 @@ class Config {
 			cvr = cog;
 		}
 
-		std::string SdkVersion = "0.2";
+		std::string SdkVersion = "1.0.1";
 
 		std::string kNetworkHost = "data.cognitive3d.com";
 
@@ -46,6 +46,7 @@ class Config {
 		std::string HMDType = "";
 
 		std::vector<SceneData> AllSceneData;
+		std::string DynamicObjectFileType = "obj";
 
 		#pragma warning(pop)
 };

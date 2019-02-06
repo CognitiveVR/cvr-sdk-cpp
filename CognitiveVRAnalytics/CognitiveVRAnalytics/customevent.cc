@@ -11,16 +11,6 @@ CustomEvent::CustomEvent(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	BatchedCustomEvents = nlohmann::json::array();
 }
 
-void CustomEvent::Send(std::string category, std::vector<float> &Position)
-{
-	RecordEvent(category, Position, nlohmann::json(), "");
-}
-
-void CustomEvent::Send(std::string category, std::vector<float> &Position, nlohmann::json properties)
-{
-	RecordEvent(category, Position, properties, "");
-}
-
 void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position)
 {
 	RecordEvent(category, Position, nlohmann::json(),"");
@@ -40,8 +30,6 @@ void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position
 {
 	double ts = cvr->GetTimestamp();
 
-	//TODO conversion for xyz = -xzy or whatever
-
 	nlohmann::json se = nlohmann::json();
 	se["name"] = category;
 	se["time"] = ts;
@@ -53,9 +41,9 @@ void CustomEvent::RecordEvent(std::string category, std::vector<float> &Position
 		se["properties"] = properties;
 	}
 
-	BatchedCustomEvents.emplace_back(se);
+	BatchedCustomEvents.push_back(se);
 
-	if (BatchedCustomEvents.size() >= cvr->config->CustomEventBatchSize)
+	if (BatchedCustomEvents.size() >= cvr->GetConfig()->CustomEventBatchSize)
 	{
 		SendData();
 	}
@@ -65,7 +53,7 @@ nlohmann::json CustomEvent::SendData()
 {
 	if (!cvr->IsSessionActive())
 	{
-		cvr->log->Info("CustomEvent::SendData failed: no session active");
+		cvr->GetLog()->Info("CustomEvent::SendData failed: no session active");
 		BatchedCustomEvents.clear();
 		return nlohmann::json();
 	}
@@ -85,7 +73,7 @@ nlohmann::json CustomEvent::SendData()
 	se["formatversion"] = "1.0";
 	jsonPart++;
 	se["data"] = BatchedCustomEvents;
-	cvr->network->NetworkCall("events", se.dump());
+	cvr->GetNetwork()->NetworkCall("events", se.dump());
 	BatchedCustomEvents.clear();
 	return se;
 }

@@ -18,6 +18,67 @@ struct D {
 	}
 };
 
+std::string CognitiveVRAnalyticsCore::GetCurrentSceneId()
+{
+	return CurrentSceneId;
+}
+int CognitiveVRAnalyticsCore::GetCurrentSceneVersionId()
+{
+	return CurrentSceneVersionId;
+}
+std::string CognitiveVRAnalyticsCore::GetCurrentSceneVersionNumber()
+{
+	return CurrentSceneVersionNumber;
+}
+
+//log
+std::unique_ptr<CognitiveLog> const& CognitiveVRAnalyticsCore::GetLog() const
+{
+	return log;
+}
+
+//exitpoll
+std::unique_ptr<ExitPoll> const& CognitiveVRAnalyticsCore::GetExitPoll() const
+{
+	return exitpoll;
+}
+
+//custom event
+std::unique_ptr<CustomEvent> const& CognitiveVRAnalyticsCore::GetCustomEvent() const
+{
+	return customevent;
+}
+
+//gaze
+std::unique_ptr<cognitive::GazeTracker> const& CognitiveVRAnalyticsCore::GetGazeTracker() const
+{
+	return gaze;
+}
+
+//sensor
+std::unique_ptr<Sensor> const& CognitiveVRAnalyticsCore::GetSensor() const
+{
+	return sensor;
+}
+
+//dynamic
+std::unique_ptr<DynamicObject> const& CognitiveVRAnalyticsCore::GetDynamicObject() const
+{
+	return dynamicobject;
+}
+
+//network
+std::unique_ptr<Network> const& CognitiveVRAnalyticsCore::GetNetwork() const
+{
+	return network;
+}
+
+//config
+std::unique_ptr<Config> const& CognitiveVRAnalyticsCore::GetConfig() const
+{
+	return config;
+}
+
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 {
 	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
@@ -25,27 +86,29 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	sendFunctionPointer = settings.webRequest;
 
 	log = make_unique_cognitive<CognitiveLog>(CognitiveLog(instance));
-	log->SetLoggingLevel(settings.loggingLevel);
-	log->Info("CognitiveVRAnalyticsCore()");
+	GetLog()->SetLoggingLevel(settings.loggingLevel);
+	GetLog()->Info("CognitiveVRAnalyticsCore()");
 
 	if (settings.webRequest == nullptr)
 	{
-		log->Error("CognitiveVRAnalyticsCore() webRequest is null!");
+		GetLog()->Error("CognitiveVRAnalyticsCore() webRequest is null!");
 	}
 
 	config = make_unique_cognitive<Config>(Config(instance));
+
 	//SET VALUES FROM SETTINGS
 	if (!settings.CustomGateway.empty())
 	{
-		config->kNetworkHost = settings.CustomGateway;
+		GetConfig()->kNetworkHost = settings.CustomGateway;
 	}
-	config->HMDType = settings.GetHMDType();
-	config->APIKey = settings.APIKey;
-	config->GazeBatchSize = settings.GazeBatchSize;
-	config->CustomEventBatchSize = settings.CustomEventBatchSize;
-	config->SensorDataLimit = settings.SensorDataLimit;
-	config->DynamicDataLimit = settings.DynamicDataLimit;
-	config->GazeInterval = settings.GazeInterval;
+	GetConfig()->HMDType = settings.GetHMDType();
+	GetConfig()->APIKey = settings.APIKey;
+	GetConfig()->GazeBatchSize = settings.GazeBatchSize;
+	GetConfig()->CustomEventBatchSize = settings.CustomEventBatchSize;
+	GetConfig()->SensorDataLimit = settings.SensorDataLimit;
+	GetConfig()->DynamicDataLimit = settings.DynamicDataLimit;
+	GetConfig()->GazeInterval = settings.GazeInterval;
+	GetConfig()->DynamicObjectFileType = settings.DynamicObjectFileType;
 
 	network = make_unique_cognitive<Network>(Network(instance));
 
@@ -56,14 +119,14 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
 
 	//set scenes
-	config->AllSceneData = settings.AllSceneData;
+	GetConfig()->AllSceneData = settings.AllSceneData;
 	if (settings.DefaultSceneName.size() > 0)
 		SetScene(settings.DefaultSceneName);
 }
 
 CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 {
-	log->Info("~CognitiveVRAnalyticsCore");
+	GetLog()->Info("~CognitiveVRAnalyticsCore");
 	config.reset();
 	log.reset();
 	network.reset();
@@ -98,26 +161,22 @@ bool CognitiveVRAnalyticsCore::StartSession()
 
 	if (GetUniqueID().empty())
 	{
-		log->Error("CognitiveVRAnalytics::StartSession failed - DeviceId or UserId must be set");
+		GetLog()->Error("CognitiveVRAnalytics::StartSession failed - DeviceId or UserId must be set");
 		return false;
 	}
 
-	log->Info("CognitiveVRAnalytics::StartSession");
-
-	//TODO maybe set device and user ids here if not previously set?
+	GetLog()->Info("CognitiveVRAnalytics::StartSession");
 
 	GetSessionTimestamp();
 	GetSessionID();
 
-	double ts = GetSessionTimestamp();
-
-	gaze->SetInterval(config->GazeInterval);
-	gaze->SetHMDType(config->HMDType);
+	GetGazeTracker()->SetInterval(config->GazeInterval);
+	GetGazeTracker()->SetHMDType(config->HMDType);
 
 	isSessionActive = true;
 
 	std::vector<float> pos = { 0,0,0 };
-	customevent->RecordEvent("Start Session", pos);
+	GetCustomEvent()->RecordEvent("Start Session", pos);
 
 	return true;
 }
@@ -131,7 +190,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 {
 	if (!IsSessionActive()) { return; }
 
-	log->Info("CognitiveVRAnalytics::EndSession");
+	GetLog()->Info("CognitiveVRAnalytics::EndSession");
 
 	nlohmann::json props = nlohmann::json();
 
@@ -140,7 +199,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
 
-	customevent->RecordEvent("End Session", endPos, props);
+	GetCustomEvent()->RecordEvent("End Session", endPos, props);
 
 	SendData();
 
@@ -149,10 +208,10 @@ void CognitiveVRAnalyticsCore::EndSession()
 
 	isSessionActive = false;
 
-	gaze->EndSession();
-	customevent->EndSession();
-	dynamicobject->EndSession();
-	sensor->EndSession();
+	GetGazeTracker()->EndSession();
+	GetCustomEvent()->EndSession();
+	GetDynamicObject()->EndSession();
+	GetSensor()->EndSession();
 }
 
 double CognitiveVRAnalyticsCore::GetSessionTimestamp()
@@ -197,12 +256,12 @@ std::string CognitiveVRAnalyticsCore::GetUniqueID()
 
 void CognitiveVRAnalyticsCore::SendData()
 {
-	//if (!IsSessionActive()) { log->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
+	if (!IsSessionActive()) { GetLog()->Info("CognitiveVRAnalyticsCore::SendData failed: no session active"); return; }
 
-	customevent->SendData();
-	gaze->SendData();
-	sensor->SendData();
-	dynamicobject->SendData();
+	GetCustomEvent()->SendData();
+	GetGazeTracker()->SendData();
+	GetSensor()->SendData();
+	GetDynamicObject()->SendData();
 }
 
 void CognitiveVRAnalyticsCore::SetUserName(std::string name)
@@ -240,18 +299,18 @@ nlohmann::json CognitiveVRAnalyticsCore::GetNewSessionProperties()
 void CognitiveVRAnalyticsCore::SetDeviceName(std::string name)
 {
 	DeviceId = name;
-	AllSessionProperties["deviceid"] = name;
-	NewSessionProperties["deviceid"] = name;
+	AllSessionProperties["c3d.deviceid"] = name;
+	NewSessionProperties["c3d.deviceid"] = name;
 }
 void CognitiveVRAnalyticsCore::SetSessionName(std::string sessionName)
 {
-	AllSessionProperties["cvr.sessionname"] = sessionName;
-	NewSessionProperties["cvr.sessionname"] = sessionName;
+	AllSessionProperties["c3d.sessionname"] = sessionName;
+	NewSessionProperties["c3d.sessionname"] = sessionName;
 }
 
 void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 {
-	log->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
+	GetLog()->Info("CognitiveVRAnalytics::SetScene: " + sceneName);
 	if (CurrentSceneId.size() > 0)
 	{
 		//send any remaining data to current scene, if there is a current scene
@@ -276,7 +335,7 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 
 	if (!foundScene)
 	{
-		log->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
+		GetLog()->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
 		CurrentSceneId = "";
 		CurrentSceneVersionNumber = "";
 		CurrentSceneVersionId = 0;
@@ -295,27 +354,27 @@ std::string CognitiveVRAnalyticsCore::GetSceneId()
 
 std::string CognitiveVRAnalyticsCore::DevicePropertyToString(EDeviceProperty propertyType)
 {
-	if (propertyType == EDeviceProperty::kAppName) { return"cvr.app.name"; }
-	if (propertyType == EDeviceProperty::kAppVersion) { return"cvr.app.version"; }
-	if (propertyType == EDeviceProperty::kAppEngine) { return"cvr.app.engine"; }
-	if (propertyType == EDeviceProperty::kAppEngineVersion) { return"cvr.app.engine.version"; }
+	if (propertyType == EDeviceProperty::kAppName) { return"c3d.app.name"; }
+	if (propertyType == EDeviceProperty::kAppVersion) { return"c3d.app.version"; }
+	if (propertyType == EDeviceProperty::kAppEngine) { return"c3d.app.engine"; }
+	if (propertyType == EDeviceProperty::kAppEngineVersion) { return"c3d.app.engine.version"; }
 
-	if (propertyType == EDeviceProperty::kDeviceType) { return"cvr.device.type"; }
-	if (propertyType == EDeviceProperty::kDeviceModel) { return"cvr.device.model"; }
-	if (propertyType == EDeviceProperty::kDeviceMemory) { return"cvr.device.memory"; }
-	if (propertyType == EDeviceProperty::kDeviceOS) { return"cvr.device.os"; }
+	if (propertyType == EDeviceProperty::kDeviceType) { return"c3d.device.type"; }
+	if (propertyType == EDeviceProperty::kDeviceModel) { return"c3d.device.model"; }
+	if (propertyType == EDeviceProperty::kDeviceMemory) { return"c3d.device.memory"; }
+	if (propertyType == EDeviceProperty::kDeviceOS) { return"c3d.device.os"; }
 	
-	if (propertyType == EDeviceProperty::kDeviceCPU) { return"cvr.device.cpu"; }
-	if (propertyType == EDeviceProperty::kDeviceCPUCores) { return"cvr.device.cpu.cores"; }
-	if (propertyType == EDeviceProperty::kDeviceCPUVendor) { return"cvr.device.cpu.vendor"; }
+	if (propertyType == EDeviceProperty::kDeviceCPU) { return"c3d.device.cpu"; }
+	if (propertyType == EDeviceProperty::kDeviceCPUCores) { return"c3d.device.cpu.cores"; }
+	if (propertyType == EDeviceProperty::kDeviceCPUVendor) { return"c3d.device.cpu.vendor"; }
 
-	if (propertyType == EDeviceProperty::kDeviceGPU) { return"cvr.device.gpu"; }
-	if (propertyType == EDeviceProperty::kDeviceGPUDriver) { return"cvr.device.gpu.driver"; }
-	if (propertyType == EDeviceProperty::kDeviceGPUVendor) { return"cvr.device.gpu.vendor"; }
-	if (propertyType == EDeviceProperty::kDeviceGPUMemory) { return"cvr.device.gpu.memory"; }
+	if (propertyType == EDeviceProperty::kDeviceGPU) { return"c3d.device.gpu"; }
+	if (propertyType == EDeviceProperty::kDeviceGPUDriver) { return"c3d.device.gpu.driver"; }
+	if (propertyType == EDeviceProperty::kDeviceGPUVendor) { return"c3d.device.gpu.vendor"; }
+	if (propertyType == EDeviceProperty::kDeviceGPUMemory) { return"c3d.device.gpu.memory"; }
 
-	if (propertyType == EDeviceProperty::kVRModel) { return"cvr.vr.model"; }
-	if (propertyType == EDeviceProperty::kVRVendor) { return"cvr.vr.vendor"; }
+	if (propertyType == EDeviceProperty::kVRModel) { return"c3d.vr.model"; }
+	if (propertyType == EDeviceProperty::kVRVendor) { return"c3d.vr.vendor"; }
 
 	return "unknown.property";
 }
