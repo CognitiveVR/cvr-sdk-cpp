@@ -187,6 +187,8 @@ public:
 	void SetScene(std::string scenename);
 	std::string GetSceneId();
 
+	void SetSceneById(std::string sceneId, std::string version = "");
+
 	void SetLobbyId(std::string lobbyId);
 	std::string GetLobbyId();
 

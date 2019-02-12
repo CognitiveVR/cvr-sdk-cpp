@@ -12,6 +12,13 @@
 #include <chrono>
 #include <thread>
 
+//threads
+#if defined(_MSC_VER)
+#include <windows.h> //windows
+#else
+#include <pthread.h> //NOT windows
+#endif
+
 //requires a valid API key from travis command line. if testing and expecting not to have this key, can disable all tests that are expected to fail
 #define EXITPOLLVALID
 
@@ -21,18 +28,24 @@
 #include "include/gtest/gtest.h"
 #endif
 
-std::string temp;
+//std::string temp;
 
 std::string TESTINGAPIKEY = "asdf1234hjkl5678";
 std::string INVALIDAPIKEY = "INVALID_API_KEY";
 long TestDelay = 1;
 
-size_t handle(char* buf, size_t size, size_t nmemb, void* up)
+//size_t handle(char* buf, size_t size, size_t nmemb, void* up)
+//{
+//	for (int c = 0; c < size*nmemb; c++)
+//	{
+//		temp.push_back(buf[c]);
+//	}
+//	return size * nmemb;
+//}
+
+size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
 {
-	for (int c = 0; c < size*nmemb; c++)
-	{
-		temp.push_back(buf[c]);
-	}
+	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
 
@@ -70,8 +83,9 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 		{
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
 		}
-
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &handle);
+		std::string responseBody;
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseBody);
 
 		for (auto const &ent : headers)
 		{
@@ -85,7 +99,7 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 
 		//call response
 		if (response != NULL)
-			response(temp);
+			response(responseBody);
 
 		/* Check for errors */
 		if (res != CURLE_OK)
@@ -97,14 +111,176 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 
 		}
 
-		temp.clear();
 		/* always cleanup */
 		curl_easy_cleanup(curl);
 		curl_slist_free_all(list); /* free the list again */
 	}
 }
 
+struct ThreadWebRequestData
+{
+	std::string url;
+	std::string content;
+	std::vector<std::string> headers;
+	cognitive::WebResponse response;
+};
+
+#if defined(_MSC_VER) //windows
+
+DWORD WINAPI myThread(LPVOID lpParameter)
+{
+	CURL* curl;
+	CURLcode res;
+	curl = curl_easy_init();
+
+	struct curl_slist *list = NULL;
+
+	ThreadWebRequestData twrd = *(static_cast<ThreadWebRequestData*>(lpParameter));
+
+	std::string readBuffer;
+
+	std::cout << "thread start plz" << "\n";
+
+	if (curl) {
+		/* First set the URL that is about to receive our POST. This URL can
+		just as well be a https:// URL if that is what should receive the
+		data. */
+		curl_easy_setopt(curl, CURLOPT_URL, twrd.url.c_str());
+
+		//DEBUG verbose output
+		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+		/* Now specify the POST data */
+		if (twrd.content.size() > 0)
+		{
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, twrd.content.c_str());
+		}
+
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+		for (auto const &ent : twrd.headers)
+		{
+			list = curl_slist_append(list, ent.c_str());
+		}
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+		//iterate through and set headers
+
+		/* Perform the request, res will get the return code */
+		res = curl_easy_perform(curl);
+
+		//call response
+		if (twrd.response != NULL)
+			twrd.response(readBuffer);
+
+		/* Check for errors */
+		if (res != CURLE_OK)
+		{
+			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		}
+		else
+		{
+			fprintf(stderr, "curl_easy_perform() passed: %s\n", curl_easy_strerror(res));
+		}
+
+		/* always cleanup */
+		curl_easy_cleanup(curl);
+		curl_slist_free_all(list); /* free the list again */
+	}
+
+	return 0;
+}
+
+void DoAsyncWebStuff(std::string url, std::string content, std::vector<std::string> headers, cognitive::WebResponse response)
+{
+	//TODO listen for response per thread
+	//TODO don't allow unlimited threads
+
+	CURLcode res;
+
+	curl_global_init(CURL_GLOBAL_ALL);
+
+	DWORD myThreadID;
+
+	ThreadWebRequestData twrd = ThreadWebRequestData();
+	twrd.url = url;
+	twrd.content = content;
+	twrd.headers = headers;
+	twrd.response = response;
+
+	HANDLE handle = CreateThread(0, 0, myThread, &twrd, 0, &myThreadID);
+
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+
+	CloseHandle(handle);
+}
+#else //not windows
+
+void MyThread(ThreadWebRequestData threaddata)
+{
+
+}
+
+void DoAsyncWebStuff(std::string url, std::string content, std::vector<std::string> headers, cognitive::WebResponse response)
+{
+	//TODO listen for response per thread
+	//TODO don't allow unlimited threads
+
+	//CURLcode res;
+	//
+	//curl_global_init(CURL_GLOBAL_ALL);
+	//
+	//DWORD myThreadID;
+	//
+	//ThreadWebRequestData twrd = ThreadWebRequestData();
+	//twrd.url = url;
+	//twrd.content = content;
+	//twrd.headers = headers;
+	//twrd.response = response;
+	//
+	//HANDLE handle = CreateThread(0, 0, myThread, &twrd, 0, &myThreadID);
+	//
+	//std::this_thread::sleep_for(std::chrono::seconds(2));
+	//
+	//CloseHandle(handle);
+}
+#endif
+
+
 //===========================TESTS
+TEST(Curl, AsyncThread) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoAsyncWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	settings.DefaultSceneName = "tutorial";
+
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetSensor()->RecordSensor("sensor", 1);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
+	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+
+	cog.StartSession();
+
+	//send any data
+	auto d = cog.GetGazeTracker()->SendData();
+	EXPECT_NE(d.size(), 0);
+
+	std::this_thread::sleep_for(std::chrono::seconds(4));
+}
+
 //----------------------INITIALIZATION
 
 TEST(Initialization, StartSession) {
@@ -230,6 +406,48 @@ TEST(Initialization, SetScene){
 	EXPECT_EQ(cog.GetSceneId(), "");
 	cog.SetScene("tutorial");
 	EXPECT_EQ(cog.GetSceneId(), "DELETE_ME_1");
+}
+
+TEST(Initialization, SetSceneById) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.StartSession();
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.SetSceneById("asdf1234");
+	EXPECT_EQ(cog.GetSceneId(), "asdf1234");
+	EXPECT_EQ(cog.GetCurrentSceneVersionNumber(), "");
+}
+
+TEST(Initialization, SetSceneByIdVersion) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.StartSession();
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.SetSceneById("asdf1234","4");
+	EXPECT_EQ(cog.GetSceneId(), "asdf1234");
+	EXPECT_EQ(cog.GetCurrentSceneVersionNumber(), "4");
 }
 
 TEST(Initialization, SetLobbyId){

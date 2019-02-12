@@ -326,7 +326,6 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 		{
 			CurrentSceneId = ent.SceneId;
 			CurrentSceneVersionNumber = ent.VersionNumber;
-			CurrentSceneVersionId = ent.VersionId;
 
 			foundScene = true;
 			break;
@@ -338,10 +337,28 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 		GetLog()->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
 		CurrentSceneId = "";
 		CurrentSceneVersionNumber = "";
-		CurrentSceneVersionId = 0;
 	}
 	else
 	{
+		NewSessionProperties = AllSessionProperties;
+		dynamicobject->RefreshObjectManifest();
+	}
+}
+
+void CognitiveVRAnalyticsCore::SetSceneById(std::string sceneid, std::string version)
+{
+	if (CurrentSceneId.size() > 0)
+	{
+		//send any remaining data to current scene, if there is a current scene
+		SendData();
+	}
+	if (!sceneid.empty())
+	{
+		CurrentSceneId = sceneid;
+		if (!version.empty())
+			CurrentSceneVersionNumber = version;
+		else
+			CurrentSceneVersionNumber = "";
 		NewSessionProperties = AllSessionProperties;
 		dynamicobject->RefreshObjectManifest();
 	}
