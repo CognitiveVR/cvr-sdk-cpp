@@ -21,7 +21,7 @@
 #endif
 
 //requires a valid API key from travis command line. if testing and expecting not to have this key, can disable all tests that are expected to fail
-//#define EXITPOLLVALID
+#define EXITPOLLVALID
 
 #if defined(_MSC_VER)
 #include "gtest.h"
