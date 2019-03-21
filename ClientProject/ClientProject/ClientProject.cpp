@@ -13,13 +13,6 @@
 #include <thread>
 #include <mutex>
 
-//threads
-#if defined(_MSC_VER)
-#include <windows.h> //windows
-#else
-#include <pthread.h> //NOT windows
-#endif
-
 //requires a valid API key from travis command line. if testing and expecting not to have this key, can disable all tests that are expected to fail
 #define EXITPOLLVALID
 
@@ -118,16 +111,6 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 	}
 }
 
-struct ThreadWebRequestData
-{
-	std::string url;
-	std::string content;
-	std::vector<std::string> headers;
-	cognitive::WebResponse response;
-};
-
-#if defined(_MSC_VER) //windows
-
 void myThread(std::string url, std::string content, std::vector<std::string> headers,cognitive::WebResponse response)
 {
 	CURL* curl;
@@ -135,8 +118,6 @@ void myThread(std::string url, std::string content, std::vector<std::string> hea
 	curl = curl_easy_init();
 
 	struct curl_slist *list = NULL;
-
-	//ThreadWebRequestData twrd = *(static_cast<ThreadWebRequestData*>(lpParameter));
 
 	std::string readBuffer;
 
@@ -194,70 +175,12 @@ static std::vector<std::thread*> activeThreads;
 
 void DoAsyncWebStuff(std::string url, std::string content, std::vector<std::string> headers, cognitive::WebResponse response)
 {
-	//TODO listen for response per thread
 	//TODO don't allow unlimited threads
-
-	//CURLcode res;
-
 	curl_global_init(CURL_GLOBAL_ALL);
-
-	//DWORD myThreadID;
-
-	//std::shared_ptr<ThreadWebRequestData> twrd(new ThreadWebRequestData);
-
-	//ThreadWebRequestData twrd;// = new ThreadWebRequestData();
-	//twrd.url = url;
-	//twrd.content = content;
-	//twrd.headers = headers;
-	//twrd.response = response;
-
 	std::thread* t1 = new std::thread(myThread, url,content,headers,response);
 
 	activeThreads.push_back(t1);
-
-	//t1.join();
-
-
-
-	//HANDLE handle = CreateThread(0, 0, myThread, &twrd, 0, &myThreadID);
-
-	
-
-	//std::this_thread::sleep_for(std::chrono::seconds(2));
-
-	//CloseHandle(handle);
 }
-#else //not windows
-
-void MyThread(ThreadWebRequestData threaddata)
-{
-
-}
-
-void DoAsyncWebStuff(std::string url, std::string content, std::vector<std::string> headers, cognitive::WebResponse response)
-{
-	//TODO listen for response per thread
-	//TODO don't allow unlimited threads
-
-	//CURLcode res;
-	//
-	//curl_global_init(CURL_GLOBAL_ALL);
-	//
-	//DWORD myThreadID;
-	//
-	//ThreadWebRequestData twrd = ThreadWebRequestData();
-	//twrd.url = url;
-	//twrd.content = content;
-	//twrd.headers = headers;
-	//twrd.response = response;
-	//
-	//HANDLE handle = CreateThread(0, 0, myThread, &twrd, 0, &myThreadID);
-	//
-	//std::this_thread::sleep_for(std::chrono::seconds(2));
-	//
-	//CloseHandle(handle);
-}
-#endif
 
 
 //===========================TESTS
