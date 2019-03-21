@@ -176,7 +176,7 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	isSessionActive = true;
 
 	std::vector<float> pos = { 0,0,0 };
-	GetCustomEvent()->RecordEvent("Start Session", pos);
+	GetCustomEvent()->RecordEvent("c3d.sessionStart", pos);
 
 	return true;
 }
@@ -199,7 +199,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 	double sessionLength = GetTimestamp() - GetSessionTimestamp();
 	props["sessionlength"] = sessionLength;
 
-	GetCustomEvent()->RecordEvent("End Session", endPos, props);
+	GetCustomEvent()->RecordEvent("c3d.sessionEnd", endPos, props);
 
 	SendData();
 

@@ -54,7 +54,7 @@ nlohmann::json Sensor::SendData()
 	if (!cvr->GetLobbyId().empty())
 		data["lobbyId"] = cvr->GetLobbyId();
 	data["sessionid"] = cvr->GetSessionID();
-	data["timestamp"] = (int)cvr->GetTimestamp();
+	data["timestamp"] = (int)cvr->GetSessionTimestamp();
 	data["part"] = jsonPart;
 	data["formatversion"] = "1.0";
 	jsonPart++;

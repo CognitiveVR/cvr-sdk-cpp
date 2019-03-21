@@ -111,7 +111,7 @@ nlohmann::json GazeTracker::SendData()
 	se["userid"] = cvr->GetUniqueID();
 	if (!cvr->GetLobbyId().empty())
 		se["lobbyId"] = cvr->GetLobbyId();
-	se["timestamp"] = (int)cvr->GetTimestamp();
+	se["timestamp"] = (int)cvr->GetSessionTimestamp();
 	se["sessionid"] = cvr->GetSessionID();
 	se["part"] = jsonPart;
 	jsonPart++;
