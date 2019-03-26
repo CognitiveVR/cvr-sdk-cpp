@@ -121,8 +121,6 @@ void myThread(std::string url, std::string content, std::vector<std::string> hea
 
 	std::string readBuffer;
 
-	std::cout << "thread start plz" << "\n";
-
 	if (curl) {
 		/* First set the URL that is about to receive our POST. This URL can
 		just as well be a https:// URL if that is what should receive the
@@ -304,8 +302,6 @@ TEST(Curl, GazeAsyncThread) {
 	auto d = cog.GetGazeTracker()->SendData();
 	EXPECT_NE(d.size(), 0);
 
-	std::cout << d << "\n";
-
 	cog.SetSessionName("client project test");
 	cog.SetSessionProperty("cpu", "good");
 	cog.SetSessionProperty("gpu", "good");
@@ -326,8 +322,6 @@ TEST(Curl, GazeAsyncThread) {
 	//send data 2
 	d = cog.GetGazeTracker()->SendData();
 	EXPECT_NE(d.size(), 0);
-
-	std::cout << d << "\n";
 
 	//join all outstanding threads
 	for (int i = 0; i < activeThreads.size(); i++)
@@ -2793,6 +2787,129 @@ TEST(Dynamics, Values) {
 	EXPECT_EQ(c["data"][3]["p"][2], 3);
 	EXPECT_EQ(c["data"][3]["properties"][0], colortarget);
 	EXPECT_EQ(c["data"][3]["properties"][1], sizetarget);
+}
+
+TEST(Dynamics, RegisterScaleValues) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> scale1 = { 1,1,1 };
+	std::vector<float> scale2 = { 2,2,2 };
+	std::vector<float> scale3 = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, scale2);
+	cog.GetDynamicObject()->RegisterObject("name", "mesh", pos, rot); //1000
+	cog.GetDynamicObject()->RegisterObject("name", "mesh", pos, rot, scale3); //1001
+
+	cognitive::nlohmann::json enabledtarget;
+	enabledtarget["enabled"] = true;
+
+	//check here
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 4);
+
+	//dynamic 1
+	EXPECT_EQ(c["data"][0]["id"], "0");
+	EXPECT_EQ(c["data"][0]["s"].size(), 0);
+	EXPECT_EQ(c["data"][0]["properties"][0], enabledtarget);
+
+	//dynamic 2
+	EXPECT_EQ(c["data"][1]["id"], "1");
+	EXPECT_EQ(c["data"][1]["s"][0], 2);
+	EXPECT_EQ(c["data"][1]["s"][1], 2);
+	EXPECT_EQ(c["data"][1]["s"][2], 2);
+	EXPECT_EQ(c["data"][1]["properties"][0], enabledtarget);
+
+	//dynamic 3
+	EXPECT_EQ(c["data"][2]["id"], "1000");
+	EXPECT_EQ(c["data"][2]["s"].size(), 0);
+	EXPECT_EQ(c["data"][2]["properties"][0], enabledtarget);
+
+	//dynamic 4
+	EXPECT_EQ(c["data"][3]["id"], "1001");
+	EXPECT_EQ(c["data"][3]["s"][0], 1);
+	EXPECT_EQ(c["data"][3]["s"][1], 2);
+	EXPECT_EQ(c["data"][3]["s"][2], 3);
+	EXPECT_EQ(c["data"][3]["properties"][0], enabledtarget);
+}
+
+TEST(Dynamics, RecordScaleValues) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> scale1 = { 1,1,1 };
+	std::vector<float> scale2 = { 2,2,2 };
+	std::vector<float> scale3 = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+
+	cognitive::nlohmann::json color;
+	color["color"] = "yellow";
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array({ color });
+
+	cognitive::nlohmann::json colortarget;
+	colortarget["color"] = "yellow";
+
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot,scale3);
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot, scale2, props); //scale and json
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot, props); //no scale. only json
+
+	//check here
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 6);
+
+	//dynamic 1 (from registering object)
+	EXPECT_EQ(c["data"][0]["id"], "0");
+	EXPECT_EQ(c["data"][0]["s"].size(), 0);
+
+	//dynamic 2
+	EXPECT_EQ(c["data"][1]["id"], "0");
+	EXPECT_EQ(c["data"][1]["s"].size(), 0);
+
+	//dynamic 3
+	EXPECT_EQ(c["data"][2]["id"], "0");
+	EXPECT_EQ(c["data"][2]["s"][0], 1);
+	EXPECT_EQ(c["data"][2]["s"][1], 2);
+	EXPECT_EQ(c["data"][2]["s"][2], 3);
+
+	//dynamic 4
+	EXPECT_EQ(c["data"][3]["id"], "0");
+	EXPECT_EQ(c["data"][3]["s"].size(), 0);
+
+	//dynamic 5 (scale and json)
+	EXPECT_EQ(c["data"][4]["id"], "0");
+	EXPECT_EQ(c["data"][4]["s"][0], 2);
+	EXPECT_EQ(c["data"][4]["s"][1], 2);
+	EXPECT_EQ(c["data"][4]["s"][2], 2);
+	EXPECT_EQ(c["data"][4]["properties"][0], colortarget);
+
+	//dynamic 6 (json)
+	EXPECT_EQ(c["data"][5]["id"], "0");
+	EXPECT_EQ(c["data"][5]["s"].size(), 0);
+	EXPECT_EQ(c["data"][5]["properties"][0], colortarget);
 }
 
 TEST(Dynamics, DynamicMeshFileType) {

@@ -62,6 +62,8 @@ struct DynamicObjectSnapshot
 private:
 	std::vector<float> Position;
 	std::vector<float> Rotation;
+	bool useScale;
+	std::vector<float> Scale;
 	double Time = -1;
 	std::string Id = "";
 	nlohmann::json Properties = nlohmann::json();
@@ -69,6 +71,9 @@ private:
 
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId);
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, nlohmann::json properties);
+
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId);
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId, nlohmann::json properties);
 };
 
 //an interaction the player has with a dynamic object
@@ -120,6 +125,10 @@ private:
 
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
+	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
+	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale);
+	void RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties);
+
 	/** end all engagements on an object. to be used if the object is destroyed. requires a snapshot of the dynamic object to send engagement data!
 
 		@param int objectid
@@ -137,26 +146,38 @@ public:
 	@param std::string name
 	@param std::string meshname
 	@param int customid
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale - Optional
 	*/
 	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation);
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
 
 	//
 	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 
 	@param std::string name
 	@param std::string meshname
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale - Optional
 	*/
 	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation);
+	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
 
 	/** record the position, rotation and other properties of an object
 
 	@param int objectId
 	@param std::vector<float> position
 	@param std::vector<float> rotation
+	@param std::vector<float> scale - Optional
 	@param nlohmann::json properties - Optional
 	*/
 	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation);
 	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
+
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties);
 
 	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!
 	@param std::string objectid of the object being engaged with
