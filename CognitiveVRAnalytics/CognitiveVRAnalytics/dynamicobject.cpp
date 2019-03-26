@@ -216,7 +216,7 @@ void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<flo
 
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, scale, objectId);
 	if (!useScale)
-		snapshot = DynamicObjectSnapshot(position, rotation, objectId);
+		snapshot.useScale = false;
 
 	if (properties.size() > 0)
 	{

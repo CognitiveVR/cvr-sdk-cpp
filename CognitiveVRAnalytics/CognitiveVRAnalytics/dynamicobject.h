@@ -62,7 +62,7 @@ struct DynamicObjectSnapshot
 private:
 	std::vector<float> Position;
 	std::vector<float> Rotation;
-	bool useScale;
+	bool useScale = true;
 	std::vector<float> Scale;
 	double Time = -1;
 	std::string Id = "";

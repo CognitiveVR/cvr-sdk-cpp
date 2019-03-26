@@ -2800,7 +2800,6 @@ TEST(Dynamics, RegisterScaleValues) {
 	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,2,3 };
-	std::vector<float> scale1 = { 1,1,1 };
 	std::vector<float> scale2 = { 2,2,2 };
 	std::vector<float> scale3 = { 1,2,3 };
 	std::vector<float> rot = { 4,5,6,7 };
