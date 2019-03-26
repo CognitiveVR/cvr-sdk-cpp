@@ -62,7 +62,7 @@ struct DynamicObjectSnapshot
 private:
 	std::vector<float> Position;
 	std::vector<float> Rotation;
-	bool useScale;
+	bool useScale = true;
 	std::vector<float> Scale;
 	double Time = -1;
 	std::string Id = "";
@@ -125,8 +125,8 @@ private:
 
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
-	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale);
+	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation);
+	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation);
 	void RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties);
 
 	/** end all engagements on an object. to be used if the object is destroyed. requires a snapshot of the dynamic object to send engagement data!

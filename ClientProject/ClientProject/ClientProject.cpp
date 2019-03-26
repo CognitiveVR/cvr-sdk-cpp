@@ -2800,7 +2800,6 @@ TEST(Dynamics, RegisterScaleValues) {
 	cog.SetUserName("travis");
 
 	std::vector<float> pos = { 1,2,3 };
-	std::vector<float> scale1 = { 1,1,1 };
 	std::vector<float> scale2 = { 2,2,2 };
 	std::vector<float> scale3 = { 1,2,3 };
 	std::vector<float> rot = { 4,5,6,7 };
@@ -2821,7 +2820,10 @@ TEST(Dynamics, RegisterScaleValues) {
 
 	//dynamic 1
 	EXPECT_EQ(c["data"][0]["id"], "0");
-	EXPECT_EQ(c["data"][0]["s"].size(), 0);
+	EXPECT_EQ(c["data"][0]["s"].size(), 3);
+	EXPECT_EQ(c["data"][0]["s"][0], 1);
+	EXPECT_EQ(c["data"][0]["s"][1], 1);
+	EXPECT_EQ(c["data"][0]["s"][2], 1);
 	EXPECT_EQ(c["data"][0]["properties"][0], enabledtarget);
 
 	//dynamic 2
@@ -2833,7 +2835,9 @@ TEST(Dynamics, RegisterScaleValues) {
 
 	//dynamic 3
 	EXPECT_EQ(c["data"][2]["id"], "1000");
-	EXPECT_EQ(c["data"][2]["s"].size(), 0);
+	EXPECT_EQ(c["data"][2]["s"][0], 1);
+	EXPECT_EQ(c["data"][2]["s"][1], 1);
+	EXPECT_EQ(c["data"][2]["s"][2], 1);
 	EXPECT_EQ(c["data"][2]["properties"][0], enabledtarget);
 
 	//dynamic 4
@@ -2883,7 +2887,10 @@ TEST(Dynamics, RecordScaleValues) {
 
 	//dynamic 1 (from registering object)
 	EXPECT_EQ(c["data"][0]["id"], "0");
-	EXPECT_EQ(c["data"][0]["s"].size(), 0);
+	EXPECT_EQ(c["data"][0]["s"].size(), 3);
+	EXPECT_EQ(c["data"][0]["s"][0], 1);
+	EXPECT_EQ(c["data"][0]["s"][1], 1);
+	EXPECT_EQ(c["data"][0]["s"][2], 1);
 
 	//dynamic 2
 	EXPECT_EQ(c["data"][1]["id"], "0");

@@ -68,17 +68,17 @@ DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1, 1, 1 };
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, scale);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation);
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
-	RecordDynamic_Internal(customid, position, rotation, scale, false, props);
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props);
 }
 
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, scale);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -87,7 +87,7 @@ void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshnam
 	RecordDynamic_Internal(customid, position, rotation, scale, true, props);
 }
 
-void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
+void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
 {
 	for (auto& element : objectIds)
 	{
@@ -110,20 +110,7 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1,1,1 };
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, scale, false);
-
-	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
-	enable["enabled"] = true;
-	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
-	props.push_back(enable);
-
-	RecordDynamic_Internal(newObjectId, position, rotation, scale, false, props);
-	return newObjectId;
-}
-
-std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
-{
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, scale, true);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -134,7 +121,20 @@ std::string DynamicObject::RegisterObject(std::string name, std::string meshname
 	return newObjectId;
 }
 
-std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale)
+std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
+{
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation);
+
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props);
+	return newObjectId;
+}
+
+std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
 {
 	bool foundRecycledId = false;
 	DynamicObjectId newObjectId = DynamicObjectId("0", meshname);
@@ -216,7 +216,7 @@ void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<flo
 
 	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, scale, objectId);
 	if (!useScale)
-		snapshot = DynamicObjectSnapshot(position, rotation, objectId);
+		snapshot.useScale = false;
 
 	if (properties.size() > 0)
 	{
