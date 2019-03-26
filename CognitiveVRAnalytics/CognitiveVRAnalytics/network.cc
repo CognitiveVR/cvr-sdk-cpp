@@ -67,7 +67,13 @@ void Network::NetworkCall(std::string suburl, std::string content)
 	if (cvr->CurrentSceneId == "") { cvr->log->Warning("Network::NetworkCall does not have valid scenename"); return; }
 	if (cvr->CurrentSceneVersionNumber == "") { cvr->log->Warning("Network::NetworkCall does not have valid scene version number"); return; }
 
-	std::string path = "https://"+cvr->config->kNetworkHost+"/v"+cvr->config->networkVersion+"/"+suburl+"/"+cvr->CurrentSceneId+"?version="+cvr->CurrentSceneVersionNumber;
+	std::string path;
+
+	if (cvr->CurrentSceneVersionNumber.empty())
+		path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/" + suburl + "/" + cvr->CurrentSceneId;
+	else
+		path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/" + suburl + "/" + cvr->CurrentSceneId + "?version=" + cvr->CurrentSceneVersionNumber;
+	
 
 	cvr->GetLog()->Info("API call: " + path);
 

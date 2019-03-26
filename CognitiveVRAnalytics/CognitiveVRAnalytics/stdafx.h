@@ -39,14 +39,20 @@ namespace cognitive
 		std::string SceneId;
 		//integer representing the version of the scene on the dashboard
 		std::string VersionNumber;
-		int VersionId;
 
-		SceneData(std::string sceneName, std::string sceneId, std::string versionNumber, int versionId)
+		SceneData(std::string sceneName, std::string sceneId, std::string versionNumber)
 		{
 			SceneName = sceneName;
 			SceneId = sceneId;
 			VersionNumber = versionNumber;
-			VersionId = versionId;
+		}
+
+		//versionId is deprecated. use the SceneData constructor without this parameter
+		SceneData(std::string sceneName, std::string sceneId, std::string versionNumber, int versionId = 0)
+		{
+			SceneName = sceneName;
+			SceneId = sceneId;
+			VersionNumber = versionNumber;
 		}
 	};
 }

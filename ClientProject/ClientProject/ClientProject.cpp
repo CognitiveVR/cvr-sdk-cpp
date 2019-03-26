@@ -11,6 +11,7 @@
 //for testing delay
 #include <chrono>
 #include <thread>
+#include <mutex>
 
 //requires a valid API key from travis command line. if testing and expecting not to have this key, can disable all tests that are expected to fail
 #define EXITPOLLVALID
@@ -21,18 +22,24 @@
 #include "include/gtest/gtest.h"
 #endif
 
-std::string temp;
+//std::string temp;
 
 std::string TESTINGAPIKEY = "asdf1234hjkl5678";
 std::string INVALIDAPIKEY = "INVALID_API_KEY";
 long TestDelay = 1;
 
-size_t handle(char* buf, size_t size, size_t nmemb, void* up)
+//size_t handle(char* buf, size_t size, size_t nmemb, void* up)
+//{
+//	for (int c = 0; c < size*nmemb; c++)
+//	{
+//		temp.push_back(buf[c]);
+//	}
+//	return size * nmemb;
+//}
+
+size_t WriteCallback(char *contents, size_t size, size_t nmemb, void *userp)
 {
-	for (int c = 0; c < size*nmemb; c++)
-	{
-		temp.push_back(buf[c]);
-	}
+	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
 
@@ -70,8 +77,9 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 		{
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
 		}
-
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &handle);
+		std::string responseBody;
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseBody);
 
 		for (auto const &ent : headers)
 		{
@@ -85,7 +93,7 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 
 		//call response
 		if (response != NULL)
-			response(temp);
+			response(responseBody);
 
 		/* Check for errors */
 		if (res != CURLE_OK)
@@ -97,14 +105,233 @@ void DoWebStuff(std::string url, std::string content, std::vector<std::string> h
 
 		}
 
-		temp.clear();
 		/* always cleanup */
 		curl_easy_cleanup(curl);
 		curl_slist_free_all(list); /* free the list again */
 	}
 }
 
+void myThread(std::string url, std::string content, std::vector<std::string> headers,cognitive::WebResponse response)
+{
+	CURL* curl;
+	CURLcode res;
+	curl = curl_easy_init();
+
+	struct curl_slist *list = NULL;
+
+	std::string readBuffer;
+
+	if (curl) {
+		/* First set the URL that is about to receive our POST. This URL can
+		just as well be a https:// URL if that is what should receive the
+		data. */
+		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+		//DEBUG verbose output
+		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+		/* Now specify the POST data */
+		if (content.size() > 0)
+		{
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, content.c_str());
+		}
+
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+		for (auto const &ent : headers)
+		{
+			list = curl_slist_append(list, ent.c_str());
+		}
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+		//iterate through and set headers
+
+		/* Perform the request, res will get the return code */
+		res = curl_easy_perform(curl);
+
+		//call response
+		if (response != NULL)
+			response(readBuffer);
+
+		/* Check for errors */
+		if (res != CURLE_OK)
+		{
+			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		}
+		else
+		{
+			fprintf(stderr, "curl_easy_perform() passed: %s\n", curl_easy_strerror(res));
+		}
+
+		/* always cleanup */
+		curl_easy_cleanup(curl);
+		curl_slist_free_all(list); /* free the list again */
+	}
+}
+
+static std::vector<std::thread*> activeThreads;
+
+void DoAsyncWebStuff(std::string url, std::string content, std::vector<std::string> headers, cognitive::WebResponse response)
+{
+	//TODO don't allow unlimited threads
+	curl_global_init(CURL_GLOBAL_ALL);
+	std::thread* t1 = new std::thread(myThread, url,content,headers,response);
+
+	activeThreads.push_back(t1);
+}
+
+
 //===========================TESTS
+TEST(Curl, AsyncThread) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoAsyncWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	settings.DefaultSceneName = "tutorial";
+
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetSensor()->RecordSensor("sensor", 1);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
+	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+
+	cog.StartSession();
+
+	//send any data
+	auto d = cog.GetGazeTracker()->SendData();
+	EXPECT_NE(d.size(), 0);
+
+	//join all outstanding threads
+	for (int i = 0; i < activeThreads.size(); i++)
+	{
+		activeThreads[i]->join();
+		delete(activeThreads[i]);
+	}
+	activeThreads.clear();
+}
+
+TEST(Curl, MultipleAsyncThread) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoAsyncWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	settings.DefaultSceneName = "tutorial";
+
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetSensor()->RecordSensor("sensor", 1);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
+	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+
+	cog.StartSession();
+
+	//send data 1
+	auto d = cog.GetGazeTracker()->SendData();
+	EXPECT_NE(d.size(), 0);
+
+
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetSensor()->RecordSensor("sensor", 1);
+	cog.GetCustomEvent()->RecordEvent("event", pos);
+	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+
+	//send data 2
+	d = cog.GetGazeTracker()->SendData();
+	EXPECT_NE(d.size(), 0);
+
+	//join all outstanding threads
+	for (int i = 0; i < activeThreads.size(); i++)
+	{
+		activeThreads[i]->join();
+		delete(activeThreads[i]);
+	}
+	activeThreads.clear();
+}
+
+TEST(Curl, GazeAsyncThread) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoAsyncWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	settings.DefaultSceneName = "tutorial";
+
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.StartSession();
+
+
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+
+	//send data 1
+	auto d = cog.GetGazeTracker()->SendData();
+	EXPECT_NE(d.size(), 0);
+
+	cog.SetSessionName("client project test");
+	cog.SetSessionProperty("cpu", "good");
+	cog.SetSessionProperty("gpu", "good");
+	cog.SetSessionProperty("harddrive", "large");
+
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+
+
+	//send data 2
+	d = cog.GetGazeTracker()->SendData();
+	EXPECT_NE(d.size(), 0);
+
+	//join all outstanding threads
+	for (int i = 0; i < activeThreads.size(); i++)
+	{
+		activeThreads[i]->join();
+		delete(activeThreads[i]);
+	}
+	activeThreads.clear();
+}
+
 //----------------------INITIALIZATION
 
 TEST(Initialization, StartSession) {
@@ -230,6 +457,48 @@ TEST(Initialization, SetScene){
 	EXPECT_EQ(cog.GetSceneId(), "");
 	cog.SetScene("tutorial");
 	EXPECT_EQ(cog.GetSceneId(), "DELETE_ME_1");
+}
+
+TEST(Initialization, SetSceneById) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.StartSession();
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.SetSceneById("asdf1234");
+	EXPECT_EQ(cog.GetSceneId(), "asdf1234");
+	EXPECT_EQ(cog.GetCurrentSceneVersionNumber(), "");
+}
+
+TEST(Initialization, SetSceneByIdVersion) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.StartSession();
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.SetSceneById("asdf1234","4");
+	EXPECT_EQ(cog.GetSceneId(), "asdf1234");
+	EXPECT_EQ(cog.GetCurrentSceneVersionNumber(), "4");
 }
 
 TEST(Initialization, SetLobbyId){
@@ -932,14 +1201,16 @@ TEST(CustomEvent, Values) {
 	std::string dynamicId = "asdf1234";
 
 	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
 	cog.GetCustomEvent()->RecordEvent("testing1", pos, prop);
 	cog.GetCustomEvent()->RecordEvent("testing2", pos, prop,dynamicId);
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
 	EXPECT_EQ(c["data"].size(), 3);
-	EXPECT_EQ(c["data"][0]["name"], "Start Session");
+	EXPECT_EQ(c["data"][0]["name"], "c3d.sessionStart");
 	EXPECT_EQ(c["data"][1]["name"], "testing1");
 	EXPECT_EQ(c["data"][1]["properties"].size(), 2);
 	EXPECT_EQ(c["data"][1]["properties"]["number"], 1);
@@ -1043,7 +1314,7 @@ TEST(CustomEvent, WithDynamic) {
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"][0]["name"], "testing1");
 	EXPECT_EQ(c["data"][0]["dynamicId"], "1000"); //generated
-	EXPECT_EQ(c["data"][1]["name"], "Start Session");
+	EXPECT_EQ(c["data"][1]["name"], "c3d.sessionStart");
 }
 
 TEST(CustomEvent, NoDynamic) {
@@ -1065,7 +1336,7 @@ TEST(CustomEvent, NoDynamic) {
 	auto c = cog.GetCustomEvent()->SendData();
 	EXPECT_EQ(c["data"][0]["name"], "testing1");
 	EXPECT_EQ(c["data"][0]["dynamicId"], nullptr);
-	EXPECT_EQ(c["data"][1]["name"], "Start Session");
+	EXPECT_EQ(c["data"][1]["name"], "c3d.sessionStart");
 }
 
 //-----------------------------------SCENES
@@ -1460,6 +1731,7 @@ TEST(ExitPoll, AnswerValues) {
 	cog.SetUserName("travis");
 
 	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
 	cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
 
 	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kBoolean, true));
@@ -1480,7 +1752,7 @@ TEST(ExitPoll, AnswerValues) {
 	
 	EXPECT_EQ(a["sceneId"], "DELETE_ME_1");
 	EXPECT_EQ(a["versionNumber"], "6");
-	EXPECT_EQ(a["versionId"], 2);
+	EXPECT_EQ(a["versionId"], 0);
 	
 	EXPECT_EQ(a["answers"].size(), 8);
 	
@@ -1686,6 +1958,7 @@ TEST(Gaze, Values) {
 	std::vector<float> rot = { 4,5,6,7 };
 
 	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos);
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos, "1");
@@ -1697,6 +1970,7 @@ TEST(Gaze, Values) {
 	EXPECT_EQ(c["hmdtype"], "vive");
 	EXPECT_EQ(c["interval"],0.134f);
 	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
 	
 	//sky
 	EXPECT_EQ(c["data"][0]["p"][0], 1);
@@ -1980,6 +2254,7 @@ TEST(Sensors, Values) {
 	cog.SetUserName("travis");
 
 	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
 	
 	cog.GetSensor()->RecordSensor("testing1", 1);
 	cog.GetSensor()->RecordSensor("testing1", 1);
@@ -1997,6 +2272,7 @@ TEST(Sensors, Values) {
 	EXPECT_EQ(c["name"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
 	EXPECT_EQ(c["data"].size(), 3);
 	EXPECT_EQ(c["data"][0]["name"], "testing1");
 	EXPECT_EQ(c["data"][0]["data"].size(), 3);
@@ -2447,6 +2723,7 @@ TEST(Dynamics, Values) {
 	std::vector<float> rot = { 4,5,6,7 };
 
 	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
 	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
 	cog.GetDynamicObject()->RegisterObject("name2", "mesh2", pos, rot);
 	cog.GetDynamicObject()->RecordDynamic("2", pos, rot);
@@ -2470,6 +2747,7 @@ TEST(Dynamics, Values) {
 	EXPECT_EQ(c["userid"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
 
 	//manifest
 	EXPECT_EQ(c["manifest"].size(), 2);
@@ -2509,6 +2787,129 @@ TEST(Dynamics, Values) {
 	EXPECT_EQ(c["data"][3]["p"][2], 3);
 	EXPECT_EQ(c["data"][3]["properties"][0], colortarget);
 	EXPECT_EQ(c["data"][3]["properties"][1], sizetarget);
+}
+
+TEST(Dynamics, RegisterScaleValues) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> scale1 = { 1,1,1 };
+	std::vector<float> scale2 = { 2,2,2 };
+	std::vector<float> scale3 = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, scale2);
+	cog.GetDynamicObject()->RegisterObject("name", "mesh", pos, rot); //1000
+	cog.GetDynamicObject()->RegisterObject("name", "mesh", pos, rot, scale3); //1001
+
+	cognitive::nlohmann::json enabledtarget;
+	enabledtarget["enabled"] = true;
+
+	//check here
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 4);
+
+	//dynamic 1
+	EXPECT_EQ(c["data"][0]["id"], "0");
+	EXPECT_EQ(c["data"][0]["s"].size(), 0);
+	EXPECT_EQ(c["data"][0]["properties"][0], enabledtarget);
+
+	//dynamic 2
+	EXPECT_EQ(c["data"][1]["id"], "1");
+	EXPECT_EQ(c["data"][1]["s"][0], 2);
+	EXPECT_EQ(c["data"][1]["s"][1], 2);
+	EXPECT_EQ(c["data"][1]["s"][2], 2);
+	EXPECT_EQ(c["data"][1]["properties"][0], enabledtarget);
+
+	//dynamic 3
+	EXPECT_EQ(c["data"][2]["id"], "1000");
+	EXPECT_EQ(c["data"][2]["s"].size(), 0);
+	EXPECT_EQ(c["data"][2]["properties"][0], enabledtarget);
+
+	//dynamic 4
+	EXPECT_EQ(c["data"][3]["id"], "1001");
+	EXPECT_EQ(c["data"][3]["s"][0], 1);
+	EXPECT_EQ(c["data"][3]["s"][1], 2);
+	EXPECT_EQ(c["data"][3]["s"][2], 3);
+	EXPECT_EQ(c["data"][3]["properties"][0], enabledtarget);
+}
+
+TEST(Dynamics, RecordScaleValues) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> scale1 = { 1,1,1 };
+	std::vector<float> scale2 = { 2,2,2 };
+	std::vector<float> scale3 = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+
+	cognitive::nlohmann::json color;
+	color["color"] = "yellow";
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array({ color });
+
+	cognitive::nlohmann::json colortarget;
+	colortarget["color"] = "yellow";
+
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot,scale3);
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot, scale2, props); //scale and json
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot, props); //no scale. only json
+
+	//check here
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 6);
+
+	//dynamic 1 (from registering object)
+	EXPECT_EQ(c["data"][0]["id"], "0");
+	EXPECT_EQ(c["data"][0]["s"].size(), 0);
+
+	//dynamic 2
+	EXPECT_EQ(c["data"][1]["id"], "0");
+	EXPECT_EQ(c["data"][1]["s"].size(), 0);
+
+	//dynamic 3
+	EXPECT_EQ(c["data"][2]["id"], "0");
+	EXPECT_EQ(c["data"][2]["s"][0], 1);
+	EXPECT_EQ(c["data"][2]["s"][1], 2);
+	EXPECT_EQ(c["data"][2]["s"][2], 3);
+
+	//dynamic 4
+	EXPECT_EQ(c["data"][3]["id"], "0");
+	EXPECT_EQ(c["data"][3]["s"].size(), 0);
+
+	//dynamic 5 (scale and json)
+	EXPECT_EQ(c["data"][4]["id"], "0");
+	EXPECT_EQ(c["data"][4]["s"][0], 2);
+	EXPECT_EQ(c["data"][4]["s"][1], 2);
+	EXPECT_EQ(c["data"][4]["s"][2], 2);
+	EXPECT_EQ(c["data"][4]["properties"][0], colortarget);
+
+	//dynamic 6 (json)
+	EXPECT_EQ(c["data"][5]["id"], "0");
+	EXPECT_EQ(c["data"][5]["s"].size(), 0);
+	EXPECT_EQ(c["data"][5]["properties"][0], colortarget);
 }
 
 TEST(Dynamics, DynamicMeshFileType) {
