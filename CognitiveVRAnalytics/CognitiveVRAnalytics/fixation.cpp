@@ -23,7 +23,7 @@ namespace cognitive {
 
 		BatchedFixations.push_back(se);
 
-		if (BatchedFixations.size() >= cvr->GetConfig()->CustomEventBatchSize)
+		if (BatchedFixations.size() >= cvr->GetConfig()->FixationBatchSize)
 		{
 			SendData();
 		}
@@ -39,7 +39,7 @@ namespace cognitive {
 
 		BatchedFixations.push_back(se);
 
-		if (BatchedFixations.size() >= cvr->GetConfig()->CustomEventBatchSize)
+		if (BatchedFixations.size() >= cvr->GetConfig()->FixationBatchSize)
 		{
 			SendData();
 		}
@@ -61,6 +61,8 @@ namespace cognitive {
 
 		nlohmann::json se = nlohmann::json();
 		se["userid"] = cvr->GetUniqueID();
+		if (!cvr->GetLobbyId().empty())
+			se["lobbyId"] = cvr->GetLobbyId();
 		se["timestamp"] = (int)cvr->GetSessionTimestamp();
 		se["sessionid"] = cvr->GetSessionID();
 		se["part"] = jsonPart;
