@@ -16,6 +16,7 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 #include "cognitive_log.h"
 #include "config.h"
 #include "coresettings.h"
+#include "fixation.h"
 #include <chrono>
 
 
@@ -82,6 +83,7 @@ class Network;
 class CustomEvent;
 class Sensor;
 class CoreSettings;
+class Fixation;
 
 class COGNITIVEVRANALYTICS_API CognitiveVRAnalyticsCore
 {
@@ -119,6 +121,7 @@ private:
 	std::unique_ptr<GazeTracker> gaze = nullptr;
 	std::unique_ptr<DynamicObject> dynamicobject = nullptr;
 	std::unique_ptr<ExitPoll> exitpoll = nullptr;
+	std::unique_ptr<Fixation> fixation = nullptr;
 
 public:
 
@@ -138,6 +141,7 @@ public:
 	std::unique_ptr<ExitPoll> const& GetExitPoll() const;
 	std::unique_ptr<Network> const& GetNetwork() const;
 	std::unique_ptr<Config> const& GetConfig() const;
+	std::unique_ptr<Fixation> const& GetFixation() const;
 
 	std::string GetCurrentSceneId();
 	int GetCurrentSceneVersionId();

@@ -205,6 +205,7 @@ TEST(Curl, AsyncThread) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	cog.StartSession();
 
@@ -244,6 +245,7 @@ TEST(Curl, MultipleAsyncThread) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	cog.StartSession();
 
@@ -256,6 +258,7 @@ TEST(Curl, MultipleAsyncThread) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	//send data 2
 	d = cog.GetGazeTracker()->SendData();
@@ -686,6 +689,8 @@ TEST(General, CoreSendDataPreSession) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
+
 	cog.SendData();
 
 	auto d = cog.GetGazeTracker()->SendData();
@@ -695,6 +700,8 @@ TEST(General, CoreSendDataPreSession) {
 	d = cog.GetDynamicObject()->SendData();
 	EXPECT_EQ(d.size(), 0);
 	d = cog.GetSensor()->SendData();
+	EXPECT_EQ(d.size(), 0);
+	d = cog.GetFixation()->SendData();
 	EXPECT_EQ(d.size(), 0);
 }
 
@@ -715,6 +722,7 @@ TEST(General, CoreSendData) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	cog.StartSession();
 
@@ -727,11 +735,14 @@ TEST(General, CoreSendData) {
 	EXPECT_NE(d.size(), 0);
 	d = cog.GetSensor()->SendData();
 	EXPECT_NE(d.size(), 0);
+	d = cog.GetFixation()->SendData();
+	EXPECT_NE(d.size(), 0);
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	//sends all data
 	cog.SendData();
@@ -744,6 +755,8 @@ TEST(General, CoreSendData) {
 	d = cog.GetDynamicObject()->SendData();
 	EXPECT_EQ(d.size(), 0);
 	d = cog.GetSensor()->SendData();
+	EXPECT_EQ(d.size(), 0);
+	d = cog.GetFixation()->SendData();
 	EXPECT_EQ(d.size(), 0);
 }
 
@@ -764,6 +777,7 @@ TEST(General, CoreSendDataEnd) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	cog.StartSession();
 	cog.EndSession(); //end calls senddata
@@ -776,6 +790,8 @@ TEST(General, CoreSendDataEnd) {
 	d = cog.GetDynamicObject()->SendData();
 	EXPECT_EQ(d.size(), 0);
 	d = cog.GetSensor()->SendData();
+	EXPECT_EQ(d.size(), 0);
+	d = cog.GetFixation()->SendData();
 	EXPECT_EQ(d.size(), 0);
 }
 
@@ -798,6 +814,7 @@ TEST(General, JsonPartSendData) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	cog.SendData();
 
@@ -805,6 +822,7 @@ TEST(General, JsonPartSendData) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 
 	//json part increments
@@ -815,6 +833,8 @@ TEST(General, JsonPartSendData) {
 	d = cog.GetDynamicObject()->SendData();
 	EXPECT_EQ(d["part"], 2);
 	d = cog.GetSensor()->SendData();
+	EXPECT_EQ(d["part"], 2);
+	d = cog.GetFixation()->SendData();
 	EXPECT_EQ(d["part"], 2);
 }
 
@@ -838,6 +858,7 @@ TEST(General, Lobby) {
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
 	cog.GetDynamicObject()->RegisterObject("object", "mesh", pos, rot);
+	cog.GetFixation()->RecordFixation(1000, 100, 0.5f, pos);
 
 	//send any data
 	auto d = cog.GetGazeTracker()->SendData();
@@ -847,6 +868,8 @@ TEST(General, Lobby) {
 	d = cog.GetDynamicObject()->SendData();
 	EXPECT_EQ(d["lobbyId"], "7891234");
 	d = cog.GetSensor()->SendData();
+	EXPECT_EQ(d["lobbyId"], "7891234");
+	d = cog.GetFixation()->SendData();
 	EXPECT_EQ(d["lobbyId"], "7891234");
 }
 
@@ -3525,6 +3548,266 @@ TEST(Engagements, LimitPostSession) {
 	EXPECT_EQ(c["data"][0]["engagements"].size(), 0);
 	EXPECT_EQ(c["data"][1]["engagements"].size(), 1);
 }
+
+//----------------------FIXATION
+
+TEST(Fixation, PreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c.size(), 0);
+}
+
+TEST(Fixation, DuringSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+
+	cog.StartSession();
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+}
+
+TEST(Fixation, PostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cog.StartSession();
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+	cog.EndSession();
+
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c.size(), 0);
+}
+
+TEST(Fixation, PostSceneChange) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cog.StartSession();
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+
+	cog.SetScene("tutorial");
+	c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c.size(), 0);
+}
+
+TEST(Fixation, PostSceneChangeMultiple) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cog.StartSession();
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+
+	cog.SetScene("tutorial");
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+
+	cog.SetScene("tutorial");
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
+}
+
+TEST(Fixation, PostInvalidSceneChange) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cog.StartSession();
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.SetScene("invalid");
+	c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
+}
+
+TEST(Fixation, Values) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::string dynamicId = "asdf1234";
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1005.00, 115, 0.2f, dynamicId, pos);
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["part"], 1);
+	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
+	EXPECT_EQ(c["data"].size(), 2);
+	EXPECT_EQ(c["data"][0].size(), 4);
+	EXPECT_EQ(c["data"][0]["time"], 1000.00);
+	EXPECT_EQ(c["data"][0]["duration"], 100);
+	EXPECT_EQ(c["data"][0]["maxradius"], 0.5);
+	EXPECT_EQ(c["data"][0]["p"][0], 1);
+	EXPECT_EQ(c["data"][0]["p"][1], 2);
+	EXPECT_EQ(c["data"][0]["p"][2], 3);
+
+
+	EXPECT_EQ(c["data"][1].size(), 5);
+	EXPECT_EQ(c["data"][1]["time"], 1005.00);
+	EXPECT_EQ(c["data"][1]["duration"], 115);
+	EXPECT_EQ(c["data"][1]["maxradius"], 0.2f);
+	EXPECT_EQ(c["data"][1]["objectid"], "asdf1234");
+	EXPECT_EQ(c["data"][1]["p"][0], 1);
+	EXPECT_EQ(c["data"][1]["p"][1], 2);
+	EXPECT_EQ(c["data"][1]["p"][2], 3);
+}
+
+TEST(Fixation, LimitPreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	settings.FixationBatchSize = 4;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos); //clear
+
+	cog.StartSession();
+
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 0);
+}
+
+TEST(Fixation, LimitDuringSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	settings.FixationBatchSize = 4;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	cog.StartSession();
+
+	std::vector<float> pos = { 0,0,0 };
+
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos); //clear
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
+}
+
+TEST(Fixation, LimitPostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	settings.FixationBatchSize = 4;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	cog.StartSession(); //record
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.EndSession(); //send
+
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, "objectid", pos);
+	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
+	cog.StartSession();
+
+	auto c = cog.GetFixation()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+}
+
 
 int main(int argc, char **argv)
 {
