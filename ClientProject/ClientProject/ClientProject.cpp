@@ -3808,6 +3808,420 @@ TEST(Fixation, LimitPostSession) {
 	EXPECT_EQ(c["data"].size(), 2);
 }
 
+//----------------------DYNAMIC CONTROLLERS
+
+TEST(DynamicController, PreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot,"oculustouchleft");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
+
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c.size(), 0);
+
+	cog.StartSession();
+}
+
+TEST(DynamicController, DuringSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
+
+	cog.StartSession();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
+	auto c = cog.GetDynamicObject()->SendData();
+
+	EXPECT_EQ(c["data"].size(), 4);
+	EXPECT_EQ(c["manifest"].size(), 2);
+}
+
+TEST(DynamicController, DuringSessionOverwriteManifest) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	cog.StartSession();
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "oculustouchright");
+
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+
+	auto c = cog.GetDynamicObject()->SendData();
+
+	EXPECT_EQ(c["data"].size(), 5);
+	EXPECT_EQ(c["manifest"].size(), 2);
+}
+
+TEST(DynamicController, MultipleManifests) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	cog.StartSession();
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+	EXPECT_EQ(c["manifest"].size(), 2);
+
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+	EXPECT_EQ(c["manifest"], nullptr);
+}
+
+TEST(DynamicController, PostSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+
+	cog.StartSession();
+
+	cog.EndSession();
+
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c.size(), 0);
+}
+
+TEST(DynamicController, RemovePreSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
+	cog.GetDynamicObject()->RemoveObject("1", pos, rot);
+	auto c = cog.GetDynamicObject()->SendData();
+
+	EXPECT_EQ(c.size(), 0);
+	cog.StartSession();
+	c = cog.GetDynamicObject()->SendData();
+
+	EXPECT_EQ(c["data"].size(), 3);
+	EXPECT_EQ(c["manifest"].size(), 1);
+}
+
+TEST(DynamicController, RemoveDuringSession) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.StartSession();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
+	cog.GetDynamicObject()->RemoveObject("1", pos, rot);
+	auto c = cog.GetDynamicObject()->SendData();
+
+	EXPECT_EQ(c["data"].size(), 3);
+	EXPECT_EQ(c["manifest"].size(), 1);
+}
+
+TEST(DynamicController, PostSceneChange) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.StartSession();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+	cog.GetDynamicObject()->RegisterObject("name", "mesh", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 4);
+	EXPECT_EQ(c["manifest"].size(), 2);
+
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	cog.SetScene("tutorial"); //no previous scene. this is just setting it late
+	c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 2);
+	EXPECT_EQ(c["manifest"].size(), 2);
+}
+
+TEST(DynamicController, PostSceneChangeMultiple) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	settings.AllSceneData = scenedatas;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+
+	cog.StartSession();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
+	cog.GetDynamicObject()->RegisterObject("name", "mesh", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	auto c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 4);
+	EXPECT_EQ(c["manifest"].size(), 2);
+
+	cog.SetScene("tutorial");
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	cog.GetDynamicObject()->RegisterObject("name", "mesh", pos, rot);
+
+	cog.SetScene("tutorial");
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
+	c = cog.GetDynamicObject()->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
+	EXPECT_EQ(c["manifest"].size(), 3);
+}
+
+TEST(DynamicController, Values) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller"); //0
+	cog.GetDynamicObject()->RegisterObject("name2", "mesh2", pos, rot, "oculustouchright"); //1
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0); //2
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "grip", 0.5); //3
+
+	std::vector<cognitive::ControllerInputState> states = std::vector<cognitive::ControllerInputState>();
+	states.push_back(cognitive::ControllerInputState("padbtn", 0, 0.25, -0.75));
+	states.push_back(cognitive::ControllerInputState("grip", 0.25));
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, states); //4
+
+	auto c = cog.GetDynamicObject()->SendData();
+
+	//std::cout << c.dump() << "\n";
+
+	cognitive::nlohmann::json enabledtarget;
+	enabledtarget["enabled"] = true;
+
+	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["part"], 1);
+	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
+
+	//manifest
+	EXPECT_EQ(c["manifest"].size(), 2);
+	EXPECT_EQ(c["manifest"]["1"]["name"], "name");
+	EXPECT_EQ(c["manifest"]["1"]["mesh"], "mesh");
+	EXPECT_EQ(c["manifest"]["1"]["properties"]["controller"], "vivecontroller");
+
+	EXPECT_EQ(c["manifest"]["1000"]["name"], "name2");
+	EXPECT_EQ(c["manifest"]["1000"]["mesh"], "mesh2");
+
+	EXPECT_EQ(c["data"].size(), 5);
+
+	//dynamic 1
+	EXPECT_EQ(c["data"][0]["id"], "1");
+	EXPECT_EQ(c["data"][0]["p"][0], 1);
+	EXPECT_EQ(c["data"][0]["p"][1], 2);
+	EXPECT_EQ(c["data"][0]["p"][2], 3);
+	EXPECT_EQ(c["data"][0]["properties"][0], enabledtarget);
+	EXPECT_EQ(c["data"][0]["buttons"], nullptr);
+
+	//dynamic 2
+	EXPECT_EQ(c["data"][1]["id"], "1000");
+	EXPECT_EQ(c["data"][1]["p"][0], 1);
+	EXPECT_EQ(c["data"][1]["p"][1], 2);
+	EXPECT_EQ(c["data"][1]["p"][2], 3);
+	EXPECT_EQ(c["data"][1]["properties"][0], enabledtarget);
+	EXPECT_EQ(c["data"][1]["buttons"], nullptr);
+
+	//dynamic 1 trigger
+	EXPECT_EQ(c["data"][2]["id"], "1");
+	EXPECT_EQ(c["data"][2]["p"][0], 1);
+	EXPECT_EQ(c["data"][2]["p"][1], 2);
+	EXPECT_EQ(c["data"][2]["p"][2], 3);
+	EXPECT_EQ(c["data"][2]["buttons"].size(),1);
+	EXPECT_EQ(c["data"][2]["buttons"]["trigger"]["buttonPercent"], 1.0);
+
+	//dynamic 1 grip
+	EXPECT_EQ(c["data"][3]["id"], "1");
+	EXPECT_EQ(c["data"][3]["p"][0], 1);
+	EXPECT_EQ(c["data"][3]["p"][1], 2);
+	EXPECT_EQ(c["data"][3]["p"][2], 3);
+	EXPECT_EQ(c["data"][3]["buttons"].size(), 1);
+	EXPECT_EQ(c["data"][3]["buttons"]["grip"]["buttonPercent"], 0.5);
+
+	//dynamic 1 padbtn, grip
+	EXPECT_EQ(c["data"][4]["id"], "1");
+	EXPECT_EQ(c["data"][4]["p"][0], 1);
+	EXPECT_EQ(c["data"][4]["p"][1], 2);
+	EXPECT_EQ(c["data"][4]["p"][2], 3);
+	EXPECT_EQ(c["data"][4]["buttons"].size(), 2);
+	EXPECT_EQ(c["data"][4]["buttons"]["padbtn"]["buttonPercent"], 0.0);
+	EXPECT_EQ(c["data"][4]["buttons"]["padbtn"]["x"], 0.25);
+	EXPECT_EQ(c["data"][4]["buttons"]["padbtn"]["y"], -0.75);
+	EXPECT_EQ(c["data"][4]["buttons"]["grip"]["buttonPercent"], 0.25);
+}
+
+TEST(DynamicController, ValuesRecordInputNonController) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 1,2,3 };
+	std::vector<float> rot = { 4,5,6,7 };
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot); //0
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0); //1
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "grip", 0.5); //2
+
+	std::vector<cognitive::ControllerInputState> states = std::vector<cognitive::ControllerInputState>();
+	states.push_back(cognitive::ControllerInputState("padbtn", 0, 0.25, -0.75));
+	states.push_back(cognitive::ControllerInputState("grip", 0.25));
+	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, states); //3
+
+	auto c = cog.GetDynamicObject()->SendData();
+
+	cognitive::nlohmann::json enabledtarget;
+	enabledtarget["enabled"] = true;
+
+	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["part"], 1);
+	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
+
+	//manifest
+	EXPECT_EQ(c["manifest"].size(), 1);
+	EXPECT_EQ(c["manifest"]["1"]["name"], "name");
+	EXPECT_EQ(c["manifest"]["1"]["mesh"], "mesh");
+	EXPECT_EQ(c["manifest"]["1"]["properties"].size(), 0);
+
+	EXPECT_EQ(c["data"].size(), 4);
+
+	//dynamic 1
+	EXPECT_EQ(c["data"][0]["id"], "1");
+	EXPECT_EQ(c["data"][0]["p"][0], 1);
+	EXPECT_EQ(c["data"][0]["p"][1], 2);
+	EXPECT_EQ(c["data"][0]["p"][2], 3);
+	EXPECT_EQ(c["data"][0]["properties"][0], enabledtarget);
+	EXPECT_EQ(c["data"][0]["buttons"], nullptr);
+
+	//dynamic 1 trigger
+	EXPECT_EQ(c["data"][1]["id"], "1");
+	EXPECT_EQ(c["data"][1]["p"][0], 1);
+	EXPECT_EQ(c["data"][1]["p"][1], 2);
+	EXPECT_EQ(c["data"][1]["p"][2], 3);
+	EXPECT_EQ(c["data"][1]["buttons"].size(), 1);
+	EXPECT_EQ(c["data"][1]["buttons"]["trigger"]["buttonPercent"], 1.0);
+
+	//dynamic 1 grip
+	EXPECT_EQ(c["data"][2]["id"], "1");
+	EXPECT_EQ(c["data"][2]["p"][0], 1);
+	EXPECT_EQ(c["data"][2]["p"][1], 2);
+	EXPECT_EQ(c["data"][2]["p"][2], 3);
+	EXPECT_EQ(c["data"][2]["buttons"].size(), 1);
+	EXPECT_EQ(c["data"][2]["buttons"]["grip"]["buttonPercent"], 0.5);
+
+	//dynamic 1 padbtn, grip
+	EXPECT_EQ(c["data"][3]["id"], "1");
+	EXPECT_EQ(c["data"][3]["p"][0], 1);
+	EXPECT_EQ(c["data"][3]["p"][1], 2);
+	EXPECT_EQ(c["data"][3]["p"][2], 3);
+	EXPECT_EQ(c["data"][3]["buttons"].size(), 2);
+	EXPECT_EQ(c["data"][3]["buttons"]["padbtn"]["buttonPercent"], 0.0);
+	EXPECT_EQ(c["data"][3]["buttons"]["padbtn"]["x"], 0.25);
+	EXPECT_EQ(c["data"][3]["buttons"]["padbtn"]["y"], -0.75);
+	EXPECT_EQ(c["data"][3]["buttons"]["grip"]["buttonPercent"], 0.25);
+}
 
 int main(int argc, char **argv)
 {

@@ -51,16 +51,28 @@ class COGNITIVEVRANALYTICS_API CustomEvent
 
 
 		/** Record a new custom event
-
 		@param std::string category
 		@param std::vector<float> position of event
-		@param nlohmann::json properties - Optional
 		*/
-
 		void RecordEvent(std::string category, std::vector<float> &Position);
+		/** Record a new custom event
+		@param std::string category
+		@param std::vector<float> position of event
+		@param nlohmann::json properties
+		*/
 		void RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties);
-
+		/** Record a new custom event
+		@param std::string category
+		@param std::vector<float> position of event
+		@param std::string dynamic object id. the dynamic object related to this event
+		*/
 		void RecordEvent(std::string category, std::vector<float> &Position, std::string dynamicObjectId);
+		/** Record a new custom event
+		@param std::string category
+		@param std::vector<float> position of event
+		@param nlohmann::json properties
+		@param std::string dynamic object id. the dynamic object related to this event
+		*/
 		void RecordEvent(std::string category, std::vector<float> &Position, nlohmann::json properties, std::string dynamicObjectId);
 
 		nlohmann::json SendData();
