@@ -1806,6 +1806,92 @@ TEST(ExitPoll, AnswerValues) {
 }
 
 
+TEST(ExitPoll, AsyncBasicRequest) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoAsyncWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	settings.loggingLevel = cognitive::LoggingLevel::kAll;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	cog.StartSession();
+	cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
+
+	int loopLimit = 5; //5 seconds
+	while (!cog.GetExitPoll()->HasQuestionSet() && loopLimit > 0)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		loopLimit--;
+	}
+
+	auto q = cog.GetExitPoll()->GetQuestionSet();
+
+#ifdef EXITPOLLVALID
+
+	EXPECT_NE(cog.GetExitPoll()->GetQuestionSetString(), "");
+	EXPECT_EQ(q["id"], "testing:1");
+	EXPECT_EQ(q["version"], 1);
+	EXPECT_EQ(q["title"], "Testing new dash Exitpoll");
+	EXPECT_EQ(q["status"], "active");
+	EXPECT_EQ(q["questions"].size(), 6);
+
+	//true false
+	EXPECT_EQ(q["questions"][0]["title"], "TF");
+	EXPECT_EQ(q["questions"][0]["type"], "BOOLEAN");
+
+	//happy sad
+	EXPECT_EQ(q["questions"][1]["title"], "Happy");
+	EXPECT_EQ(q["questions"][1]["type"], "HAPPYSAD");
+
+	//thumbs up down
+	EXPECT_EQ(q["questions"][2]["title"], "Thumbs");
+	EXPECT_EQ(q["questions"][2]["type"], "THUMBS");
+
+	//multiple choice
+	EXPECT_EQ(q["questions"][3]["title"], "MC");
+	EXPECT_EQ(q["questions"][3]["type"], "MULTIPLE");
+	EXPECT_EQ(q["questions"][3]["answers"].size(), 4);
+	EXPECT_EQ(q["questions"][3]["answers"][0]["answer"], "answer one");
+	EXPECT_EQ(q["questions"][3]["answers"][1]["answer"], "answer two");
+	EXPECT_EQ(q["questions"][3]["answers"][2]["answer"], "answer three");
+	EXPECT_EQ(q["questions"][3]["answers"][3]["answer"], "answer four");
+
+	//multiple choice
+	EXPECT_EQ(q["questions"][4]["title"], "scale");
+	EXPECT_EQ(q["questions"][4]["type"], "SCALE");
+	EXPECT_EQ(q["questions"][4]["minLabel"], "lower label");
+	EXPECT_EQ(q["questions"][4]["maxLabel"], "upper label");
+	EXPECT_EQ(q["questions"][4]["range"]["start"], 0);
+	EXPECT_EQ(q["questions"][4]["range"]["end"], 10);
+
+	//multiple choice
+	EXPECT_EQ(q["questions"][5]["title"], "voice q");
+	EXPECT_EQ(q["questions"][5]["type"], "VOICE");
+	EXPECT_EQ(q["questions"][5]["maxResponseLength"], 20);
+#endif
+
+	//send some answers
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kBoolean, 0));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kHappySad, 0));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kThumbs, 0));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kMultiple, 0));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kScale, 0));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kVoice, "ASDF=="));
+	cog.GetExitPoll()->SendAllAnswers();
+
+	//join all outstanding threads
+	for (int i = 0; i < activeThreads.size(); i++)
+	{
+		activeThreads[i]->join();
+		delete(activeThreads[i]);
+	}
+	activeThreads.clear();
+}
+
+
 //----------------------GAZE
 
 TEST(Gaze, PreSession) {
