@@ -49,15 +49,12 @@ void ExitPollCallback(std::string body)
 
 	if (errorcode == 0)
 	{
-		//cvr->log->Info("ExitPollCallback callback successful");
-
 		cvr->GetExitPoll()->ReceiveQuestionSet(body, jsonresponse);
 	}
 	else
 	{
 		std::string message = jsonresponse["message"].get<std::string>();
-
-		//cvr->log->Error("ExitPoll Callback Error: " + message);
+		cvr->GetLog()->Warning("cognitive::ExitPoll Callback Error: " + message);
 	}
 }
 
@@ -96,6 +93,8 @@ void Network::NetworkExitpollPost(std::string questionsetname, std::string quest
 	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkExitpollPost cannot find webrequest pointer"); return; }
 
 	std::string path = "https://" + cvr->config->kNetworkHost + "/v" + cvr->config->networkVersion + "/questionSets/" + questionsetname + "/" +questionsetversion + "/responses";
+
+	cvr->GetLog()->Info("Network::NetworkExitpollPost: " + path);
 
 	cvr->sendFunctionPointer(path, content, headers, nullptr);
 }
