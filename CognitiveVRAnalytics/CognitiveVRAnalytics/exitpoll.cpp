@@ -135,6 +135,7 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 		properties["lobbyId"] = cvr->GetLobbyId();
 	properties["questionSetId"] = fullResponse.questionSetId;
 	properties["hook"] = fullResponse.hook;
+	response["sessionId"] = cvr->GetSessionID();
 	properties["sceneId"] = cvr->GetCurrentSceneId();
 	properties["versionNumber"] = cvr->GetCurrentSceneVersionNumber();
 	properties["versionId"] = cvr->GetCurrentSceneVersionId();

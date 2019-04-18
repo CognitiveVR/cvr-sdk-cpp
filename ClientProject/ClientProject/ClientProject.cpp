@@ -950,7 +950,7 @@ TEST(SessionProperties, DuringSessionValues) {
 
 	auto p = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 }
 
@@ -992,13 +992,13 @@ TEST(SessionProperties, SceneChange) {
 	cog.SetSessionProperty("location", "vancouver");
 	auto p = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 
 	cog.SetScene("tutorial");
 	p = cog.GetGazeTracker()->SendData(); //not a 'new' scene, but needs to know properties not yet reported to it
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 }
 
@@ -1020,7 +1020,7 @@ TEST(SessionProperties, InvalidSceneChange) {
 	cog.SetSessionProperty("location", "vancouver");
 	auto p = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 
 	cog.SetScene("invalid");
@@ -1048,13 +1048,13 @@ TEST(SessionProperties, SceneChangeMultiple) {
 	cog.SetScene("tutorial");
 	auto p = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 
 	cog.SetScene("tutorial");
 	p = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 
 	cog.SetScene("invalid");
@@ -1064,7 +1064,7 @@ TEST(SessionProperties, SceneChangeMultiple) {
 	cog.SetScene("tutorial");
 	p = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 }
 
@@ -1228,7 +1228,7 @@ TEST(CustomEvent, Values) {
 	cog.GetCustomEvent()->RecordEvent("testing1", pos, prop);
 	cog.GetCustomEvent()->RecordEvent("testing2", pos, prop,dynamicId);
 	auto c = cog.GetCustomEvent()->SendData();
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 	EXPECT_EQ(c["timestamp"], (int)timestamp);
@@ -1768,7 +1768,7 @@ TEST(ExitPoll, AnswerValues) {
 	auto a = cog.GetExitPoll()->SendAllAnswers();
 
 #ifdef EXITPOLLVALID
-	EXPECT_EQ(a["userId"], "travis");
+	EXPECT_EQ(a["c3d.username"], "travis");
 
 	EXPECT_EQ(a["questionSetId"], "testing:1");
 	EXPECT_EQ(a["hook"], "testing_new_sdk");
@@ -2075,7 +2075,7 @@ TEST(Gaze, Values) {
 
 	auto c = cog.GetGazeTracker()->SendData();
 
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["hmdtype"], "vive");
 	EXPECT_EQ(c["interval"],0.134f);
@@ -2854,7 +2854,7 @@ TEST(Dynamics, Values) {
 	cognitive::nlohmann::json sizetarget;
 	sizetarget["size"] = 5;
 
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 	EXPECT_EQ(c["timestamp"], (int)timestamp);
@@ -3047,7 +3047,7 @@ TEST(Dynamics, DynamicMeshFileType) {
 
 	auto c = cog.GetDynamicObject()->SendData();
 
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 
@@ -3067,7 +3067,7 @@ TEST(Dynamics, DynamicMeshFileType) {
 	cog2.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot);
 
 	c = cog2.GetDynamicObject()->SendData();
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 
@@ -3522,7 +3522,7 @@ TEST(Engagements, Values) {
 	cognitive::nlohmann::json sizetarget;
 	sizetarget["size"] = 5;
 
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 
 	//manifest
@@ -3798,7 +3798,7 @@ TEST(Fixation, Values) {
 	cog.GetFixation()->RecordFixation(1000.00, 100, 0.5, pos);
 	cog.GetFixation()->RecordFixation(1005.00, 115, 0.2f, dynamicId, pos);
 	auto c = cog.GetFixation()->SendData();
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 	EXPECT_EQ(c["timestamp"], (int)timestamp);
@@ -4172,7 +4172,7 @@ TEST(DynamicController, Values) {
 	cognitive::nlohmann::json enabledtarget;
 	enabledtarget["enabled"] = true;
 
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 	EXPECT_EQ(c["timestamp"], (int)timestamp);
@@ -4261,7 +4261,7 @@ TEST(DynamicController, ValuesRecordInputNonController) {
 	cognitive::nlohmann::json enabledtarget;
 	enabledtarget["enabled"] = true;
 
-	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["c3d.username"], "travis");
 	EXPECT_EQ(c["part"], 1);
 	EXPECT_EQ(c["formatversion"], "1.0");
 	EXPECT_EQ(c["timestamp"], (int)timestamp);

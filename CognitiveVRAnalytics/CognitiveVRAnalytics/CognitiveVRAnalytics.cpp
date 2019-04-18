@@ -278,8 +278,8 @@ void CognitiveVRAnalyticsCore::SendData()
 void CognitiveVRAnalyticsCore::SetUserName(std::string name)
 {
 	UserId = name;
-	AllSessionProperties["userid"] = name;
-	NewSessionProperties["userid"] = name;
+	AllSessionProperties["c3d.username"] = name;
+	NewSessionProperties["c3d.username"] = name;
 }
 
 void CognitiveVRAnalyticsCore::SetSessionProperty(std::string propertyType, int value)
