@@ -51,6 +51,9 @@ class CoreSettings
 		//how many gaze data points to batch before sending to SceneExplorer
 		int GazeBatchSize = 64;
 
+		//how many fixation points to batch before sending to SceneExplorer
+		int FixationBatchSize = 64;
+
 		//the expected interval for gaze snapshots in SECONDS. used by SceneExplorer's timeline
 		float GazeInterval = 0.1f;
 

@@ -7,6 +7,22 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 
 namespace cognitive {
 
+ControllerInputState::ControllerInputState(std::string axisName, float axisValue, float x, float y)
+{
+	AxisName = axisName;
+	AxisValue = axisValue;
+	IsJoystick = true;
+	X = x;
+	Y = y;
+}
+
+ControllerInputState::ControllerInputState(std::string axisName, float axisValue)
+{
+	AxisName = axisName;
+	AxisValue = axisValue;
+	IsJoystick = false;
+}
+
 DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId)
 {
 	Position = position;
@@ -68,26 +84,48 @@ DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1, 1, 1 };
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, "");
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
-	RecordDynamic_Internal(customid, position, rotation, scale, true, props);
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
 }
 
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation,"");
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
-	RecordDynamic_Internal(customid, position, rotation, scale, true, props);
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
 }
 
-void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
+void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllername)
+{
+	std::vector<float> scale = { 1, 1, 1 };
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername);
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+}
+
+void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername)
+{
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername);
+
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+}
+
+void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName)
 {
 	for (auto& element : objectIds)
 	{
@@ -102,6 +140,10 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 	objectIds.push_back(registerId);
 
 	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
+	if (controllerName.length() > 0)
+	{
+		dome.Properties["controller"] = controllerName;
+	}
 
 	manifestEntries.push_back(dome);
 	fullManifest.push_back(dome);
@@ -110,31 +152,58 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1,1,1 };
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"");
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
 
-	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props);
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
 	return newObjectId;
 }
 
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"");
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
 
-	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props);
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
 	return newObjectId;
 }
 
-std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
+std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllername)
+{
+	std::vector<float> scale = { 1,1,1 };
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername);
+
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	return newObjectId;
+}
+
+std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername)
+{
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername);
+
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	return newObjectId;
+}
+
+std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName)
 {
 	bool foundRecycledId = false;
 	DynamicObjectId newObjectId = DynamicObjectId("0", meshname);
@@ -161,6 +230,11 @@ std::string DynamicObject::RegisterObject_Internal(std::string name, std::string
 		newObjectId = DynamicObjectId(std::to_string(nextObjectId), meshname);
 		objectIds.push_back(newObjectId);
 		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname);
+		if (controllerName.length() > 0)
+		{
+			dome.Properties["controller"] = controllerName;
+		}
+		
 
 		manifestEntries.push_back(dome);
 		fullManifest.push_back(dome);
@@ -178,26 +252,116 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 {
 	//should record a dynamic object snapshot and set ignore scale to true
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json());
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), std::vector<cognitive::ControllerInputState>());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties)
 {
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties);
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, std::vector<cognitive::ControllerInputState>());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json());
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(),std::vector<cognitive::ControllerInputState>());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties)
 {
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, std::vector<cognitive::ControllerInputState>());
 }
 
-void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties)
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::string axis, float value)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
+	inputs.push_back(input);
+	std::vector<float> scale = { 1,1,1 };
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::string axis, float value)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
+	inputs.push_back(input);
+	std::vector<float> scale = { 1,1,1 };
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string axis, float value)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
+	inputs.push_back(input);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::string axis, float value)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
+	inputs.push_back(input);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::string axis, float value, float x, float y)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
+	inputs.push_back(input);
+	std::vector<float> scale = { 1,1,1 };
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::string axis, float value, float x, float y)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
+	inputs.push_back(input);
+	std::vector<float> scale = { 1,1,1 };
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string axis, float value, float x, float y)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
+	inputs.push_back(input);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::string axis, float value, float x, float y)
+{
+	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
+	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
+	inputs.push_back(input);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputs);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<ControllerInputState> inputState)
+{
+	std::vector<float> scale = { 1,1,1 };
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputState);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::vector<ControllerInputState> inputState)
+{
+	std::vector<float> scale = { 1,1,1 };
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputState);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::vector<ControllerInputState> inputState)
+{
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputState);
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::vector<ControllerInputState> inputState)
+{
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputState);
+}
+
+void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties, std::vector<ControllerInputState> inputs)
 {
 	//if dynamic object id is not in manifest, display warning. likely object ids were cleared from scene change
 	bool foundId = false;
@@ -247,6 +411,21 @@ void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<flo
 		//remove inactive engagements https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 		allEngagements[objectId].erase(std::remove_if(allEngagements[objectId].begin(), allEngagements[objectId].end(), isInactive), allEngagements[objectId].end());
 		activeEngagements[objectId].erase(std::remove_if(activeEngagements[objectId].begin(), activeEngagements[objectId].end(), isInactive), activeEngagements[objectId].end());
+	}
+
+	if (inputs.size() > 0)
+	{
+		for (int i = 0; i < inputs.size(); i++)
+		{
+			//add button inputs to snapshot
+			snapshot.Buttons[inputs[i].AxisName] = nlohmann::json();
+			snapshot.Buttons[inputs[i].AxisName]["buttonPercent"] = inputs[i].AxisValue;
+			if (inputs[i].IsJoystick)
+			{
+				snapshot.Buttons[inputs[i].AxisName]["x"] = inputs[i].X;
+				snapshot.Buttons[inputs[i].AxisName]["y"] = inputs[i].Y;
+			}
+		}
 	}
 
 	snapshots.push_back(snapshot);
@@ -340,6 +519,8 @@ nlohmann::json DynamicObject::SendData()
 			entryValues["name"] = element.Name;
 			entryValues["mesh"] = element.MeshName;
 			entryValues["fileType"] = cvr->GetConfig()->DynamicObjectFileType;
+			if (element.Properties.size() > 0)
+				entryValues["properties"] = element.Properties;
 
 			manifest[element.Id] = entryValues;
 		}
@@ -361,6 +542,8 @@ nlohmann::json DynamicObject::SendData()
 			entry["properties"] = element.Properties;
 		if (element.Engagements.size() > 0)
 			entry["engagements"] = element.Engagements;
+		if (element.Buttons.size() > 0)
+			entry["buttons"] = element.Buttons;
 		data.push_back(entry);
 	}
 	if (data.size() > 0)

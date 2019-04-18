@@ -27,7 +27,7 @@ class Config {
 			cvr = cog;
 		}
 
-		std::string SdkVersion = "1.0.2";
+		std::string SdkVersion = "1.1.0";
 
 		std::string kNetworkHost = "data.cognitive3d.com";
 
@@ -40,6 +40,7 @@ class Config {
 		int DynamicDataLimit = 64;
 		int CustomEventBatchSize = 64;
 		int GazeBatchSize = 64;
+		int FixationBatchSize = 64;
 
 		//only holds the value between core construction and session begin. use cvr.gaze.PlayerSnapshotInterval
 		float GazeInterval = 0.1f;

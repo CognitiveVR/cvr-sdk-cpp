@@ -55,7 +55,7 @@ enum class EQuestionType
 };
 
 //the value of an answer
-struct ExitPollAnswer
+struct COGNITIVEVRANALYTICS_API ExitPollAnswer
 {
 	friend class ExitPoll;
 	friend struct ExitPollResponse;
@@ -159,10 +159,11 @@ public:
 	void AddAnswer(ExitPollAnswer answer);
 
 	/** Send the collection of answers from a question set to the web api
-
-		@param std::vector<float> position - Optional
 	*/
 	nlohmann::json SendAllAnswers();
+	/** Send the collection of answers from a question set to the web api
+	@param std::vector<float> position
+	*/
 	nlohmann::json SendAllAnswers(std::vector<float> position);
 
 	//called after SendQuestionResponse. clears the currentQuestionSetData and response

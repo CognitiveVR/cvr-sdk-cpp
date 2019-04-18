@@ -145,6 +145,7 @@
     <ClInclude Include="coresettings.h" />
     <ClInclude Include="dynamicobject.h" />
     <ClInclude Include="exitpoll.h" />
+    <ClInclude Include="fixation.h" />
     <ClInclude Include="gazetracker.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="network.h" />
@@ -157,6 +158,7 @@
     <ClCompile Include="cognitive_log.cc" />
     <ClCompile Include="dynamicobject.cpp" />
     <ClCompile Include="exitpoll.cpp" />
+    <ClCompile Include="fixation.cpp" />
     <ClCompile Include="gazetracker.cc" />
     <ClCompile Include="network.cc" />
     <ClCompile Include="sensor.cc" />

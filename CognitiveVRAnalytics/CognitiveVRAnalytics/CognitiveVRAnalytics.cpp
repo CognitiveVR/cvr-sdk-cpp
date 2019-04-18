@@ -79,6 +79,12 @@ std::unique_ptr<Config> const& CognitiveVRAnalyticsCore::GetConfig() const
 	return config;
 }
 
+//fixation
+std::unique_ptr<Fixation> const& CognitiveVRAnalyticsCore::GetFixation() const
+{
+	return fixation;
+}
+
 CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 {
 	instance = std::shared_ptr<CognitiveVRAnalyticsCore>(this, D());
@@ -109,6 +115,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	GetConfig()->DynamicDataLimit = settings.DynamicDataLimit;
 	GetConfig()->GazeInterval = settings.GazeInterval;
 	GetConfig()->DynamicObjectFileType = settings.DynamicObjectFileType;
+	GetConfig()->FixationBatchSize = settings.FixationBatchSize;
 
 	network = make_unique_cognitive<Network>(Network(instance));
 
@@ -117,6 +124,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 	sensor = make_unique_cognitive<Sensor>(Sensor(instance));
 	dynamicobject = make_unique_cognitive<DynamicObject>(DynamicObject(instance));
 	exitpoll = make_unique_cognitive<ExitPoll>(ExitPoll(instance));
+	fixation = make_unique_cognitive<Fixation>(Fixation(instance));
 
 	//set scenes
 	GetConfig()->AllSceneData = settings.AllSceneData;
@@ -136,6 +144,7 @@ CognitiveVRAnalyticsCore::~CognitiveVRAnalyticsCore()
 	dynamicobject.reset();
 	exitpoll.reset();
 	instance.reset();
+	fixation.reset();
 }
 
 bool CognitiveVRAnalyticsCore::IsSessionActive()
@@ -212,6 +221,7 @@ void CognitiveVRAnalyticsCore::EndSession()
 	GetCustomEvent()->EndSession();
 	GetDynamicObject()->EndSession();
 	GetSensor()->EndSession();
+	GetFixation()->EndSession();
 }
 
 double CognitiveVRAnalyticsCore::GetSessionTimestamp()
@@ -262,13 +272,14 @@ void CognitiveVRAnalyticsCore::SendData()
 	GetGazeTracker()->SendData();
 	GetSensor()->SendData();
 	GetDynamicObject()->SendData();
+	GetFixation()->SendData();
 }
 
 void CognitiveVRAnalyticsCore::SetUserName(std::string name)
 {
 	UserId = name;
-	AllSessionProperties["userid"] = name;
-	NewSessionProperties["userid"] = name;
+	AllSessionProperties["c3d.username"] = name;
+	NewSessionProperties["c3d.username"] = name;
 }
 
 void CognitiveVRAnalyticsCore::SetSessionProperty(std::string propertyType, int value)

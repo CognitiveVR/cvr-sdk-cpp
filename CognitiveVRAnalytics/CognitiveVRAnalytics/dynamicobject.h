@@ -13,14 +13,6 @@ namespace cognitive
 {
 class CognitiveVRAnalyticsCore;
 
-enum class CommonMeshName
-{
-	kViveController,
-	kOculusTouchLeft,
-	kOculusTouchRight,
-	kViveTracker
-};
-
 //created when registering dynamic objects. sent to SceneExplorer
 struct DynamicObjectManifestEntry
 {
@@ -29,13 +21,21 @@ private:
 	std::string Id = "";
 	std::string Name = "";
 	std::string MeshName = "";
-	//json Properties
+	nlohmann::json Properties;
 
 	DynamicObjectManifestEntry(std::string id, std::string name, std::string mesh)
 	{
 		Id = id;
 		Name = name;
 		MeshName = mesh;
+	}
+
+	DynamicObjectManifestEntry(std::string id, std::string name, std::string mesh, nlohmann::json properties)
+	{
+		Id = id;
+		Name = name;
+		MeshName = mesh;
+		Properties = properties;
 	}
 };
 
@@ -55,6 +55,23 @@ private:
 	}
 };
 
+//dictionary of these in dynamic snapshot to record changes to controller inputs
+struct COGNITIVEVRANALYTICS_API ControllerInputState
+{
+	friend class DynamicObject;
+	friend class DynamicObjectSnapshot;
+private:
+	std::string AxisName;
+	float AxisValue;
+	bool IsJoystick;
+	float X;
+	float Y;
+
+public:
+	ControllerInputState(std::string AxisName, float AxisValue);
+	ControllerInputState(std::string AxisName, float AxisValue, float X, float Y);
+};
+
 //the state of an object at a time
 struct DynamicObjectSnapshot
 {
@@ -68,12 +85,20 @@ private:
 	std::string Id = "";
 	nlohmann::json Properties = nlohmann::json();
 	nlohmann::json Engagements = nlohmann::json();
+	nlohmann::json Buttons = nlohmann::json();
 
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId);
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, nlohmann::json properties);
 
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId);
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId, nlohmann::json properties);
+
+	//for dynamic object controller type
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, std::vector<ControllerInputState> inputStates);
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, nlohmann::json properties, std::vector<ControllerInputState> inputStates);
+
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId, std::vector<ControllerInputState> inputStates);
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId, nlohmann::json properties, std::vector<ControllerInputState> inputStates);
 };
 
 //an interaction the player has with a dynamic object
@@ -95,7 +120,7 @@ private:
 class COGNITIVEVRANALYTICS_API DynamicObject
 {
 	friend class CognitiveVRAnalyticsCore;
-private:
+protected:
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 
 	int jsonpart = 1;
@@ -122,12 +147,13 @@ private:
 	//count of engagements on dynamic objects of type
 	std::map<std::string, std::map < std::string, int >> engagementCounts;
 
+	std::map<std::string, std::map<std::string, std::string>> controllerInputs;
 
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation);
-	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation);
-	void RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties);
+	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName);
+	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName);
+	void RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties, std::vector<ControllerInputState> inputs);
 
 	/** end all engagements on an object. to be used if the object is destroyed. requires a snapshot of the dynamic object to send engagement data!
 
@@ -140,44 +166,223 @@ private:
 
 	void EndSession();
 
+	//TODO optional lightweight struct to use to register a dynamic instead of a bunch of parameters
 public:
-	/** put into dynamic manifest with an id. returns objectid. also adds a snapshot with the property 'enabled'
-
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 	@param std::string name
 	@param std::string meshname
-	@param int customid
+	@param std::string customid
 	@param std::vector<float> position
 	@param std::vector<float> rotation
-	@param std::vector<float> scale - Optional
 	*/
 	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation);
-	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
-
-	//
 	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+	@param std::string name
+	@param std::string meshname
+	@param std::string customid
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	*/
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+	@param std::string name
+	@param std::string meshname
+	@param std::string customid
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	*/
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllertype);
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+	@param std::string name
+	@param std::string meshname
+	@param std::string customid
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	*/
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllertype);
 
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 	@param std::string name
 	@param std::string meshname
 	@param std::vector<float> position
 	@param std::vector<float> rotation
-	@param std::vector<float> scale - Optional
 	*/
 	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation);
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+	@param std::string name
+	@param std::string meshname
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	*/
 	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+	@param std::string name
+	@param std::string meshname
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	*/
+	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerType);
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+	@param std::string name
+	@param std::string meshname
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	*/
+	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllerType);
+
 
 	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param cognitive::nlohmann::json properties
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param cognitive::nlohmann::json properties
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties);
 
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::string inputName - the name of the controller input. valid names are vive_trigger, vive_grip, vive_menubtn,vive_homebtn, rift_abtn, rift_bbtn, rift_xbtn, rift_ybtn, rift_thumbrest, rift_start, rift_trigger, rift_grip
+	@param std::string inputValue - the value of the input. between 0 and 100
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::string inputName, float inputValue);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param cognitive::nlohmann::json properties
+	@param std::string inputName - the name of the controller input. valid names are vive_trigger, vive_grip, vive_menubtn,vive_homebtn, rift_abtn, rift_bbtn, rift_xbtn, rift_ybtn, rift_thumbrest, rift_start, rift_trigger, rift_grip
+	@param std::string inputValue - the value of the input. between 0 and 100
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::string inputName, float inputValue);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param std::string inputName - the name of the controller input. valid names are vive_trigger, vive_grip, vive_menubtn,vive_homebtn, rift_abtn, rift_bbtn, rift_xbtn, rift_ybtn, rift_thumbrest, rift_start, rift_trigger, rift_grip
+	@param std::string inputValue - the value of the input. between 0 and 100
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string inputName, float inputValue);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param cognitive::nlohmann::json properties
+	@param std::string inputName - the name of the controller input. valid names are vive_trigger, vive_grip, vive_menubtn,vive_homebtn, rift_abtn, rift_bbtn, rift_xbtn, rift_ybtn, rift_thumbrest, rift_start, rift_trigger, rift_grip
+	@param std::string inputValue - the value of the input. between 0 and 100
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::string inputName, float inputValue);
+
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::string inputName - the name of the controller input. valid names are vive_touchpad and rift_joystick
+	@param std::string inputValue - the amount this input has been pressed. 0 for nothing. 0.5 for touch. 1 for press
+	@param std::string x - the x position of the input. between -1 and 1
+	@param std::string y - the y position of the input. between -1 and 1
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::string inputName, float inputValue, float x, float y);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param cognitive::nlohmann::json properties
+	@param std::string inputName - the name of the controller input. valid names are vive_touchpad and rift_joystick
+	@param std::string inputValue - the amount this input has been pressed. 0 for nothing. 0.5 for touch. 1 for press
+	@param std::string x - the x position of the input. between -1 and 1
+	@param std::string y - the y position of the input. between -1 and 1
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::string inputName, float inputValue, float x, float y);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param std::string inputName - the name of the controller input. valid names are vive_touchpad and rift_joystick
+	@param std::string inputValue - the amount this input has been pressed. 0 for nothing. 0.5 for touch. 1 for press
+	@param std::string x - the x position of the input. between -1 and 1
+	@param std::string y - the y position of the input. between -1 and 1
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string inputName, float inputValue, float x, float y);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param cognitive::nlohmann::json properties
+	@param std::string inputName - the name of the controller input. valid names are vive_touchpad and rift_joystick
+	@param std::string inputValue - the amount this input has been pressed. 0 for nothing. 0.5 for touch. 1 for press
+	@param std::string x - the x position of the input. between -1 and 1
+	@param std::string y - the y position of the input. between -1 and 1
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::string inputName, float inputValue, float x, float y);
+
+	/** record the position, rotation and other properties of an object
 	@param int objectId
 	@param std::vector<float> position
 	@param std::vector<float> rotation
-	@param std::vector<float> scale - Optional
-	@param nlohmann::json properties - Optional
+	@param std::vector<cognitive::ControllerInputState> inputState. records any number of input states (ie button presses, thumbstick positions) in a frame
 	*/
-	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation);
-	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties);
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<ControllerInputState> inputState);
+	/** record the position, rotation and other properties of an object
+	@param int objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param cognitive::nlohmann::json properties
+	@param std::vector<cognitive::ControllerInputState> inputState. records any number of input states (ie button presses, thumbstick positions) in a frame
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::vector<ControllerInputState> inputState);
+	/** record the position, rotation and other properties of an object
+	@param int objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param std::vector<cognitive::ControllerInputState> inputState. records any number of input states (ie button presses, thumbstick positions) in a frame
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::vector<ControllerInputState> inputState);
+	/** record the position, rotation and other properties of an object
+	@param int objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param std::vector<float> scale
+	@param cognitive::nlohmann::json properties
+	@param std::vector<cognitive::ControllerInputState> inputState. records any number of input states (ie button presses, thumbstick positions) in a frame
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::vector<ControllerInputState> inputState);
 
-	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale);
-	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties);
 
 	/** add engagement to dynamic object. requires a snapshot of the dynamic object to send engagement data!
 	@param std::string objectid of the object being engaged with
@@ -215,4 +420,5 @@ public:
 
 	nlohmann::json SendData();
 };
+
 }
