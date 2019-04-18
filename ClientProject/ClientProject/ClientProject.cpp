@@ -1064,7 +1064,7 @@ TEST(SessionProperties, SceneChangeMultiple) {
 	cog.SetScene("tutorial");
 	p = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(p["properties"]["age"], 21);
-	EXPECT_EQ(p["properties"]["userid"], "john");
+	EXPECT_EQ(p["properties"]["c3d.username"], "john");
 	EXPECT_EQ(p["properties"]["location"], "vancouver");
 }
 
