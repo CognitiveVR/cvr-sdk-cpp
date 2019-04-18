@@ -99,6 +99,7 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 	response["questionSetId"] = fullResponse.questionSetId;
 	response["hook"] = fullResponse.hook;
 	response["sceneId"] = cvr->GetCurrentSceneId();
+	response["sessionId"] = cvr->GetSessionID();
 	response["versionNumber"] = cvr->GetCurrentSceneVersionNumber();
 	response["versionId"] = cvr->GetCurrentSceneVersionId();
 
