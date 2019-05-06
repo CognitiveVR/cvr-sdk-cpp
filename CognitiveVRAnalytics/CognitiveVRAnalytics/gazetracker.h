@@ -40,18 +40,12 @@ class COGNITIVEVRANALYTICS_API GazeTracker
 private:
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	int jsonPart = 1;
-	
-	//set from config
-	float PlayerSnapshotInterval = 0.1f;
-	//set from config
-	std::string HMDType = "";
 
+	double nextSendTimestamp = 0;
 
 	nlohmann::json BatchedGaze = nlohmann::json();
 
 	GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
-	void SetInterval(float interval);
-	void SetHMDType(std::string hmdtype);
 
 	//clear gaze points
 	void EndSession();

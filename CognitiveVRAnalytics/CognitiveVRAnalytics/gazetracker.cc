@@ -12,20 +12,14 @@ GazeTracker::GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 	cvr = cog;
 }
 
-void GazeTracker::SetInterval(float interval)
-{
-	PlayerSnapshotInterval = interval;
-}
-
-void GazeTracker::SetHMDType(std::string hmdtype)
-{
-	HMDType = hmdtype;
-}
-
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze)
 {
+	double time = cvr->GetTimestamp();
+	if (time < nextSendTimestamp) { return; }
+	nextSendTimestamp = time + 0.1;
+
 	nlohmann::json data = nlohmann::json();
-	data["time"] = cvr->GetTimestamp();
+	data["time"] = time;
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
@@ -40,8 +34,12 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId)
 {
+	double time = cvr->GetTimestamp();
+	if (time < nextSendTimestamp) { return; }
+	nextSendTimestamp = time + 0.1;
+
 	nlohmann::json data = nlohmann::json();
-	data["time"] = cvr->GetTimestamp();
+	data["time"] = time;
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
@@ -57,8 +55,12 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId, std::string mediaId, long mediaTime, std::vector<float> &uvs)
 {
+	double time = cvr->GetTimestamp();
+	if (time < nextSendTimestamp) { return; }
+	nextSendTimestamp = time + 0.1;
+
 	nlohmann::json data = nlohmann::json();
-	data["time"] = cvr->GetTimestamp();
+	data["time"] = time;
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["g"] = { Gaze[0],Gaze[1],Gaze[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
@@ -77,8 +79,12 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
 {
+	double time = cvr->GetTimestamp();
+	if (time < nextSendTimestamp){return;}
+	nextSendTimestamp = time + 0.1;
+
 	nlohmann::json data = nlohmann::json();
-	data["time"] = cvr->GetTimestamp();
+	data["time"] = time;
 	data["p"] = { Position[0],Position[1],Position[2] };
 	data["r"] = { Rotation[0],Rotation[1],Rotation[2],Rotation[3] };
 
@@ -115,8 +121,8 @@ nlohmann::json GazeTracker::SendData()
 	se["sessionid"] = cvr->GetSessionID();
 	se["part"] = jsonPart;
 	jsonPart++;
-	se["hmdtype"] = HMDType;
-	se["interval"] = PlayerSnapshotInterval;
+	se["hmdtype"] = cvr->GetConfig()->HMDType;
+	se["interval"] = cvr->GetConfig()->GazeInterval;
 	if (BatchedGaze.size() > 0)
 		se["data"] = BatchedGaze;
 	se["formatversion"] = "1.0";

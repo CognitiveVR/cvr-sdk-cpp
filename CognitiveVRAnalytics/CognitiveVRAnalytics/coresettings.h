@@ -54,7 +54,9 @@ class CoreSettings
 		//how many fixation points to batch before sending to SceneExplorer
 		int FixationBatchSize = 64;
 
-		//the expected interval for gaze snapshots in SECONDS. used by SceneExplorer's timeline
+		// GazeInterval lets us know how often you are sending gaze data.
+		// This number does not control the flow of data, it simply tags your outgoing data so we can process your data appropriately.
+		// In general this number MUST be 0.1f (10 data points every second), unless you have specifically spoken to us changing this interval.
 		float GazeInterval = 0.1f;
 
 		//the type of HMD the user has. used by SceneExplorer to display the correct player mesh
