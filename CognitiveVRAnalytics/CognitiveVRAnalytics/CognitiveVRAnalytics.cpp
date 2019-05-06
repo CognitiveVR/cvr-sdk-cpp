@@ -179,9 +179,6 @@ bool CognitiveVRAnalyticsCore::StartSession()
 	GetSessionTimestamp();
 	GetSessionID();
 
-	GetGazeTracker()->SetInterval(config->GazeInterval);
-	GetGazeTracker()->SetHMDType(config->HMDType);
-
 	isSessionActive = true;
 
 	std::vector<float> pos = { 0,0,0 };

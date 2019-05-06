@@ -253,6 +253,7 @@ TEST(Curl, MultipleAsyncThread) {
 	auto d = cog.GetGazeTracker()->SendData();
 	EXPECT_NE(d.size(), 0);
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
@@ -296,9 +297,13 @@ TEST(Curl, GazeAsyncThread) {
 
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 
 	//send data 1
@@ -311,14 +316,23 @@ TEST(Curl, GazeAsyncThread) {
 	cog.SetSessionProperty("harddrive", "large");
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 
 
@@ -818,6 +832,7 @@ TEST(General, JsonPartSendData) {
 
 	cog.SendData();
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.GetSensor()->RecordSensor("sensor", 1);
 	cog.GetCustomEvent()->RecordEvent("event", pos);
@@ -1908,7 +1923,9 @@ TEST(Gaze, PreSession) {
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
 	cog.GetGazeTracker()->RecordGaze(pos,rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos,rot,pos,"1");
 
 	auto c = cog.GetGazeTracker()->SendData();
@@ -1930,12 +1947,17 @@ TEST(Gaze, DuringSession) {
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos, "1");
 
 	cog.StartSession();
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos, "1");
 	auto c = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(c["data"].size(), 6);
@@ -1954,7 +1976,9 @@ TEST(Gaze, PostSession) {
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos, "1");
 
 	cog.StartSession();
@@ -1983,11 +2007,14 @@ TEST(Gaze, PostSceneChange) {
 
 	cog.StartSession();
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos, "1");
 	auto c = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(c["data"].size(), 3);
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos, "1");
 	cog.SetScene("tutorial");
 	c = cog.GetGazeTracker()->SendData();
@@ -2017,9 +2044,11 @@ TEST(Gaze, PostSceneChangeMultiple) {
 	EXPECT_EQ(c["data"].size(), 1);
 
 	cog.SetScene("tutorial");
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 
 	cog.SetScene("tutorial");
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	c = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(c["data"].size(), 1);
@@ -2046,6 +2075,7 @@ TEST(Gaze, PostInvalidSceneChange) {
 	auto c = cog.GetGazeTracker()->SendData();
 	EXPECT_EQ(c["data"].size(), 1);
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.SetScene("invalid");
 	c = cog.GetGazeTracker()->SendData();
@@ -2070,7 +2100,9 @@ TEST(Gaze, Values) {
 	cog.StartSession();
 	double timestamp = cog.GetSessionTimestamp();
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot, pos, "1");
 
 	auto c = cog.GetGazeTracker()->SendData();
@@ -2133,8 +2165,11 @@ TEST(Gaze, LimitPreSession) {
 	std::vector<float> rot = { 0,0,0,1 };
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot); //clear
 
 	cog.StartSession();
@@ -2160,9 +2195,13 @@ TEST(Gaze, LimitDuringSession) {
 	std::vector<float> rot = { 0,0,0,1 };
 
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);//clear
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 
 	auto c = cog.GetGazeTracker()->SendData();
@@ -2186,7 +2225,9 @@ TEST(Gaze, LimitPostSession) {
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.EndSession(); //send
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	cog.GetGazeTracker()->RecordGaze(pos, rot);
 	cog.StartSession();
 
@@ -2223,6 +2264,36 @@ TEST(Gaze, Media) {
 	EXPECT_EQ(c["data"][0]["uvs"].size(), 2);
 	EXPECT_EQ(c["data"][0]["uvs"][0], 0.3f);
 	EXPECT_EQ(c["data"][0]["uvs"][1], 0.9f);
+}
+
+TEST(Gaze, LimitRecordRate) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	settings.GazeBatchSize = 4;
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	std::vector<float> pos = { 0,0,0 };
+	std::vector<float> rot = { 0,0,0,1 };
+	cog.StartSession();
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	auto c = cog.GetGazeTracker()->SendData();
+	EXPECT_EQ(c["data"].size(), 1);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	cog.GetGazeTracker()->RecordGaze(pos, rot);
+	c = cog.GetGazeTracker()->SendData();
+	EXPECT_EQ(c["data"].size(), 3);
 }
 
 

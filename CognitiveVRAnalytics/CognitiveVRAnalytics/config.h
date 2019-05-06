@@ -27,7 +27,7 @@ class Config {
 			cvr = cog;
 		}
 
-		std::string SdkVersion = "1.1.0";
+		std::string SdkVersion = "1.2.0";
 
 		std::string kNetworkHost = "data.cognitive3d.com";
 
