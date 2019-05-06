@@ -42,6 +42,7 @@ private:
 	int jsonPart = 1;
 
 	double nextSendTimestamp = 0;
+	double nextWarningTimestamp = 0;
 
 	nlohmann::json BatchedGaze = nlohmann::json();
 

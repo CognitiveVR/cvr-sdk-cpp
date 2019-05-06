@@ -15,7 +15,7 @@ GazeTracker::GazeTracker(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze)
 {
 	double time = cvr->GetTimestamp();
-	if (time < nextSendTimestamp) { return; }
+	if (time < nextSendTimestamp) { if (time > nextWarningTimestamp) { nextWarningTimestamp = time + 5; cvr->GetLog()->Warning("RecordGaze called more frequently than license allows. Some recorded data may be lost"); } return; }
 	nextSendTimestamp = time + 0.1;
 
 	nlohmann::json data = nlohmann::json();
@@ -35,7 +35,7 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId)
 {
 	double time = cvr->GetTimestamp();
-	if (time < nextSendTimestamp) { return; }
+	if (time < nextSendTimestamp) { if (time > nextWarningTimestamp) { nextWarningTimestamp = time + 5; cvr->GetLog()->Warning("RecordGaze called more frequently than license allows. Some recorded data may be lost"); } return; }
 	nextSendTimestamp = time + 0.1;
 
 	nlohmann::json data = nlohmann::json();
@@ -56,7 +56,7 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation, std::vector<float> &Gaze, std::string objectId, std::string mediaId, long mediaTime, std::vector<float> &uvs)
 {
 	double time = cvr->GetTimestamp();
-	if (time < nextSendTimestamp) { return; }
+	if (time < nextSendTimestamp) { if (time > nextWarningTimestamp) { nextWarningTimestamp = time + 5; cvr->GetLog()->Warning("RecordGaze called more frequently than license allows. Some recorded data may be lost"); } return; }
 	nextSendTimestamp = time + 0.1;
 
 	nlohmann::json data = nlohmann::json();
@@ -80,7 +80,7 @@ void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &R
 void GazeTracker::RecordGaze(std::vector<float> &Position, std::vector<float> &Rotation)
 {
 	double time = cvr->GetTimestamp();
-	if (time < nextSendTimestamp){return;}
+	if (time < nextSendTimestamp) { if (time > nextWarningTimestamp) { nextWarningTimestamp = time + 5; cvr->GetLog()->Warning("RecordGaze called more frequently than license allows. Some recorded data may be lost"); } return; }
 	nextSendTimestamp = time + 0.1;
 
 	nlohmann::json data = nlohmann::json();
