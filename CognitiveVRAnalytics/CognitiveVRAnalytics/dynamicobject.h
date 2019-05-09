@@ -21,7 +21,7 @@ private:
 	std::string Id = "";
 	std::string Name = "";
 	std::string MeshName = "";
-	nlohmann::json Properties;
+	nlohmann::json Properties; //this must be an array
 	bool IsController;
 	std::string ControllerType = "";
 

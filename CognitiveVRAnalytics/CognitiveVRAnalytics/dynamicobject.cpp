@@ -141,8 +141,11 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 
 	if (controllerName.length() > 0) //register controller with properties
 	{
-		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname, nlohmann::json(), controllerName);
-		dome.Properties["controller"] = isRight ? "right" : "left";
+		auto controllerProps = nlohmann::json::array();
+		auto j = nlohmann::json();
+		j["controller"] = isRight ? "right" : "left";
+		controllerProps.push_back(j);
+		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname, controllerProps, controllerName);
 		manifestEntries.push_back(dome);
 		fullManifest.push_back(dome);
 	}
@@ -234,12 +237,11 @@ std::string DynamicObject::RegisterObject_Internal(std::string name, std::string
 	{
 		newObjectId = DynamicObjectId(std::to_string(nextObjectId), meshname);
 		objectIds.push_back(newObjectId);
-		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname, nlohmann::json(), controllerName);
-		if (controllerName.length() > 0)
-		{
-			dome.Properties["controller"] = isRight ? "right" : "left";
-		}
-		
+		auto controllerProps = nlohmann::json::array();
+		auto j = nlohmann::json();
+		j["controller"] = isRight ? "right" : "left";
+		controllerProps.push_back(j);
+		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname, controllerProps, controllerName);
 
 		manifestEntries.push_back(dome);
 		fullManifest.push_back(dome);
@@ -525,7 +527,14 @@ nlohmann::json DynamicObject::SendData()
 			entryValues["mesh"] = element.MeshName;
 			entryValues["fileType"] = cvr->GetConfig()->DynamicObjectFileType;
 			if (element.Properties.size() > 0)
-				entryValues["properties"] = element.Properties;
+			{
+				nlohmann::json proparray = nlohmann::json::array();
+				for (auto& entryprop : element.Properties)
+				{
+					proparray.push_back(entryprop);
+				}
+				entryValues["properties"] = proparray;
+			}
 			if (element.IsController)
 				entryValues["controllerType"] = element.ControllerType;
 

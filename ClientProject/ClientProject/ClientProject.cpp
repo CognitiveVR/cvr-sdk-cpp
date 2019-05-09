@@ -4253,7 +4253,12 @@ TEST(DynamicController, Values) {
 	EXPECT_EQ(c["manifest"]["1"]["name"], "name");
 	EXPECT_EQ(c["manifest"]["1"]["mesh"], "mesh");
 	EXPECT_EQ(c["manifest"]["1"]["controllerType"], "vivecontroller");
-	EXPECT_EQ(c["manifest"]["1"]["properties"]["controller"], "left");
+	EXPECT_EQ(c["manifest"]["1"]["properties"].size(),1);
+	EXPECT_EQ(c["manifest"]["1"]["properties"][0]["controller"], "left");
+
+	EXPECT_EQ(c["manifest"]["1000"]["controllerType"], "oculustouchright");
+	EXPECT_EQ(c["manifest"]["1000"]["properties"].size(), 1);
+	EXPECT_EQ(c["manifest"]["1000"]["properties"][0]["controller"], "right");
 
 	EXPECT_EQ(c["manifest"]["1000"]["name"], "name2");
 	EXPECT_EQ(c["manifest"]["1000"]["mesh"], "mesh2");
