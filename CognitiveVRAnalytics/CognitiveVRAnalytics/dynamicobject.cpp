@@ -84,7 +84,7 @@ DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1, 1, 1 };
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, "");
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, "",false);
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
@@ -94,7 +94,7 @@ void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshnam
 
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation,"");
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation,"", false);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -103,10 +103,10 @@ void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshnam
 	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
 }
 
-void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllername)
+void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllername, bool isRight)
 {
 	std::vector<float> scale = { 1, 1, 1 };
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername,isRight);
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
@@ -114,9 +114,9 @@ void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshnam
 	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
 }
 
-void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername)
+void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername, bool isRight)
 {
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername,isRight);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -125,7 +125,7 @@ void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshnam
 	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
 }
 
-void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName)
+void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight)
 {
 	for (auto& element : objectIds)
 	{
@@ -139,20 +139,25 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 	DynamicObjectId registerId = DynamicObjectId(customid, meshname);
 	objectIds.push_back(registerId);
 
-	DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
-	if (controllerName.length() > 0)
+	if (controllerName.length() > 0) //register controller with properties
 	{
-		dome.Properties["controller"] = controllerName;
+		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname, nlohmann::json(), controllerName);
+		dome.Properties["controller"] = isRight ? "right" : "left";
+		manifestEntries.push_back(dome);
+		fullManifest.push_back(dome);
 	}
-
-	manifestEntries.push_back(dome);
-	fullManifest.push_back(dome);
+	else //register normal dynamic object
+	{
+		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(registerId.Id, name, meshname);
+		manifestEntries.push_back(dome);
+		fullManifest.push_back(dome);
+	}
 }
 
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1,1,1 };
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"");
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"",false);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -165,7 +170,7 @@ std::string DynamicObject::RegisterObject(std::string name, std::string meshname
 
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"");
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"", false);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -176,10 +181,10 @@ std::string DynamicObject::RegisterObject(std::string name, std::string meshname
 	return newObjectId;
 }
 
-std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllername)
+std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllername, bool isRight)
 {
 	std::vector<float> scale = { 1,1,1 };
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername, isRight);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -190,9 +195,9 @@ std::string DynamicObject::RegisterObject(std::string name, std::string meshname
 	return newObjectId;
 }
 
-std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername)
+std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername, bool isRight)
 {
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername, isRight);
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
@@ -203,7 +208,7 @@ std::string DynamicObject::RegisterObject(std::string name, std::string meshname
 	return newObjectId;
 }
 
-std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName)
+std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight)
 {
 	bool foundRecycledId = false;
 	DynamicObjectId newObjectId = DynamicObjectId("0", meshname);
@@ -229,10 +234,10 @@ std::string DynamicObject::RegisterObject_Internal(std::string name, std::string
 	{
 		newObjectId = DynamicObjectId(std::to_string(nextObjectId), meshname);
 		objectIds.push_back(newObjectId);
-		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname);
+		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname, nlohmann::json(), controllerName);
 		if (controllerName.length() > 0)
 		{
-			dome.Properties["controller"] = controllerName;
+			dome.Properties["controller"] = isRight ? "right" : "left";
 		}
 		
 
@@ -521,6 +526,8 @@ nlohmann::json DynamicObject::SendData()
 			entryValues["fileType"] = cvr->GetConfig()->DynamicObjectFileType;
 			if (element.Properties.size() > 0)
 				entryValues["properties"] = element.Properties;
+			if (element.IsController)
+				entryValues["controllerType"] = element.ControllerType;
 
 			manifest[element.Id] = entryValues;
 		}

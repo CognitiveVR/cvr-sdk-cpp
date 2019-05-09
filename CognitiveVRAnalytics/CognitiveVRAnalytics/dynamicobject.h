@@ -22,12 +22,15 @@ private:
 	std::string Name = "";
 	std::string MeshName = "";
 	nlohmann::json Properties;
+	bool IsController;
+	std::string ControllerType = "";
 
 	DynamicObjectManifestEntry(std::string id, std::string name, std::string mesh)
 	{
 		Id = id;
 		Name = name;
 		MeshName = mesh;
+		IsController = false;
 	}
 
 	DynamicObjectManifestEntry(std::string id, std::string name, std::string mesh, nlohmann::json properties)
@@ -36,6 +39,24 @@ private:
 		Name = name;
 		MeshName = mesh;
 		Properties = properties;
+		IsController = false;
+	}
+
+	DynamicObjectManifestEntry(std::string id, std::string name, std::string mesh, nlohmann::json properties, std::string controllerType)
+	{
+		Id = id;
+		Name = name;
+		MeshName = mesh;
+		Properties = properties;
+		if (controllerType.length() > 0)
+		{
+			IsController = true;
+			ControllerType = controllerType;
+		}
+		else
+		{
+			IsController = false;
+		}
 	}
 };
 
@@ -151,8 +172,8 @@ protected:
 
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName);
-	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName);
+	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight);
+	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight);
 	void RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties, std::vector<ControllerInputState> inputs);
 
 	/** end all engagements on an object. to be used if the object is destroyed. requires a snapshot of the dynamic object to send engagement data!
@@ -192,8 +213,9 @@ public:
 	@param std::vector<float> position
 	@param std::vector<float> rotation
 	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	@param bool isRight. if this dynamic represents the user's right hand
 	*/
-	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllertype);
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllertype, bool isRight);
 	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 	@param std::string name
 	@param std::string meshname
@@ -202,8 +224,9 @@ public:
 	@param std::vector<float> rotation
 	@param std::vector<float> scale
 	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	@param bool isRight. if this dynamic represents the user's right hand
 	*/
-	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllertype);
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllertype, bool isRight);
 
 	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 	@param std::string name
@@ -226,8 +249,9 @@ public:
 	@param std::vector<float> position
 	@param std::vector<float> rotation
 	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	@param bool isRight. if this dynamic represents the user's right hand
 	*/
-	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerType);
+	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerType, bool isRight);
 	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 	@param std::string name
 	@param std::string meshname
@@ -235,8 +259,9 @@ public:
 	@param std::vector<float> rotation
 	@param std::vector<float> scale
 	@param std::string controllerType. either vivecontroller, oculustouchleft or oculustouchright
+	@param bool isRight. if this dynamic represents the user's right hand
 	*/
-	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllerType);
+	std::string RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllerType, bool isRight);
 
 
 	/** record the position, rotation and other properties of an object

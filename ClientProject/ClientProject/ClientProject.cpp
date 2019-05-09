@@ -3980,8 +3980,8 @@ TEST(DynamicController, PreSession) {
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot,"oculustouchleft");
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot,"oculustouchleft",false);
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller",true);
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
 
 	auto c = cog.GetDynamicObject()->SendData();
@@ -4002,10 +4002,10 @@ TEST(DynamicController, DuringSession) {
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft",false);
 
 	cog.StartSession();
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller",true);
 	cog.GetDynamicObject()->RecordDynamic("0", pos, rot);
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
 	auto c = cog.GetDynamicObject()->SendData();
@@ -4028,9 +4028,9 @@ TEST(DynamicController, DuringSessionOverwriteManifest) {
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
 
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "oculustouchright");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft",false);
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller",true);
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "oculustouchright",true);
 
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
@@ -4054,8 +4054,8 @@ TEST(DynamicController, MultipleManifests) {
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft",false);
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller",true);
 
 	auto c = cog.GetDynamicObject()->SendData();
 	EXPECT_EQ(c["data"].size(), 2);
@@ -4080,8 +4080,8 @@ TEST(DynamicController, PostSession) {
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft");
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "0", pos, rot, "oculustouchleft",false);
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller",true);
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot);
 
@@ -4105,7 +4105,7 @@ TEST(DynamicController, RemovePreSession) {
 
 	std::vector<float> pos = { 0,0,0 };
 	std::vector<float> rot = { 0,0,0,1 };
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller",true);
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
 	cog.GetDynamicObject()->RemoveObject("1", pos, rot);
 	auto c = cog.GetDynamicObject()->SendData();
@@ -4132,7 +4132,7 @@ TEST(DynamicController, RemoveDuringSession) {
 	std::vector<float> rot = { 0,0,0,1 };
 
 	cog.StartSession();
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller");
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller",true);
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0);
 	cog.GetDynamicObject()->RemoveObject("1", pos, rot);
 	auto c = cog.GetDynamicObject()->SendData();
@@ -4226,8 +4226,8 @@ TEST(DynamicController, Values) {
 
 	cog.StartSession();
 	double timestamp = cog.GetSessionTimestamp();
-	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller"); //0
-	cog.GetDynamicObject()->RegisterObject("name2", "mesh2", pos, rot, "oculustouchright"); //1
+	cog.GetDynamicObject()->RegisterObjectCustomId("name", "mesh", "1", pos, rot, "vivecontroller", false); //0
+	cog.GetDynamicObject()->RegisterObject("name2", "mesh2", pos, rot, "oculustouchright", true); //1
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "trigger", 1.0); //2
 	cog.GetDynamicObject()->RecordDynamic("1", pos, rot, "grip", 0.5); //3
 
@@ -4252,7 +4252,8 @@ TEST(DynamicController, Values) {
 	EXPECT_EQ(c["manifest"].size(), 2);
 	EXPECT_EQ(c["manifest"]["1"]["name"], "name");
 	EXPECT_EQ(c["manifest"]["1"]["mesh"], "mesh");
-	EXPECT_EQ(c["manifest"]["1"]["properties"]["controller"], "vivecontroller");
+	EXPECT_EQ(c["manifest"]["1"]["controllerType"], "vivecontroller");
+	EXPECT_EQ(c["manifest"]["1"]["properties"]["controller"], "left");
 
 	EXPECT_EQ(c["manifest"]["1000"]["name"], "name2");
 	EXPECT_EQ(c["manifest"]["1000"]["mesh"], "mesh2");
