@@ -48,15 +48,8 @@ private:
 		Name = name;
 		MeshName = mesh;
 		Properties = properties;
-		if (controllerType.length() > 0)
-		{
-			IsController = true;
-			ControllerType = controllerType;
-		}
-		else
-		{
-			IsController = false;
-		}
+		IsController = true;
+		ControllerType = controllerType;
 	}
 };
 

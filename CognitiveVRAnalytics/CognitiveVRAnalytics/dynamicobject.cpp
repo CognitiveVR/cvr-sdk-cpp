@@ -132,7 +132,7 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 		if (element.Id == customid)
 		{
 			cvr->GetLog()->Warning("DynamicObject::RegisterObjectCustomId object id " +customid + " already registered");
-			break;
+			break; //should this return? customid is already in the manifest
 		}
 	}
 
@@ -237,14 +237,23 @@ std::string DynamicObject::RegisterObject_Internal(std::string name, std::string
 	{
 		newObjectId = DynamicObjectId(std::to_string(nextObjectId), meshname);
 		objectIds.push_back(newObjectId);
-		auto controllerProps = nlohmann::json::array();
-		auto j = nlohmann::json();
-		j["controller"] = isRight ? "right" : "left";
-		controllerProps.push_back(j);
-		DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname, controllerProps, controllerName);
-
-		manifestEntries.push_back(dome);
-		fullManifest.push_back(dome);
+		
+		if (controllerName.length() > 0)
+		{
+			auto controllerProps = nlohmann::json::array();
+			auto j = nlohmann::json();
+			j["controller"] = isRight ? "right" : "left";
+			controllerProps.push_back(j);
+			DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname, controllerProps, controllerName);
+			manifestEntries.push_back(dome);
+			fullManifest.push_back(dome);
+		}
+		else
+		{
+			DynamicObjectManifestEntry dome = DynamicObjectManifestEntry(newObjectId.Id, name, meshname);
+			manifestEntries.push_back(dome);
+			fullManifest.push_back(dome);
+		}
 	}
 
 	return newObjectId.Id;
