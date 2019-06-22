@@ -132,7 +132,7 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 		if (element.Id == customid)
 		{
 			cvr->GetLog()->Warning("DynamicObject::RegisterObjectCustomId object id " +customid + " already registered");
-			break; //should this return? customid is already in the manifest
+			return; //customid is already in the manifest. won't duplicate the id in the manifest, but will display incorrectly in SceneExplorer
 		}
 	}
 
