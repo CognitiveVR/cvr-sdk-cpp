@@ -31,18 +31,29 @@ Copyright (c) 2017 CognitiveVR, Inc. All rights reserved.
 namespace cognitive
 {
 class CognitiveVRAnalyticsCore;
+class GazeTracker;
+class CustomEvent;
+class Sensor;
+class Fixation;
+class DynamicObject;
 
 class Network
 {
+	friend class GazeTracker;
+	friend class CustomEvent;
+	friend class Sensor;
+	friend class Fixation;
+	friend class DynamicObject;
+
     private:
 		std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 		std::vector<std::string> headers;
 
-    public:
-        Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
-
 		//used for posting gaze/events/dynamics/sensors to dashboard and scene explorer
 		void NetworkCall(std::string suburl, std::string content);
+
+    public:
+        Network(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
 		//used by exitpolls
 		void NetworkExitpollGet(std::string hook);
