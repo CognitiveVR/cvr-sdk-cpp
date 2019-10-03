@@ -1907,6 +1907,59 @@ TEST(ExitPoll, AsyncBasicRequest) {
 	activeThreads.clear();
 }
 
+TEST(ExitPoll, CustomEventAnswerValues) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "6", 2));
+	settings.AllSceneData = scenedatas;
+	settings.DefaultSceneName = "tutorial";
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+
+	cog.StartSession();
+	double timestamp = cog.GetSessionTimestamp();
+	cog.GetExitPoll()->RequestQuestionSet("testing_new_sdk");
+
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kBoolean, true));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kHappySad, false));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kThumbs, true));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kMultiple, 2));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kScale, 9));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kVoice, "ASDF=="));
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kBoolean, -1)); //skip
+	cog.GetExitPoll()->AddAnswer(cognitive::ExitPollAnswer(cognitive::EQuestionType::kBoolean, -32768)); //skip
+	auto a = cog.GetExitPoll()->SendAllAnswers();
+
+	auto c = cog.GetCustomEvent()->SendData();
+	EXPECT_EQ(c["userid"], "travis");
+	EXPECT_EQ(c["part"], 1);
+	EXPECT_EQ(c["formatversion"], "1.0");
+	EXPECT_EQ(c["timestamp"], (int)timestamp);
+	EXPECT_EQ(c["data"].size(), 2);
+	EXPECT_EQ(c["data"][0]["name"], "c3d.sessionStart");
+	EXPECT_EQ(c["data"][1]["name"], "c3d.exitpoll");
+	EXPECT_EQ(c["data"][1]["properties"].size(), 12);
+	EXPECT_EQ(c["data"][1]["properties"]["userId"], "whatever");
+	EXPECT_EQ(c["data"][1]["properties"]["questionSetId"], "testing:1");
+	EXPECT_EQ(c["data"][1]["properties"]["hook"], "testing_new_sdk");
+	//EXPECT_EQ(c["data"][1]["properties"]["sessionId"], ""); //expecting timestamp_travis
+	EXPECT_GT(c["data"][1]["properties"]["duration"], 0.0f);
+	EXPECT_LT(c["data"][1]["properties"]["duration"], 5.0f); //total exitpoll duration
+	EXPECT_EQ(c["data"][1]["properties"]["Answer0"], 1);
+	EXPECT_EQ(c["data"][1]["properties"]["Answer1"], 0);
+	EXPECT_EQ(c["data"][1]["properties"]["Answer2"], 1);
+	EXPECT_EQ(c["data"][1]["properties"]["Answer3"], 2); //multiple choice index
+	EXPECT_EQ(c["data"][1]["properties"]["Answer4"], 9); //scale value
+	EXPECT_EQ(c["data"][1]["properties"]["Answer5"], 0); //voice. 0 unless skipped
+	EXPECT_EQ(c["data"][1]["properties"]["Answer6"], -1); //skip
+	EXPECT_EQ(c["data"][1]["properties"]["Answer7"], -32768); //skip
+}
+
 
 //----------------------GAZE
 
