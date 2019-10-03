@@ -1943,13 +1943,18 @@ TEST(ExitPoll, CustomEventAnswerValues) {
 	EXPECT_EQ(c["data"].size(), 2);
 	EXPECT_EQ(c["data"][0]["name"], "c3d.sessionStart");
 	EXPECT_EQ(c["data"][1]["name"], "c3d.exitpoll");
-	EXPECT_EQ(c["data"][1]["properties"].size(), 12);
-	EXPECT_EQ(c["data"][1]["properties"]["userId"], "whatever");
+	EXPECT_EQ(c["data"][1]["properties"].size(), 16);
+	EXPECT_EQ(c["data"][1]["properties"]["userId"], "travis");
 	EXPECT_EQ(c["data"][1]["properties"]["questionSetId"], "testing:1");
 	EXPECT_EQ(c["data"][1]["properties"]["hook"], "testing_new_sdk");
-	//EXPECT_EQ(c["data"][1]["properties"]["sessionId"], ""); //expecting timestamp_travis
+	EXPECT_NE(c["data"][1]["properties"]["sessionId"], ""); //expecting timestamp_travis
+	EXPECT_EQ(c["data"][1]["properties"]["sceneId"], "tutorial");
+	EXPECT_EQ(c["data"][1]["properties"]["versionNumber"], "6");
+	EXPECT_EQ(c["data"][1]["properties"]["versionId"], 2);
+
 	EXPECT_GT(c["data"][1]["properties"]["duration"], 0.0f);
 	EXPECT_LT(c["data"][1]["properties"]["duration"], 5.0f); //total exitpoll duration
+	
 	EXPECT_EQ(c["data"][1]["properties"]["Answer0"], 1);
 	EXPECT_EQ(c["data"][1]["properties"]["Answer1"], 0);
 	EXPECT_EQ(c["data"][1]["properties"]["Answer2"], 1);
