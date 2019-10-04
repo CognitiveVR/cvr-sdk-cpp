@@ -334,6 +334,7 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 		{
 			CurrentSceneId = ent.SceneId;
 			CurrentSceneVersionNumber = ent.VersionNumber;
+			CurrentSceneVersionId = ent.VersionId;
 
 			foundScene = true;
 			break;
@@ -345,6 +346,7 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 		GetLog()->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
 		CurrentSceneId = "";
 		CurrentSceneVersionNumber = "";
+		CurrentSceneVersionId = 0;
 	}
 	else
 	{

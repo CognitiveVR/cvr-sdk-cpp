@@ -191,6 +191,7 @@ public:
 	void SetScene(std::string scenename);
 	std::string GetSceneId();
 
+	//In most cases, SetScene(name) is better to use. This will not set scene.versionId
 	void SetSceneById(std::string sceneId, std::string version = "");
 
 	void SetLobbyId(std::string lobbyId);

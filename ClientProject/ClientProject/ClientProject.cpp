@@ -464,7 +464,7 @@ TEST(Initialization, SetScene){
 	settings.webRequest = &DoWebStuff;
 	settings.APIKey = TESTINGAPIKEY;
 	std::vector<cognitive::SceneData> scenedatas;
-	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 0));
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 9));
 	settings.AllSceneData = scenedatas;
 
 	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
@@ -474,6 +474,8 @@ TEST(Initialization, SetScene){
 	EXPECT_EQ(cog.GetSceneId(), "");
 	cog.SetScene("tutorial");
 	EXPECT_EQ(cog.GetSceneId(), "DELETE_ME_1");
+	EXPECT_EQ(cog.GetCurrentSceneVersionId(), 9);
+	EXPECT_EQ(cog.GetCurrentSceneVersionNumber(), "1");
 }
 
 TEST(Initialization, SetSceneById) {
@@ -516,6 +518,27 @@ TEST(Initialization, SetSceneByIdVersion) {
 	cog.SetSceneById("asdf1234","4");
 	EXPECT_EQ(cog.GetSceneId(), "asdf1234");
 	EXPECT_EQ(cog.GetCurrentSceneVersionNumber(), "4");
+}
+
+TEST(Initialization, SetSceneByIdVersionId) {
+	if (TestDelay > 0)
+		std::this_thread::sleep_for(std::chrono::seconds(TestDelay));
+
+	cognitive::CoreSettings settings;
+	settings.webRequest = &DoWebStuff;
+	settings.APIKey = TESTINGAPIKEY;
+	std::vector<cognitive::SceneData> scenedatas;
+	scenedatas.emplace_back(cognitive::SceneData("tutorial", "DELETE_ME_1", "1", 4));
+	settings.AllSceneData = scenedatas;
+
+	auto cog = cognitive::CognitiveVRAnalyticsCore(settings);
+	cog.SetUserName("travis");
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.StartSession();
+	EXPECT_EQ(cog.GetSceneId(), "");
+	cog.SetSceneById("asdf1234", "4");
+	EXPECT_EQ(cog.GetSceneId(), "asdf1234");
+	EXPECT_EQ(cog.GetCurrentSceneVersionId(), 0);
 }
 
 TEST(Initialization, SetLobbyId){
@@ -1948,7 +1971,7 @@ TEST(ExitPoll, CustomEventAnswerValues) {
 	EXPECT_EQ(c["data"][1]["properties"]["questionSetId"], "testing:1");
 	EXPECT_EQ(c["data"][1]["properties"]["hook"], "testing_new_sdk");
 	EXPECT_NE(c["data"][1]["properties"]["sessionId"], ""); //expecting timestamp_travis
-	EXPECT_EQ(c["data"][1]["properties"]["sceneId"], "tutorial");
+	EXPECT_EQ(c["data"][1]["properties"]["sceneId"], "DELETE_ME_1");
 	EXPECT_EQ(c["data"][1]["properties"]["versionNumber"], "6");
 	EXPECT_EQ(c["data"][1]["properties"]["versionId"], 2);
 
