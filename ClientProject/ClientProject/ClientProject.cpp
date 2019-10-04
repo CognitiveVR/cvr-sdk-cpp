@@ -1814,7 +1814,7 @@ TEST(ExitPoll, AnswerValues) {
 	EXPECT_EQ(a["sceneId"], "DELETE_ME_1");
 	EXPECT_EQ(a["sessionId"], cog.GetSessionID());
 	EXPECT_EQ(a["versionNumber"], "6");
-	EXPECT_EQ(a["versionId"], 0);
+	EXPECT_EQ(a["versionId"], 2);
 	
 	EXPECT_EQ(a["answers"].size(), 8);
 	
