@@ -105,6 +105,7 @@ private:
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::string objectId, nlohmann::json properties);
 
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId);
+	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId, double timestamp);
 	DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId, nlohmann::json properties);
 
 	//for dynamic object controller type
@@ -165,9 +166,9 @@ protected:
 
 	DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog);
 
-	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight);
-	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight);
-	void RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties, std::vector<ControllerInputState> inputs);
+	void RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight, double timestamp);
+	std::string RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight, double timestamp);
+	void RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties, std::vector<ControllerInputState> inputs, double timestamp);
 
 	/** end all engagements on an object. to be used if the object is destroyed. requires a snapshot of the dynamic object to send engagement data!
 
@@ -190,6 +191,15 @@ public:
 	@param std::vector<float> rotation
 	*/
 	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation);
+	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
+	@param std::string name
+	@param std::string meshname
+	@param std::string customid
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param double timestamp
+	*/
+	void RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation,double timestamp);
 	/** put into dynamic manifest. reuses or creates new objectid. returns objectid. prefer using custom id when possible. also adds a snapshot with the property 'enabled'
 	@param std::string name
 	@param std::string meshname
@@ -263,6 +273,13 @@ public:
 	@param std::vector<float> rotation
 	*/
 	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation);
+	/** record the position, rotation and other properties of an object
+	@param std::string objectId
+	@param std::vector<float> position
+	@param std::vector<float> rotation
+	@param double timestamp
+	*/
+	void RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, double timestamp);
 	/** record the position, rotation and other properties of an object
 	@param std::string objectId
 	@param std::vector<float> position

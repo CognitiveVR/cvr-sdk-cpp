@@ -45,6 +45,15 @@ DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::v
 	}
 }
 
+DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId, double timestamp)
+{
+	Position = position;
+	Rotation = rotation;
+	Scale = scale;
+	Time = timestamp;
+	Id = objectId;
+}
+
 DynamicObjectSnapshot::DynamicObjectSnapshot(std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string objectId)
 {
 	Position = position;
@@ -84,48 +93,59 @@ DynamicObject::DynamicObject(std::shared_ptr<CognitiveVRAnalyticsCore> cog)
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1, 1, 1 };
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, "",false);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, "",false, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
-	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
+}
+
+void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, double timestamp)
+{
+	std::vector<float> scale = { 1, 1, 1 };
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, "", false,timestamp);
+	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
+	enable["enabled"] = true;
+	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
+	props.push_back(enable);
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), timestamp);
 }
 
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation,"", false);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation,"", false, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
-	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllername, bool isRight)
 {
 	std::vector<float> scale = { 1, 1, 1 };
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername,isRight);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername,isRight, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
-	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RegisterObjectCustomId(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername, bool isRight)
 {
-	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername,isRight);
+	RegisterObjectCustomId_Internal(name, meshname, customid, position, rotation, controllername,isRight, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
-	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(customid, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
-void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight)
+void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::string meshname, std::string customid, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight, double timestamp)
 {
 	for (auto& element : objectIds)
 	{
@@ -160,58 +180,58 @@ void DynamicObject::RegisterObjectCustomId_Internal(std::string name, std::strin
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation)
 {
 	std::vector<float> scale = { 1,1,1 };
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"",false);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"",false, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
 
-	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 	return newObjectId;
 }
 
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"", false);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation,"", false, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
 
-	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 	return newObjectId;
 }
 
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllername, bool isRight)
 {
 	std::vector<float> scale = { 1,1,1 };
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername, isRight);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername, isRight, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
 
-	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 	return newObjectId;
 }
 
 std::string DynamicObject::RegisterObject(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string controllername, bool isRight)
 {
-	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername, isRight);
+	std::string newObjectId = RegisterObject_Internal(name, meshname, position, rotation, controllername, isRight, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 
 	cognitive::nlohmann::json enable = cognitive::nlohmann::json();
 	enable["enabled"] = true;
 	cognitive::nlohmann::json props = cognitive::nlohmann::json::array();
 	props.push_back(enable);
 
-	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(newObjectId, position, rotation, scale, true, props, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 	return newObjectId;
 }
 
-std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight)
+std::string DynamicObject::RegisterObject_Internal(std::string name, std::string meshname, std::vector<float> position, std::vector<float> rotation, std::string controllerName, bool isRight, double timestamp)
 {
 	bool foundRecycledId = false;
 	DynamicObjectId newObjectId = DynamicObjectId("0", meshname);
@@ -268,23 +288,30 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 {
 	//should record a dynamic object snapshot and set ignore scale to true
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
+}
+
+void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, double timestamp)
+{
+	//should record a dynamic object snapshot and set ignore scale to true
+	std::vector<float> scale = { 1,1,1 };
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), std::vector<cognitive::ControllerInputState>(), timestamp);
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties)
 {
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale)
 {
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(),std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(),std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties)
 {
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, std::vector<cognitive::ControllerInputState>());
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, std::vector<cognitive::ControllerInputState>(), CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::string axis, float value)
@@ -293,7 +320,7 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
 	inputs.push_back(input);
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::string axis, float value)
@@ -302,7 +329,7 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
 	inputs.push_back(input);
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string axis, float value)
@@ -310,7 +337,7 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
 	inputs.push_back(input);
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::string axis, float value)
@@ -318,7 +345,7 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value);
 	inputs.push_back(input);
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::string axis, float value, float x, float y)
@@ -327,7 +354,7 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
 	inputs.push_back(input);
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::string axis, float value, float x, float y)
@@ -336,7 +363,7 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
 	inputs.push_back(input);
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::string axis, float value, float x, float y)
@@ -344,7 +371,7 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
 	inputs.push_back(input);
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::string axis, float value, float x, float y)
@@ -352,32 +379,32 @@ void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> posit
 	std::vector<cognitive::ControllerInputState> inputs = std::vector<cognitive::ControllerInputState>();
 	cognitive::ControllerInputState input = cognitive::ControllerInputState(axis, value, x, y);
 	inputs.push_back(input);
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputs);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputs, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<ControllerInputState> inputState)
 {
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputState);
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, cognitive::nlohmann::json(), inputState, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, nlohmann::json properties, std::vector<ControllerInputState> inputState)
 {
 	std::vector<float> scale = { 1,1,1 };
-	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputState);
+	RecordDynamic_Internal(objectId, position, rotation, scale, false, properties, inputState, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, std::vector<ControllerInputState> inputState)
 {
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputState);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, cognitive::nlohmann::json(), inputState, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
 void DynamicObject::RecordDynamic(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, nlohmann::json properties, std::vector<ControllerInputState> inputState)
 {
-	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputState);
+	RecordDynamic_Internal(objectId, position, rotation, scale, true, properties, inputState, CognitiveVRAnalyticsCore::Instance()->GetTimestamp());
 }
 
-void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties, std::vector<ControllerInputState> inputs)
+void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<float> position, std::vector<float> rotation, std::vector<float> scale, bool useScale, nlohmann::json properties, std::vector<ControllerInputState> inputs, double timestamp)
 {
 	//if dynamic object id is not in manifest, display warning. likely object ids were cleared from scene change
 	bool foundId = false;

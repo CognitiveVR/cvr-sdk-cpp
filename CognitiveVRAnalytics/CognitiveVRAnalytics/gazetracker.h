@@ -54,6 +54,15 @@ private:
 public:
 	/** Record HMD position, rotation and gaze
 
+	@param std::vector<float> hmdposition
+	@param std::vector<float> hmdrotation
+	@param std::vector<float> gazepoint - world position of gaze
+	@param double timestamp - unix timestamp of gaze data
+*/
+	void RecordGaze(std::vector<float>& hmdposition, std::vector<float>& hmdrotation, std::vector<float>& gazepoint, double timestamp);
+
+	/** Record HMD position, rotation and gaze
+
 		@param std::vector<float> hmdposition
 		@param std::vector<float> hmdrotation
 		@param std::vector<float> gazepoint - world position of gaze
