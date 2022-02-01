@@ -123,6 +123,7 @@ class COGNITIVEVRANALYTICS_API ExitPoll
 
 private:
 	std::string lastHook = "";
+	double startTime;
 	std::shared_ptr<CognitiveVRAnalyticsCore> cvr = nullptr;
 	nlohmann::json currentQuestionSet = nlohmann::json();
 	std::string currentQuestionSetString = "";

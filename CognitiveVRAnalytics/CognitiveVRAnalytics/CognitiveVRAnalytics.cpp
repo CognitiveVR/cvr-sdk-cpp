@@ -128,7 +128,7 @@ CognitiveVRAnalyticsCore::CognitiveVRAnalyticsCore(CoreSettings settings)
 
 	//set scenes
 	GetConfig()->AllSceneData = settings.AllSceneData;
-	if (settings.DefaultSceneName.size() > 0)
+	if (!settings.DefaultSceneName.empty())
 		SetScene(settings.DefaultSceneName);
 }
 
@@ -334,7 +334,7 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 		{
 			CurrentSceneId = ent.SceneId;
 			CurrentSceneVersionNumber = ent.VersionNumber;
-
+			CurrentSceneVersionId = ent.VersionId;
 			foundScene = true;
 			break;
 		}
@@ -345,6 +345,7 @@ void CognitiveVRAnalyticsCore::SetScene(std::string sceneName)
 		GetLog()->Error("CognitiveVRAnalyticsCore::SetScene Config scene ids does not contain key for scene " + sceneName);
 		CurrentSceneId = "";
 		CurrentSceneVersionNumber = "";
+		CurrentSceneVersionId = 0;
 	}
 	else
 	{

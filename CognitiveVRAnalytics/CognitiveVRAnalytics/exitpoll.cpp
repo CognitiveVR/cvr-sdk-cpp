@@ -42,6 +42,7 @@ void ExitPoll::ReceiveQuestionSet(std::string questionsetstring, nlohmann::json 
 	fullResponse.questionSetName = splitquestionid[0];
 	fullResponse.questionSetVersion = splitquestionid[1];
 	currentQuestionSet = questionset;
+	startTime = cvr->GetTimestamp();
 }
 
 std::string ExitPoll::GetQuestionSetString()
@@ -135,10 +136,11 @@ nlohmann::json ExitPoll::SendAllAnswers(std::vector<float> pos)
 		properties["lobbyId"] = cvr->GetLobbyId();
 	properties["questionSetId"] = fullResponse.questionSetId;
 	properties["hook"] = fullResponse.hook;
-	response["sessionId"] = cvr->GetSessionID();
+	properties["sessionId"] = cvr->GetSessionID();
 	properties["sceneId"] = cvr->GetCurrentSceneId();
 	properties["versionNumber"] = cvr->GetCurrentSceneVersionNumber();
 	properties["versionId"] = cvr->GetCurrentSceneVersionId();
+	properties["duration"] = (cvr->GetTimestamp() - startTime);
 
 	//add answers as properties
 	for (int i = 0; i < fullResponse.answers.size(); ++i)
