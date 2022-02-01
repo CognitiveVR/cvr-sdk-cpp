@@ -61,8 +61,8 @@ void ExitPollCallback(std::string body)
 void Network::NetworkCall(std::string suburl, std::string content)
 {
 	if (cvr->sendFunctionPointer == nullptr) { cvr->log->Warning("Network::NetworkCall cannot find webrequest pointer"); return; }
-	if (cvr->CurrentSceneId == "") { cvr->log->Warning("Network::NetworkCall does not have valid scenename"); return; }
-	if (cvr->CurrentSceneVersionNumber == "") { cvr->log->Warning("Network::NetworkCall does not have valid scene version number"); return; }
+	if (cvr->CurrentSceneId.empty()) { cvr->log->Warning("Network::NetworkCall current sceneid is empty"); return; }
+	if (cvr->CurrentSceneVersionNumber.empty()) { cvr->log->Warning("Network::NetworkCall current scene version number is empty"); return; }
 
 	std::string path;
 

@@ -420,8 +420,7 @@ void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<flo
 	{
 		cvr->GetLog()->Warning("DynamicObject::Snapshot cannot find objectId " + objectId + " in full manifest. Did you Register this object?");
 	}
-
-	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, scale, objectId);
+	DynamicObjectSnapshot snapshot = DynamicObjectSnapshot(position, rotation, scale, objectId, timestamp);
 	if (!useScale)
 		snapshot.useScale = false;
 
@@ -447,7 +446,7 @@ void DynamicObject::RecordDynamic_Internal(std::string objectId, std::vector<flo
 			nlohmann::json engagementEvent = nlohmann::json();
 			engagementEvent["engagementparent"] = e->ParentObjectId;
 			engagementEvent["engagement_count"] = e->EngagementNumber;
-			engagementEvent["engagement_time"] = (e->endTime > 0 ? e->endTime - e->startTime : cvr->GetTimestamp() - e->startTime);
+			engagementEvent["engagement_time"] = (e->endTime > 0 ? e->endTime - e->startTime : timestamp - e->startTime);
 			engagementEvent["engagementtype"] = e->Name;
 			snapshot.Engagements.push_back(engagementEvent);
 		}
